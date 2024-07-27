@@ -36,8 +36,8 @@
 #define DECK_OFFSET CARD_HEIGHT + 2
 #define DECK_SIZE CARD_SUITS*CARD_NUMERALS
 
-#define FIELD_HEIGHT 7
-#define FIELD_WIDTH 19
+#define FIELD_HEIGHT 19
+#define FIELD_WIDTH 7
 
 #define SCREEN_HEIGHT 46 + DECK_OFFSET
 #define SCREEN_WIDTH 58
@@ -106,12 +106,23 @@ typedef struct {
 } Cursor;
 
 
-
+//deck
 Deck generate_deck(void);
 void shuffle_deck(Deck *deck);
-Card* draw_card(Deck *deck);
+Card *draw_card(Deck *deck);
 void next_card(Deck *deck);
 void reset_deck(Deck *deck);
+//deck
+
+
+//screen
+Screen init_screen(void);
+void print_screen(const Screen *screen);
+void add_separator(Screen *screen, int y, int x, wchar_t *borders);
+void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol);
+void colorize_area(Screen *screen, const Card *card, int y, int x, int height, int width);
+void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders);
+//screen
 
 
 #endif
