@@ -124,5 +124,27 @@ void colorize_area(Screen *screen, const Card *card, int y, int x, int height, i
 void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders);
 //screen
 
+//field
+void init_field(Field field, Deck *deck);
+int get_last_card_y(const Field *field, int x);
+void print_cursor_in_field(const Cursor *cursor, Coords *coords);
+void print_field(Screen *screen, const Field *field, const Cursor *hovered_card);
+void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int delta_y);
+//field
+
+//card
+extern wchar_t fat_border[8];
+extern wchar_t card_border[8];
+wchar_t suit_to_text(Suit suit);
+char *numeral_to_text(Numeral numeral);
+void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x);
+//card
+
+//cursor
+void print_cursor(Screen *screen, const Cursor *cursor);
+Cursor init_cursor(Deck *deck, Field *field, Stock *stock);
+void move_cursor(Cursor *cursor, int delta_x, int delta_y);
+Coords try_move(const Cursor *cursor, int delta_x, int delta_y);
+//cursor
 
 #endif
