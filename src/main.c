@@ -39,6 +39,33 @@
 // cursor
 
 
+
+// screen
+void update_screen(Screen *screen, Field *field, Cursor *cursor, Deck *deck) {
+    print_field(screen, field, cursor);
+    print_cursor(screen, cursor);
+    print_screen(screen);
+}
+// screen
+
+
+void set_noncanonical_mode(void) {
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+
+    term.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+void restore_terminal_settings(void) {
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+
+    term.c_lflag |= ICANON | ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+
 int main(void) {
     setlocale(LC_ALL, "");
     clear();
@@ -53,10 +80,41 @@ int main(void) {
     add_borders(&screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, fat_border);
     add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, fat_border);
 
-    move_cursor(&cursor, 1, 0);
+    update_screen(&screen, &field, &cursor, &deck);
 
-    print_field(&screen, &field, &cursor);
-    print_cursor(&screen, &cursor);
-    print_screen(&screen);
+    set_noncanonical_mode();
+    bool need_screen_update;
+    while (true) {
+        wint_t ch = getwchar();
+        // wprintf(L"key: %i       \n", ch);
+        need_screen_update = true;
+        switch (ch) {
+            case L'q': case L'й': case KEY_ESC:
+                restore_terminal_settings();
+                exit(0);
+            case L'a': case L'ф':
+                move_cursor(&cursor, -1, 0);
+                break;
+            case L'd': case L'в':
+                move_cursor(&cursor, 1, 0);
+                break;
+            case L'w': case L'ц':
+                move_cursor(&cursor, 0, -1);
+                break;
+            case L's': case L'ы': case L'і':
+                move_cursor(&cursor, 0, 1);
+                break;
+            case L' ': case L'\n':
+                //select_card(&cursor);
+                break;
+            default:
+                need_screen_update = false;
+        }
+
+        if (need_screen_update) {
+            update_screen(&screen, &field, &cursor, &deck);
+            need_screen_update = false;
+        }
+    }
 }
 

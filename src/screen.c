@@ -85,8 +85,9 @@ void colorize_area(Screen *screen, const Card *card, int y, int x, int height, i
     }
 
     screen->foreground[y][x] = (card->suit % 2 != 0) ? ";31" : ";30";
-    screen->foreground[y + 2][x + 2] = (card->suit % 2 != 0) ? ";31" : ";30";
-    screen->foreground[y + 4][x + 4] = (card->suit % 2 != 0) ? ";31" : ";30";
+    screen->foreground[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
+    screen->foreground[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
+
     screen->foreground[y][x + width - 2] = ";30";
     screen->foreground[y][x + width - 1] = ";30";
     screen->foreground[y + height - 1][x] = ";30";

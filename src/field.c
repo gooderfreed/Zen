@@ -32,7 +32,7 @@ void init_field(Field field, Deck *deck) {
 }
 
 void print_field(Screen *screen, const Field *field, const Cursor *hovered_card) {
-    int contentHeight = SCREEN_HEIGHT - 2 * DECK_OFFSET;
+    int contentHeight = 2 * (FIELD_HEIGHT - 1) + CARD_HEIGHT - 2;
     int contentWidth = SCREEN_WIDTH - BORDER_OFFSET_X - 1;
 
     fill_area(screen, BORDER_OFFSET_Y + DECK_OFFSET, BORDER_OFFSET_X, contentHeight, contentWidth, ' ');
@@ -44,7 +44,7 @@ void print_field(Screen *screen, const Field *field, const Cursor *hovered_card)
     int hovered_y = hovered_card->coords.y;
 
     for (int y = 0; y < FIELD_HEIGHT; ++y) {
-        int y_0 = y * 2 + y_offset_base;
+        int y_0 = y * CARD_COVERED_HEIGHT + y_offset_base;
         int is_hovered_row = y > hovered_y;
 
         for (int x = 0; x < FIELD_WIDTH; ++x) {
@@ -69,7 +69,7 @@ void print_cursor_in_field(const Cursor *cursor, Coords *coords) {
     int part = BORDER_OFFSET_Y + 1 + cursor->coords.y * 2;
     bool is_last_card = FIELD_WIDTH == cursor->coords.y 
                         || (*field)[cursor->coords.y + 1][cursor->coords.x]->numeral == Null;
-    coords->y += part + (is_last_card ? CARD_HEIGHT : (CARD_HEIGHT / 2));
+    coords->y += part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1);
     coords->x += BORDER_OFFSET_X - 1;
 }
 

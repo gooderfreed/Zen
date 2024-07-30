@@ -13,7 +13,7 @@ INC_FILES = $(wildcard $(INC_DIR)/*.h)
 # LIB_INC_FILES = $(wildcard $(LIB_DIR)/$(INC_DIR))
 
 CC = clang
-CFLAGS = -std=c11 $(addprefix -W, all extra error pedantic) -g
+# CFLAGS = -std=c11 $(addprefix -W, all extra error pedantic) -g
 AR = ar
 AFLAGS = rcs
 MAKE = make -C

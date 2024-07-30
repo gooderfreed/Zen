@@ -51,7 +51,7 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
     colorize_area(screen, card, y_0 + 1, x_0 + 1, CARD_HEIGHT - 2, CARD_WIDTH - 2);
     add_borders(screen, y_0, x_0, size_y, size_x, card_border);
 
-    if (y != 10) {
+    if (y != CARD_HEIGHT + 2 * BORDER_OFFSET_Y + 1) {
         screen->data[y_0][x_0] = card_border[6];
         screen->data[y_0][x_0 + CARD_WIDTH - 1] = card_border[7];
     }

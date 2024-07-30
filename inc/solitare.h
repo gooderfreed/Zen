@@ -23,24 +23,31 @@
 #include <time.h>
 #include <wchar.h>
 #include <locale.h>
+#include <termios.h>
+#include <unistd.h>
+
+#define KEY_ESC L''
 
 #define CARD_SUITS 4
 #define CARD_NUMERALS 13
 
-#define CARD_HEIGHT 7
-#define CARD_WIDTH 8
+#define CARD_SCALE_FACTOR 7
+#define CARD_COVERED_HEIGHT 2
+
+#define CARD_HEIGHT CARD_SCALE_FACTOR
+#define CARD_WIDTH (CARD_SCALE_FACTOR + 1)
 
 #define BORDER_OFFSET_X 1
 #define BORDER_OFFSET_Y 1
 
-#define DECK_OFFSET CARD_HEIGHT + 2
-#define DECK_SIZE CARD_SUITS*CARD_NUMERALS
+#define DECK_OFFSET (CARD_HEIGHT + 2 * BORDER_OFFSET_Y)
+#define DECK_SIZE (CARD_SUITS * CARD_NUMERALS)
 
 #define FIELD_HEIGHT 19
 #define FIELD_WIDTH 7
 
-#define SCREEN_HEIGHT 46 + DECK_OFFSET
-#define SCREEN_WIDTH 58
+#define SCREEN_HEIGHT (2 * (FIELD_HEIGHT - 1) + CARD_HEIGHT + DECK_OFFSET + BORDER_OFFSET_X)
+#define SCREEN_WIDTH (FIELD_WIDTH * CARD_WIDTH + 2 * BORDER_OFFSET_X)
 
 #define OBJECTS_COUNT 3
 
@@ -63,9 +70,9 @@ typedef enum {
 } Numeral;
 
 typedef struct {
-    int y;
-    int x;
-    int z;
+    short y;
+    short x;
+    short z;
 } Coords;
 
 typedef enum{
