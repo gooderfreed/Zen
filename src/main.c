@@ -16,6 +16,8 @@
 
 #include "../inc/solitare.h"
 
+
+
 // deck
 
 // deck
@@ -35,18 +37,81 @@
 
 
 // cursor
+void merge(Cursor *cursor) {
+    Field *field = (Field *)(cursor->objects[Field_enum]);
+    Deck  *deck  = (Deck *)(cursor->objects[Deck_enum]);
+    int start_x = cursor->card->coords.x;
+    int start_y = cursor->card->coords.y;
 
+    switch (cursor->card->object) {
+
+    case Field_enum:
+        if (cursor->coords.y + 1 < FIELD_HEIGHT && 
+            (*field)[cursor->coords.y + 1][cursor->coords.x]->numeral == Null) {
+            
+            for (int i = 0; (*field)[start_y + i][start_x]->numeral != Null && start_y + i < FIELD_HEIGHT; i++) {
+                Card *card = (*field)[start_y + i][start_x];
+                (*field)[start_y + i][start_x] = &deck->deck[0];
+
+                card->selected = false;
+
+                if ((*field)[cursor->coords.y + i][cursor->coords.x]->numeral != Null) {
+                    card->coords = (Coords){.x = cursor->coords.x, .y = cursor->coords.y + 1 + i};
+                    (*field)[cursor->coords.y + 1 + i][cursor->coords.x] = card;
+                }
+                else {
+                    card->coords = (Coords){.x = cursor->coords.x, .y = cursor->coords.y + i};
+                    (*field)[cursor->coords.y + i][cursor->coords.x] = card;
+                }
+            }
+
+            cursor->card = &deck->deck[0];
+        }
+        break;
+
+    default: break;
+    }
+}
+
+void select_card(Cursor *cursor) {
+    switch (cursor->subject) {
+    
+    case Field_enum: {
+        Field *field = (Field *)(cursor->objects[Field_enum]);
+
+        if (cursor->card->numeral == Null) {
+            cursor->card = (*field)[cursor->coords.y][cursor->coords.x];
+            select_column(field, cursor);
+        }
+        else if (cursor->card->coords.x == cursor->coords.x) {
+            if (cursor->card->coords.y == cursor->coords.y) {
+                Deck *deck = (Deck *)(cursor->objects[Deck_enum]);
+                cursor->card = &deck->deck[0];
+                select_column(field, cursor);
+            }
+        }
+        else {
+            merge(cursor);
+        }
+        break;
+    }
+
+    default: break;
+    }
+}
 // cursor
 
 
 
 // screen
 void update_screen(Screen *screen, Field *field, Cursor *cursor, Deck *deck) {
+    (void) deck;
     print_field(screen, field, cursor);
     print_cursor(screen, cursor);
     print_screen(screen);
 }
 // screen
+
 
 
 void set_noncanonical_mode(void) {
@@ -65,13 +130,12 @@ void restore_terminal_settings(void) {
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
-
 int main(void) {
     setlocale(LC_ALL, "");
     clear();
 
-    Deck deck = generate_deck();
-    Field field;
+    Deck   deck = generate_deck();
+    Field  field;
     Cursor cursor = init_cursor(&deck, &field, NULL);
     Screen screen = init_screen();
 
@@ -105,7 +169,8 @@ int main(void) {
                 move_cursor(&cursor, 0, 1);
                 break;
             case L' ': case L'\n':
-                //select_card(&cursor);
+                // wprintf(L"asdasdasdsdasda\n");
+                select_card(&cursor);
                 break;
             default:
                 need_screen_update = false;

@@ -115,9 +115,9 @@ typedef struct {
 
 //deck
 Deck generate_deck(void);
-void shuffle_deck(Deck *deck);
 Card *draw_card(Deck *deck);
 void next_card(Deck *deck);
+void shuffle_deck(Deck *deck);
 void reset_deck(Deck *deck);
 //deck
 
@@ -134,6 +134,7 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
 //field
 void init_field(Field field, Deck *deck);
 int get_last_card_y(const Field *field, int x);
+void select_column(Field *field, Cursor *cursor);
 void print_cursor_in_field(const Cursor *cursor, Coords *coords);
 void print_field(Screen *screen, const Field *field, const Cursor *hovered_card);
 void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int delta_y);

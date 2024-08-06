@@ -51,6 +51,7 @@ void print_cursor(Screen *screen, const Cursor *cursor) {
 
     default: break;
     }
+    
     screen->data[coords.y][coords.x] = '/';
     screen->data[coords.y][coords.x + 1] = '\\';
 }

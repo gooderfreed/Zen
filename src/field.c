@@ -17,15 +17,15 @@
 #include "../inc/solitare.h"
 
 void init_field(Field field, Deck *deck) {
-    for (int col = 0; col < FIELD_WIDTH; col++) {
-        for (int row = 0; row < FIELD_HEIGHT; row++) {
-            if (row > col) field[row][col] = &deck->deck[0];
+    for (int row = 0; row < FIELD_WIDTH; row++) {
+        for (int col = 0; col < FIELD_HEIGHT; col++) {
+            if (col > row) field[col][row] = &deck->deck[0];
             else {
                 Card *card = draw_card(deck);
                 card->coords.x = row;
                 card->coords.y = col;
                 card->object = Field_enum;
-                field[row][col] = card;
+                field[col][row] = card;
             }
         }
     }
@@ -35,11 +35,9 @@ void print_field(Screen *screen, const Field *field, const Cursor *hovered_card)
     int contentHeight = 2 * (FIELD_HEIGHT - 1) + CARD_HEIGHT - 2;
     int contentWidth = SCREEN_WIDTH - BORDER_OFFSET_X - 1;
 
-    fill_area(screen, BORDER_OFFSET_Y + DECK_OFFSET, BORDER_OFFSET_X, contentHeight, contentWidth, ' ');
+    fill_area(screen, DECK_OFFSET + BORDER_OFFSET_Y, BORDER_OFFSET_X, contentHeight, contentWidth, ' ');
 
     int y_offset_base = DECK_OFFSET + BORDER_OFFSET_Y;
-    int card_height = CARD_HEIGHT;
-    int card_width = CARD_WIDTH;
     int hovered_x = hovered_card->coords.x;
     int hovered_y = hovered_card->coords.y;
 
@@ -49,10 +47,16 @@ void print_field(Screen *screen, const Field *field, const Cursor *hovered_card)
 
         for (int x = 0; x < FIELD_WIDTH; ++x) {
             int additional_offset = (is_hovered_row && x == hovered_x && hovered_card->subject == Field_enum);
-            int x_0 = x * card_width + BORDER_OFFSET_X;
+            int x_0 = x * CARD_WIDTH + BORDER_OFFSET_X;
 
             Card *current_card = (*field)[y][x];
-            print_card(screen, current_card, y_0 + additional_offset, x_0, card_height, card_width);
+
+            if (y == 0 && current_card->numeral == Null) {
+                add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, fat_border);
+            }
+            else {
+                print_card(screen, current_card, y_0 + additional_offset, x_0, CARD_HEIGHT, CARD_WIDTH);
+            }
         }
     }
 }
@@ -62,7 +66,6 @@ int get_last_card_y(const Field *field, int x) {
         if ((*field)[i][x]->numeral != Null) return i;
     return 0;
 }
-
 
 void print_cursor_in_field(const Cursor *cursor, Coords *coords) {
     Field *field = (Field *)(cursor->objects[Field_enum]);
@@ -83,4 +86,10 @@ void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int de
     else if (new_x >= FIELD_WIDTH || new_x == 0) res_coords->x = 0;
     if (new_y >= 0 && new_y < FIELD_HEIGHT && (*field)[new_y][res_coords->x]->numeral != Null) res_coords->y = new_y;
     if (delta_y == 0) res_coords->y = get_last_card_y(field, res_coords->x);
+}
+
+void select_column(Field *field, Cursor *cursor) {
+    for (int i = cursor->coords.y; (*field)[i][cursor->coords.x]->numeral != Null && i < FIELD_HEIGHT; ++i) {
+        (*field)[i][cursor->coords.x]->selected = !(*field)[i][cursor->coords.x]->selected;
+    }
 }
