@@ -16,19 +16,21 @@
 
 #include "../inc/solitare.h"
 
-void init_field(Field field, Deck *deck) {
+Field init_field(Deck *deck) {
+    Field field;
     for (int row = 0; row < FIELD_WIDTH; row++) {
         for (int col = 0; col < FIELD_HEIGHT; col++) {
-            if (col > row) field[col][row] = &deck->deck[0];
+            if (col > row) field.field[col][row] = NULL;
             else {
                 Card *card = draw_card(deck);
                 card->coords.x = row;
                 card->coords.y = col;
                 card->object = Field_enum;
-                field[col][row] = card;
+                field.field[col][row] = card;
             }
         }
     }
+    return field;
 }
 
 void print_field(Screen *screen, const Field *field, const Cursor *hovered_card) {
@@ -49,9 +51,9 @@ void print_field(Screen *screen, const Field *field, const Cursor *hovered_card)
             int additional_offset = (is_hovered_row && x == hovered_x && hovered_card->subject == Field_enum);
             int x_0 = x * CARD_WIDTH + BORDER_OFFSET_X;
 
-            Card *current_card = (*field)[y][x];
+            Card *current_card = field->field[y][x];
 
-            if (y == 0 && current_card->numeral == Null) {
+            if (y == 0 && !current_card) {
                 add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, fat_border);
             }
             else {
@@ -63,15 +65,15 @@ void print_field(Screen *screen, const Field *field, const Cursor *hovered_card)
 
 int get_last_card_y(const Field *field, int x) {
     for (int i = FIELD_HEIGHT - 1; i >= 0; --i)
-        if ((*field)[i][x]->numeral != Null) return i;
+        if (field->field[i][x]) return i;
     return 0;
 }
 
 void print_cursor_in_field(const Cursor *cursor, Coords *coords) {
     Field *field = (Field *)(cursor->objects[Field_enum]);
     int part = BORDER_OFFSET_Y + 1 + cursor->coords.y * 2;
-    bool is_last_card = FIELD_WIDTH == cursor->coords.y 
-                        || (*field)[cursor->coords.y + 1][cursor->coords.x]->numeral == Null;
+    bool is_last_card = FIELD_WIDTH == cursor->coords.y || !field->field[cursor->coords.y + 1][cursor->coords.x];
+
     coords->y += part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1);
     coords->x += BORDER_OFFSET_X - 1;
 }
@@ -84,12 +86,12 @@ void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int de
     if (new_x >= 0 && new_x < FIELD_WIDTH) res_coords->x = new_x;
     else if (new_x < 0) res_coords->x = FIELD_WIDTH - 1;
     else if (new_x >= FIELD_WIDTH || new_x == 0) res_coords->x = 0;
-    if (new_y >= 0 && new_y < FIELD_HEIGHT && (*field)[new_y][res_coords->x]->numeral != Null) res_coords->y = new_y;
+    if (new_y >= 0 && new_y < FIELD_HEIGHT && field->field[new_y][res_coords->x]) res_coords->y = new_y;
     if (delta_y == 0) res_coords->y = get_last_card_y(field, res_coords->x);
 }
 
 void select_column(Field *field, Cursor *cursor) {
-    for (int i = cursor->coords.y; (*field)[i][cursor->coords.x]->numeral != Null && i < FIELD_HEIGHT; ++i) {
-        (*field)[i][cursor->coords.x]->selected = !(*field)[i][cursor->coords.x]->selected;
+    for (int i = cursor->coords.y; field->field[i][cursor->coords.x] && i < FIELD_HEIGHT; ++i) {
+        field->field[i][cursor->coords.x]->selected = !field->field[i][cursor->coords.x]->selected;
     }
 }

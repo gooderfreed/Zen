@@ -42,7 +42,7 @@ char *numeral_to_text(Numeral numeral) {
 }
 
 void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x) {
-    if (card->numeral == Null) return;
+    if (!card) return;
 
     int x_0 = x;
     int y_0 = y;

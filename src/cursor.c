@@ -20,7 +20,7 @@ Cursor init_cursor(Deck *deck, Field *field, Stock *stock) {
     Cursor cursor;
     cursor.coords.x = 0;
     cursor.coords.y = 0;
-    cursor.card = &deck->deck[0];
+    cursor.card = NULL;
     cursor.subject = Field_enum;
     cursor.objects[Deck_enum]  = deck;
     cursor.objects[Field_enum] = field;

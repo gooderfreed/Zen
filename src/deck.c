@@ -19,7 +19,7 @@
 Deck generate_deck(void) {
     Deck deck;
 
-    int i = 1;
+    int i = 0;
     for (Suit suit = Spades; suit < CARD_SUITS; suit++) {
         for (Numeral numeral = Ace; numeral <= CARD_NUMERALS; numeral++) {
             Card card = {
@@ -31,9 +31,7 @@ Deck generate_deck(void) {
             deck.deck[i++] = card;
         }
     }
-    Card card = { .suit = 0, .numeral = Null, .selected = false, .object = Unknown };
-    deck.deck[0] = card;
-    deck.pointer = &deck.deck[1];
+    deck.pointer = &deck.deck[0];
 
     return deck;
 }

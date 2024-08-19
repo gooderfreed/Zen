@@ -39,7 +39,7 @@
 // cursor
 void merge(Cursor *cursor) {
     Field *field = (Field *)(cursor->objects[Field_enum]);
-    Deck  *deck  = (Deck *)(cursor->objects[Deck_enum]);
+    Card *(*field_array)[FIELD_WIDTH] = field->field;
     int start_x = cursor->card->coords.x;
     int start_y = cursor->card->coords.y;
 
@@ -47,25 +47,25 @@ void merge(Cursor *cursor) {
 
     case Field_enum:
         if (cursor->coords.y + 1 < FIELD_HEIGHT && 
-            (*field)[cursor->coords.y + 1][cursor->coords.x]->numeral == Null) {
+            !field_array[cursor->coords.y + 1][cursor->coords.x]) {
             
-            for (int i = 0; (*field)[start_y + i][start_x]->numeral != Null && start_y + i < FIELD_HEIGHT; i++) {
-                Card *card = (*field)[start_y + i][start_x];
-                (*field)[start_y + i][start_x] = &deck->deck[0];
+            for (int i = 0; field_array[start_y + i][start_x] && start_y + i < FIELD_HEIGHT; i++) {
+                Card *card = field_array[start_y + i][start_x];
+                field_array[start_y + i][start_x] = NULL;
 
                 card->selected = false;
 
-                if ((*field)[cursor->coords.y + i][cursor->coords.x]->numeral != Null) {
+                if (field_array[cursor->coords.y + i][cursor->coords.x]) {
                     card->coords = (Coords){.x = cursor->coords.x, .y = cursor->coords.y + 1 + i};
-                    (*field)[cursor->coords.y + 1 + i][cursor->coords.x] = card;
+                    field_array[cursor->coords.y + 1 + i][cursor->coords.x] = card;
                 }
                 else {
                     card->coords = (Coords){.x = cursor->coords.x, .y = cursor->coords.y + i};
-                    (*field)[cursor->coords.y + i][cursor->coords.x] = card;
+                    field_array[cursor->coords.y + i][cursor->coords.x] = card;
                 }
             }
 
-            cursor->card = &deck->deck[0];
+            cursor->card = NULL;
         }
         break;
 
@@ -79,14 +79,13 @@ void select_card(Cursor *cursor) {
     case Field_enum: {
         Field *field = (Field *)(cursor->objects[Field_enum]);
 
-        if (cursor->card->numeral == Null) {
-            cursor->card = (*field)[cursor->coords.y][cursor->coords.x];
+        if (!cursor->card) {
+            cursor->card = field->field[cursor->coords.y][cursor->coords.x];
             select_column(field, cursor);
         }
         else if (cursor->card->coords.x == cursor->coords.x) {
             if (cursor->card->coords.y == cursor->coords.y) {
-                Deck *deck = (Deck *)(cursor->objects[Deck_enum]);
-                cursor->card = &deck->deck[0];
+                cursor->card = NULL;
                 select_column(field, cursor);
             }
         }
@@ -134,12 +133,10 @@ int main(void) {
     setlocale(LC_ALL, "");
     clear();
 
-    Deck   deck = generate_deck();
-    Field  field;
+    Deck   deck   = generate_deck();
+    Field  field  = init_field(&deck);
     Cursor cursor = init_cursor(&deck, &field, NULL);
     Screen screen = init_screen();
-
-    init_field(field, &deck);
 
     add_borders(&screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, fat_border);
     add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, fat_border);
@@ -154,6 +151,7 @@ int main(void) {
         need_screen_update = true;
         switch (ch) {
             case L'q': case L'й': case KEY_ESC:
+                clear();
                 restore_terminal_settings();
                 exit(0);
             case L'a': case L'ф':

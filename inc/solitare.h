@@ -63,7 +63,6 @@ typedef enum {
 } Suit;
 
 typedef enum {
-    Null = 0,
     Ace = 1,
     Two, Three, Four, Five, Six, Seven, Eight, Nine,
     Ten, Jack, Queen, King
@@ -90,20 +89,14 @@ typedef struct {
     bool selected;
 } Card;
 
-typedef struct {
-    Card deck[DECK_SIZE + 1];
-    Card *pointer;
-} Deck;
+// typedef struct {
+//     Card deck[DECK_SIZE + 1];
+//     Card *pointer;
+// } Deck;
 
-typedef Card *Stock[CARD_SUITS][CARD_NUMERALS];
-
-typedef Card *Field[FIELD_HEIGHT][FIELD_WIDTH];
-
-typedef struct {
-    char *background[SCREEN_HEIGHT][SCREEN_WIDTH];
-    wchar_t     data[SCREEN_HEIGHT][SCREEN_WIDTH];
-    char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];
-} Screen;
+// typedef void (*Func)(void *);
+// typedef void (*GetCard)(void *);
+// typedef void (*place_card)(void *);
 
 typedef struct {
     Coords coords;
@@ -111,6 +104,35 @@ typedef struct {
     Objects subject;
     void *objects[OBJECTS_COUNT];
 } Cursor;
+
+typedef struct {
+    Card deck[DECK_SIZE + 1];
+    Card *pointer;
+
+    // Func select_card;
+    // Func get_card;
+    // Func place_card;
+} Deck;
+
+// typedef Card *Stock[CARD_SUITS][CARD_NUMERALS];
+typedef struct {
+    Card *stock[CARD_SUITS][CARD_NUMERALS];
+} Stock;
+
+// typedef Card *Field[FIELD_HEIGHT][FIELD_WIDTH];
+typedef struct {
+    Card *field[FIELD_HEIGHT][FIELD_WIDTH];
+
+    // Func select_card;
+    // Func get_card;
+    // Func place_card;
+} Field;
+
+typedef struct {
+    char *background[SCREEN_HEIGHT][SCREEN_WIDTH];
+    wchar_t     data[SCREEN_HEIGHT][SCREEN_WIDTH];
+    char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];
+} Screen;
 
 
 //deck
@@ -132,7 +154,7 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
 //screen
 
 //field
-void init_field(Field field, Deck *deck);
+Field init_field(Deck *deck);
 int get_last_card_y(const Field *field, int x);
 void select_column(Field *field, Cursor *cursor);
 void print_cursor_in_field(const Cursor *cursor, Coords *coords);
