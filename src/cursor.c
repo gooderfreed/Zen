@@ -25,6 +25,9 @@ Cursor init_cursor(Deck *deck, Field *field, Stock *stock) {
     cursor.objects[Deck_enum]  = deck;
     cursor.objects[Field_enum] = field;
     cursor.objects[Stock_enum] = stock;
+    cursor.interfaces[Deck_enum] = &deck->interface;
+    cursor.interfaces[Field_enum] = &field->interface;
+    cursor.interfaces[Stock_enum] = &stock->interface;
     return cursor;
 }
 

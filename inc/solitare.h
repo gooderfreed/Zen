@@ -94,38 +94,47 @@ typedef struct {
 //     Card *pointer;
 // } Deck;
 
-// typedef void (*Func)(void *);
+// typedef Card *(*SelectFunc)(void *);
 // typedef void (*GetCard)(void *);
 // typedef void (*place_card)(void *);
 
+// Func select_card;
+// Func get_card;
+// Func place_card;
+
+struct Cursor;
+
 typedef struct {
+    Card *(*select_card)(void *, Coords);
+    Card *(*get_card)(void *, struct Cursor *);
+    void (*place_card)(void *, Card *, Coords);
+    bool (*can_place)(void *, Card *, Coords);
+} ObjectInterface;
+
+typedef struct Cursor {
     Coords coords;
     Card *card;
     Objects subject;
     void *objects[OBJECTS_COUNT];
+    ObjectInterface *interfaces[OBJECTS_COUNT];
 } Cursor;
 
 typedef struct {
+    ObjectInterface interface;
     Card deck[DECK_SIZE + 1];
     Card *pointer;
-
-    // Func select_card;
-    // Func get_card;
-    // Func place_card;
 } Deck;
 
 // typedef Card *Stock[CARD_SUITS][CARD_NUMERALS];
 typedef struct {
+    ObjectInterface interface;
     Card *stock[CARD_SUITS][CARD_NUMERALS];
 } Stock;
 
 // typedef Card *Field[FIELD_HEIGHT][FIELD_WIDTH];
 typedef struct {
+    ObjectInterface interface;
     Card *field[FIELD_HEIGHT][FIELD_WIDTH];
-
-    // Func select_card;
-    // Func get_card;
-    // Func place_card;
 } Field;
 
 typedef struct {
@@ -156,8 +165,12 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
 //field
 Field init_field(Deck *deck);
 int get_last_card_y(const Field *field, int x);
-void select_column(Field *field, Cursor *cursor);
+void select_column(Field *field, Coords coords);
+Card *get_card_in_field(void *field_pointer, Cursor *cursor);
 void print_cursor_in_field(const Cursor *cursor, Coords *coords);
+Card *select_card_in_field(void *field_pointer, Coords cursor_coords);
+void place_card_in_filed(void *field_pointer, Card *card, Coords cursor_coord);
+bool can_place_in_field(void *field_pointer, Card *card, Coords cursor_coords);
 void print_field(Screen *screen, const Field *field, const Cursor *hovered_card);
 void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int delta_y);
 //field

@@ -37,65 +37,35 @@
 
 
 // cursor
-void merge(Cursor *cursor) {
-    Field *field = (Field *)(cursor->objects[Field_enum]);
-    Card *(*field_array)[FIELD_WIDTH] = field->field;
-    int start_x = cursor->card->coords.x;
-    int start_y = cursor->card->coords.y;
+void select_card(Cursor *cursor) {
+    Objects target = cursor->subject;
+    void *target_struct = cursor->objects[target];
+    ObjectInterface target_interface = *cursor->interfaces[target];
 
-    switch (cursor->card->object) {
+    if (cursor->card) {
+        Objects source = cursor->card->object;
+        void *source_struct = cursor->objects[source];
+        ObjectInterface source_interface = *cursor->interfaces[source];
 
-    case Field_enum:
-        if (cursor->coords.y + 1 < FIELD_HEIGHT && 
-            !field_array[cursor->coords.y + 1][cursor->coords.x]) {
-            
-            for (int i = 0; field_array[start_y + i][start_x] && start_y + i < FIELD_HEIGHT; i++) {
-                Card *card = field_array[start_y + i][start_x];
-                field_array[start_y + i][start_x] = NULL;
+        bool same_position = (cursor->subject == source) &&
+                             (cursor->coords.x == cursor->card->coords.x) &&
+                             (cursor->coords.y == cursor->card->coords.y);
 
-                card->selected = false;
-
-                if (field_array[cursor->coords.y + i][cursor->coords.x]) {
-                    card->coords = (Coords){.x = cursor->coords.x, .y = cursor->coords.y + 1 + i};
-                    field_array[cursor->coords.y + 1 + i][cursor->coords.x] = card;
-                }
-                else {
-                    card->coords = (Coords){.x = cursor->coords.x, .y = cursor->coords.y + i};
-                    field_array[cursor->coords.y + i][cursor->coords.x] = card;
-                }
-            }
-
+        if (same_position) {
+            target_interface.select_card(target_struct, cursor->coords);
             cursor->card = NULL;
         }
-        break;
-
-    default: break;
-    }
-}
-
-void select_card(Cursor *cursor) {
-    switch (cursor->subject) {
-    
-    case Field_enum: {
-        Field *field = (Field *)(cursor->objects[Field_enum]);
-
-        if (!cursor->card) {
-            cursor->card = field->field[cursor->coords.y][cursor->coords.x];
-            select_column(field, cursor);
-        }
-        else if (cursor->card->coords.x == cursor->coords.x) {
-            if (cursor->card->coords.y == cursor->coords.y) {
+        else if (target_interface.place_card && source_interface.get_card &&
+                 target_interface.can_place(target_struct, cursor->card, cursor->coords)) {
+            Card *card = source_interface.get_card(source_struct, cursor);
+            if (card) {
+                target_interface.place_card(target_struct, card, cursor->coords);
                 cursor->card = NULL;
-                select_column(field, cursor);
             }
         }
-        else {
-            merge(cursor);
-        }
-        break;
     }
-
-    default: break;
+    else {
+        cursor->card = target_interface.select_card(target_struct, cursor->coords);
     }
 }
 // cursor

@@ -30,6 +30,10 @@ Field init_field(Deck *deck) {
             }
         }
     }
+    field.interface.get_card = get_card_in_field;
+    field.interface.can_place = can_place_in_field;
+    field.interface.place_card = place_card_in_filed;
+    field.interface.select_card = select_card_in_field;
     return field;
 }
 
@@ -72,7 +76,8 @@ int get_last_card_y(const Field *field, int x) {
 void print_cursor_in_field(const Cursor *cursor, Coords *coords) {
     Field *field = (Field *)(cursor->objects[Field_enum]);
     int part = BORDER_OFFSET_Y + 1 + cursor->coords.y * 2;
-    bool is_last_card = FIELD_WIDTH == cursor->coords.y || !field->field[cursor->coords.y + 1][cursor->coords.x];
+    bool is_last_card = FIELD_HEIGHT == cursor->coords.y || !field->field[cursor->coords.y + 1][cursor->coords.x];
+    wprintf(L"%i, %i\n", FIELD_HEIGHT == cursor->coords.y, !field->field[cursor->coords.y + 1][cursor->coords.x]);
 
     coords->y += part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1);
     coords->x += BORDER_OFFSET_X - 1;
@@ -90,8 +95,76 @@ void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int de
     if (delta_y == 0) res_coords->y = get_last_card_y(field, res_coords->x);
 }
 
-void select_column(Field *field, Cursor *cursor) {
-    for (int i = cursor->coords.y; field->field[i][cursor->coords.x] && i < FIELD_HEIGHT; ++i) {
-        field->field[i][cursor->coords.x]->selected = !field->field[i][cursor->coords.x]->selected;
+void select_column(Field *field, Coords coords) {
+    for (int i = coords.y; field->field[i][coords.x] && i < FIELD_HEIGHT; ++i) {
+        field->field[i][coords.x]->selected = !field->field[i][coords.x]->selected;
     }
+}
+
+bool is_column(Field *field, Card *card) {
+    if (card->coords.y + 1 < FIELD_HEIGHT &&
+        field->field[card->coords.y + 1][card->coords.x]) 
+        return true;
+    return false;
+} 
+
+Card *select_card_in_field(void *field_pointer, Coords cursor_coords) {
+    Field *field = (Field *)field_pointer;
+
+    select_column(field, cursor_coords);
+    return (field->field[cursor_coords.y][cursor_coords.x]);
+}
+
+
+Card *get_card_in_field(void *field_pointer, Cursor *cursor) {
+    Field *field = (Field *)field_pointer;
+
+    if (is_column(field, cursor->card) && cursor->subject != Field_enum) return NULL;
+
+    Card *card = cursor->card;
+    field->field[card->coords.y][card->coords.x] = NULL;
+    return card;
+}
+
+int get_column_size(Field *field, Card *card) {
+    int column_offset = 0;
+    for (; card->coords.y + column_offset + 1 < FIELD_HEIGHT; column_offset++) {
+        if (!field->field[card->coords.y + column_offset + 1][card->coords.x]) break;
+    }
+    return column_offset + 1;
+}
+
+bool can_place_in_field(void *field_pointer, Card *card, Coords cursor_coords) {
+    Field *field = (Field *)field_pointer;
+
+    int size = card->object == Field_enum && is_column(field, card) ? get_column_size(field, card) : 1;
+    return (cursor_coords.y + size < FIELD_HEIGHT && 
+            field->field[cursor_coords.y + 1][cursor_coords.x] == NULL && 
+            (field->field[cursor_coords.y][cursor_coords.x] == NULL || 
+             !field->field[cursor_coords.y][cursor_coords.x]->selected));
+}
+
+void place_card_in_filed(void *field_pointer, Card *card, Coords cursor_coord) {
+    Field *field = (Field *)field_pointer;
+    bool y_offset = (field->field[cursor_coord.y][cursor_coord.x]);
+
+    field->field[cursor_coord.y + y_offset][cursor_coord.x] = card;
+    if (card->object != Field_enum) card->object = Field_enum;
+    else if (is_column(field, card)) {
+        int column_size = get_column_size(field, card);
+
+        for (int column_offset = 1; column_offset != column_size; column_offset++) {
+            Card *column_card = field->field[card->coords.y + column_offset][card->coords.x];
+            field->field[cursor_coord.y + column_offset + y_offset][cursor_coord.x] = column_card;
+            column_card->coords.x = cursor_coord.x;
+            column_card->coords.y = cursor_coord.y + y_offset + column_offset;
+            column_card->selected = false;
+
+            field->field[card->coords.y + column_offset][card->coords.x] = NULL;
+        }
+    }
+
+    card->coords.x = cursor_coord.x;
+    card->coords.y = cursor_coord.y + y_offset;
+    card->selected = false;
 }
