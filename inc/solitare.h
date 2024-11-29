@@ -25,10 +25,10 @@
 #include <locale.h>
 #include <termios.h>
 #include <unistd.h>
+#include <string.h>
 
 #define KEY_ESC L''
 
-#define CARD_SUITS 4
 #define CARD_NUMERALS 13
 
 #define CARD_SCALE_FACTOR 7
@@ -49,8 +49,6 @@
 #define SCREEN_HEIGHT (2 * (FIELD_HEIGHT - 1) + CARD_HEIGHT + DECK_OFFSET + BORDER_OFFSET_X)
 #define SCREEN_WIDTH (FIELD_WIDTH * CARD_WIDTH + 2 * BORDER_OFFSET_X)
 
-#define OBJECTS_COUNT 3
-
 #define clear() wprintf(L"\033[H\033[J")
 #define gotoxy(x,y) wprintf(L"\033[%d;%dH", (y), (x))
 
@@ -59,13 +57,14 @@ typedef enum {
     Spades,
     Hearts,
     Clubs,
-    Diamonds
+    Diamonds,
+    CARD_SUITS
 } Suit;
 
 typedef enum {
     Ace = 1,
     Two, Three, Four, Five, Six, Seven, Eight, Nine,
-    Ten, Jack, Queen, King
+    Ten, Jack, Queen, King,
 } Numeral;
 
 typedef struct {
@@ -78,6 +77,7 @@ typedef enum{
     Deck_enum = 0,
     Field_enum,
     Stock_enum,
+    OBJECTS_COUNT,
     Unknown
 } Objects;
 
@@ -89,34 +89,40 @@ typedef struct {
     bool selected;
 } Card;
 
-// typedef struct {
-//     Card deck[DECK_SIZE + 1];
-//     Card *pointer;
-// } Deck;
+typedef struct {
+    int size;
+    Objects source;
+    Card *container[CARD_NUMERALS];
+} CardsContainer;
 
-// typedef Card *(*SelectFunc)(void *);
-// typedef void (*GetCard)(void *);
-// typedef void (*place_card)(void *);
 
-// Func select_card;
-// Func get_card;
-// Func place_card;
+#define CURSOR_UP    (Coords){.x = 0,  .y = -1}
+#define CURSOR_DOWN  (Coords){.x = 0,  .y = 1}
+#define CURSOR_LEFT  (Coords){.x = -1, .y = 0}
+#define CURSOR_RIGHT (Coords){.x = 1,  .y = 0}
+#define CURSOR_STAY  (Coords){.x = 0,  .y = 0}
 
+
+struct Screen;
 struct Cursor;
 
 typedef struct {
-    Card *(*select_card)(void *, Coords);
-    Card *(*get_card)(void *, struct Cursor *);
-    void (*place_card)(void *, Card *, Coords);
-    bool (*can_place)(void *, Card *, Coords);
+    void (*select_cards)(void *, Coords, CardsContainer *);
+    void (*get_cards)   (void *, CardsContainer *);
+    void (*place_cards) (void *, Coords, CardsContainer *);
+    bool (*can_place)   (void *, Coords, CardsContainer *);
+
+    void (*place_cursor)(void *, Coords , Coords *);
+    void (*move)        (void *, Coords *, Coords);
+
+    bool is_drawable;
+    void (*print)(void *, struct Screen *, const struct Cursor *);
 } ObjectInterface;
 
 typedef struct Cursor {
     Coords coords;
-    Card *card;
+    CardsContainer cards;
     Objects subject;
-    void *objects[OBJECTS_COUNT];
-    ObjectInterface *interfaces[OBJECTS_COUNT];
 } Cursor;
 
 typedef struct {
@@ -125,33 +131,52 @@ typedef struct {
     Card *pointer;
 } Deck;
 
-// typedef Card *Stock[CARD_SUITS][CARD_NUMERALS];
 typedef struct {
     ObjectInterface interface;
     Card *stock[CARD_SUITS][CARD_NUMERALS];
 } Stock;
 
-// typedef Card *Field[FIELD_HEIGHT][FIELD_WIDTH];
 typedef struct {
     ObjectInterface interface;
     Card *field[FIELD_HEIGHT][FIELD_WIDTH];
 } Field;
 
-typedef struct {
+typedef struct Screen {
     char *background[SCREEN_HEIGHT][SCREEN_WIDTH];
     wchar_t     data[SCREEN_HEIGHT][SCREEN_WIDTH];
     char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];
 } Screen;
 
+typedef struct {
+    void *objects[OBJECTS_COUNT];
+    Cursor *cursor;
+    Screen *screen;
+} Core;
+
+
+// #define MAP_HEIGHT 1
+// #define MAP_WIDTH 3
+
+// typedef struct
+// {
+//     int size;
+//     Objects *array;
+// } MapObject;
+
+// typedef MapObject **Map[MAP_HEIGHT][MAP_WIDTH];
+
 
 //deck
 Deck generate_deck(void);
-Card *draw_card(Deck *deck);
 void next_card(Deck *deck);
-void shuffle_deck(Deck *deck);
 void reset_deck(Deck *deck);
+Card *draw_card(Deck *deck);
+void shuffle_deck(Deck *deck);
+void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor);
+Card *get_card_in_deck(void *deck_pointer, Cursor *cursor);
+void place_cursor_in_deck(const Cursor *cursor, Coords *coords);
+Card *select_card_in_deck(void *deck_pointer, Coords cursor_coords);
 //deck
-
 
 //screen
 Screen init_screen(void);
@@ -164,15 +189,16 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
 
 //field
 Field init_field(Deck *deck);
-int get_last_card_y(const Field *field, int x);
 void select_column(Field *field, Coords coords);
-Card *get_card_in_field(void *field_pointer, Cursor *cursor);
 void print_cursor_in_field(const Cursor *cursor, Coords *coords);
-Card *select_card_in_field(void *field_pointer, Coords cursor_coords);
-void place_card_in_filed(void *field_pointer, Card *card, Coords cursor_coord);
-bool can_place_in_field(void *field_pointer, Card *card, Coords cursor_coords);
-void print_field(Screen *screen, const Field *field, const Cursor *hovered_card);
-void move_in_field(Coords *res_coords, const Cursor *cursor, int delta_x, int delta_y);
+void print_field(void *field_pointer, Screen *screen, const Cursor *hovered_card);
+void move_in_field(void *field_pointer, Coords *coords, Coords delta);
+void place_cursor_in_field(void *field_pointer, Coords cursor_coords, Coords *target_coords);
+
+void get_cards_in_field(void *field_pointer, CardsContainer *container);
+bool can_place_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container);
+void place_cards_in_field(void *field_pointer, Coords cursor_coord, CardsContainer *container);
+void select_cards_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container);
 //field
 
 //card
@@ -184,9 +210,9 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 //card
 
 //cursor
-void print_cursor(Screen *screen, const Cursor *cursor);
-Cursor init_cursor(Deck *deck, Field *field, Stock *stock);
-void move_cursor(Cursor *cursor, int delta_x, int delta_y);
+void move_cursor(Cursor *cursor, Coords move);
+void print_cursor(Cursor *cursor, Screen *screen, void *target_struct);
+Cursor init_cursor(Objects start_object, Coords start_coords);
 Coords try_move(const Cursor *cursor, int delta_x, int delta_y);
 //cursor
 

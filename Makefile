@@ -15,7 +15,11 @@ INC_FILES = $(wildcard $(INC_DIR)/*.h)
 # -g -O3
 
 CC = clang
-CFLAGS = -std=c11 $(addprefix -W, all extra error pedantic)
+CFLAGS = -std=c11 $(addprefix -W, \
+								all extra error pedantic conversion null-dereference\
+								cast-align unreachable-code strict-prototypes bad-function-cast)
+# CFLAGS = -std=c11 $(addprefix -W, \
+# 								everything)
 AR = ar
 AFLAGS = rcs
 MAKE = make -C

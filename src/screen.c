@@ -76,11 +76,17 @@ void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symb
 }
 
 void colorize_area(Screen *screen, const Card *card, int y, int x, int height, int width) {
+    if (y < 0 || x < 0 || y + height > SCREEN_HEIGHT || x + width > SCREEN_WIDTH) {
+        return;
+    }
+
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
-            screen->background[i][j] = "\033[47";
-            screen->data[i][j] = ' ';
-            screen->foreground[i][j] = "";
+            if (i < SCREEN_HEIGHT && j < SCREEN_WIDTH) {
+                screen->background[i][j] = "\033[47";
+                screen->data[i][j] = ' ';
+                screen->foreground[i][j] = "";
+            }
         }
     }
 
