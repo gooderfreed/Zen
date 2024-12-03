@@ -81,7 +81,7 @@ void print_field(void *field_pointer, Screen *screen, const Cursor *hovered_card
         int is_hovered_row = y > hovered_y;
 
         for (int x = 0; x < FIELD_WIDTH; ++x) {
-            int additional_offset = (is_hovered_row && x == hovered_x && hovered_card->subject == Field_enum);
+            int additional_offset = (is_hovered_row && x == hovered_x && hovered_card->subject == field_pointer);
             int x_0 = x * CARD_WIDTH + BORDER_OFFSET_X;
 
             Card *current_card = field->field[y][x];
@@ -139,7 +139,7 @@ void select_cards_in_field(void *field_pointer, Coords cursor_coords, CardsConta
             container->container[i] = NULL;
         }
         container->size = 0;
-        container->source = Unknown;
+        container->source = NULL;
         return;
     }
 
@@ -147,7 +147,7 @@ void select_cards_in_field(void *field_pointer, Coords cursor_coords, CardsConta
         field->field[i][cursor_coords.x]->selected = true;
         container->container[container->size++] = field->field[i][cursor_coords.x];
     }
-    container->source = Field_enum;
+    container->source = field_pointer;
 }
 
 bool can_place_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container) {
@@ -172,5 +172,5 @@ void place_cards_in_field(void *field_pointer, Coords cursor_coord, CardsContain
         container->container[i] = NULL;
     }
     container->size = 0;
-    container->source = Unknown;
+    container->source = NULL;
 }

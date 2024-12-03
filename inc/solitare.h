@@ -48,6 +48,12 @@
 #define FIELD_WIDTH 7
 #define FIELD_DEFAULT_COORDS (Coords){.x = 3, .y = 3}
 
+#define STOCK_X_BASE (SCREEN_WIDTH - BORDER_OFFSET_X - 4 * CARD_WIDTH)
+#define STOCK_AREA_HEIGHT (DECK_OFFSET - 2)
+#define STOCK_AREA_WIDTH (4 * CARD_WIDTH)
+#define STOCK_CURSOR_BASE_X (STOCK_X_BASE + (CARD_WIDTH / 2 - 1))
+#define STOCK_DEFAULT_COORDS (Coords){.x = 2, .y = 0}
+
 #define SCREEN_HEIGHT (2 * (FIELD_HEIGHT - 1) + CARD_HEIGHT + DECK_OFFSET + BORDER_OFFSET_X)
 #define SCREEN_WIDTH (FIELD_WIDTH * CARD_WIDTH + 2 * BORDER_OFFSET_X)
 
@@ -93,7 +99,7 @@ typedef struct {
 
 typedef struct {
     int size;
-    Objects source;
+    void *source;
     Card *container[CARD_NUMERALS];
 } CardsContainer;
 
@@ -149,7 +155,7 @@ typedef struct {
 typedef struct Cursor {
     Coords coords;
     CardsContainer cards;
-    Objects subject;
+    void *subject;
 } Cursor;
 
 typedef struct {
@@ -178,7 +184,7 @@ typedef struct Screen {
 #define MAP_WIDTH 3
 
 typedef struct {
-    Objects object;
+    void *object;
     Coords default_coords;
 } MapObject;
 
@@ -188,7 +194,6 @@ typedef struct {
 } Map;
 
 typedef struct {
-    void *objects[OBJECTS_COUNT];
     Cursor *cursor;
     Screen *screen;
     Map *map;
@@ -242,9 +247,16 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 //card
 
 //cursor
-void print_cursor(Cursor *cursor, Screen *screen, void *target_struct);
-Cursor init_cursor(Objects start_object, Coords start_coords);
+void print_cursor(Cursor *cursor, Screen *screen);
+Cursor init_cursor(void *start_object, Coords start_coords);
 //cursor
+
+//stock
+Stock init_stock(void);
+void print_stock(void *stock_pointer, Screen *screen, const Cursor *cursor);
+void move_in_stock(void *stock_pointer, Coords *coords, Coords delta);
+void place_cursor_in_stock(void *stock_pointer, Coords cursor_coords, Coords *target_coords);
+//stock 
 
 // Interface validation
 bool validate_object_interfaces(const ObjectInterfaces *interfaces);

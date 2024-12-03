@@ -148,11 +148,11 @@ void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContaine
     if (container->size == 0) {
         deck->pointer->selected = true;
         container->container[container->size++] = deck->pointer;
-        container->source = Deck_enum;
+        container->source = deck_pointer;
     } else {
         deck->pointer->selected = false;
         container->size = 0;
-        container->source = Unknown;
+        container->source = NULL;
     }
 }
 

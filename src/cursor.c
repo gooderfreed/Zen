@@ -17,29 +17,29 @@
 #include "../inc/solitare.h"
 
 
-Cursor init_cursor(Objects start_object, Coords start_coords) {
+Cursor init_cursor(void *start_object, Coords start_coords) {
     Cursor cursor = {
         .coords = start_coords,
         .cards = {
             .container = {0},
             .size = 0,
-            .source = Unknown
+            .source = NULL
         },
         .subject = start_object,
     };
     return cursor;
 }
 
-void print_cursor(Cursor *cursor, Screen *screen, void *target_struct) {
+void print_cursor(Cursor *cursor, Screen *screen) {
     Coords base_coords = {
         .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
         .y = BORDER_OFFSET_Y + CARD_HEIGHT
     };
 
-    ObjectInterfaces *interfaces = (ObjectInterfaces*)target_struct;
+    ObjectInterfaces *interfaces = (ObjectInterfaces*)cursor->subject;
     
     if (interfaces->capabilities.is_interactable) {
-        interfaces->interactable->place_cursor(target_struct, cursor->coords, &base_coords);
+        interfaces->interactable->place_cursor(cursor->subject, cursor->coords, &base_coords);
     }
 
     if (base_coords.y < SCREEN_HEIGHT && base_coords.x < SCREEN_WIDTH) {

@@ -44,11 +44,11 @@
 // screen
 
 // map
-Map init_map(Coords start_global_coords) {
+Map init_map(Coords start_global_coords, Deck *deck, Field *field, Stock *stock) {
     Map map = {
         .objects = {
             {
-                {Deck_enum, DECK_DEFAULT_COORDS}, {Field_enum, FIELD_DEFAULT_COORDS}
+                {deck, DECK_DEFAULT_COORDS}, {field, FIELD_DEFAULT_COORDS}, {stock, STOCK_DEFAULT_COORDS}
             }
         },
         .global_coords = start_global_coords
@@ -70,7 +70,8 @@ void map_move(Map *map, Coords move) {
     }
 
     MapObject object = map->objects[new_coords.y][new_coords.x];
-    if (object.object == Unknown) return;
+    if (!object.object) return;
+    if (!((ObjectInterfaces*)object.object)->capabilities.is_interactable) return;
 
     map->global_coords = new_coords;
 }
@@ -81,16 +82,11 @@ MapObject map_get_current_object(Map *map) {
 // map
 
 // core
-Core init_core(Map *map, Cursor *cursor, Screen *screen, Deck *deck, Field *field) {
+Core init_core(Map *map, Cursor *cursor, Screen *screen) {
     Core core = {
         .screen = screen,
         .map = map,
         .cursor = cursor,
-        .objects = {
-            [Deck_enum] = deck,
-            [Field_enum] = field,
-            // [Stock_enum] = stock
-        },
     };
 
     return core;
@@ -100,13 +96,11 @@ void core_move(Core *core, Coords move) {
     Cursor *cursor = core->cursor;
     Coords coords = {.x = cursor->coords.x, .y = cursor->coords.y};
 
-    Objects target = cursor->subject;
-    void *target_struct = core->objects[target];
-    ObjectInterfaces *interfaces = (ObjectInterfaces*)target_struct;
+    ObjectInterfaces *interfaces = (ObjectInterfaces*)cursor->subject;
 
     if (!interfaces->capabilities.is_interactable) return;
 
-    interfaces->interactable->move(target_struct, &coords, move);
+    interfaces->interactable->move(cursor->subject, &coords, move);
 
     if (coords.x != cursor->coords.x || coords.y != cursor->coords.y) {
         wprintf(L"x: %i - y: %i", coords.x, coords.y);
@@ -116,54 +110,52 @@ void core_move(Core *core, Coords move) {
 
 void core_action(Core *core) {
     Cursor *cursor = core->cursor;
-    Objects target = cursor->subject;
-    void *target_struct = core->objects[target];
-    ObjectInterfaces *target_interfaces = (ObjectInterfaces*)target_struct;
+    ObjectInterfaces *target_interfaces = (ObjectInterfaces*)cursor->subject;
 
     if (target_interfaces->capabilities.have_buttons && 
-        target_interfaces->button_handler->is_button_position(target_struct, cursor->coords)) {
-        target_interfaces->button_handler->handle_button(target_struct, cursor->coords);
+        target_interfaces->button_handler->is_button_position(cursor->subject, cursor->coords)) {
+        target_interfaces->button_handler->handle_button(cursor->subject, cursor->coords);
         return;
     }
 
     if (!target_interfaces->capabilities.can_hold_cards) return;
 
     if (cursor->cards.size != 0) {
-        Objects source = cursor->cards.source;
-        void *source_struct = core->objects[source];
-        ObjectInterfaces *source_interfaces = (ObjectInterfaces*)source_struct;
+        ObjectInterfaces *source_interfaces = (ObjectInterfaces*)cursor->cards.source;
         Card *first_card = cursor->cards.container[0];
 
-        bool same_position = (cursor->subject == source) &&
+        bool same_position = (cursor->subject == cursor->cards.source) &&
                            (cursor->coords.x == first_card->coords.x) &&
                            (cursor->coords.y == first_card->coords.y);
 
         if (same_position) {
-            target_interfaces->card_handler->select_cards(target_struct, cursor->coords, &cursor->cards);
+            target_interfaces->card_handler->select_cards(cursor->subject, cursor->coords, &cursor->cards);
         }
         else if (source_interfaces->capabilities.can_hold_cards && 
-                 target_interfaces->card_handler->can_place(target_struct, cursor->coords, &cursor->cards)) {
-            source_interfaces->card_handler->get_cards(source_struct, &cursor->cards);
-            target_interfaces->card_handler->place_cards(target_struct, cursor->coords, &cursor->cards);
+                 target_interfaces->card_handler->can_place(cursor->subject, cursor->coords, &cursor->cards)) {
+            source_interfaces->card_handler->get_cards(cursor->cards.source, &cursor->cards);
+            target_interfaces->card_handler->place_cards(cursor->subject, cursor->coords, &cursor->cards);
         }
     }
     else {
-        target_interfaces->card_handler->select_cards(target_struct, cursor->coords, &cursor->cards);
+        target_interfaces->card_handler->select_cards(cursor->subject, cursor->coords, &cursor->cards);
     }
 }
 
 void core_update_screen(Core *core) {
-    for (Objects object = 0; object < OBJECTS_COUNT - 1; ++object) {
-        void *target_struct = core->objects[object];
-        ObjectInterfaces *interfaces = (ObjectInterfaces*)target_struct;
-        if (interfaces->capabilities.is_drawable) {
-            interfaces->drawable->print(target_struct, core->screen, core->cursor);
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            void *target_struct = core->map->objects[y][x].object;
+            if (!target_struct) continue;
+            
+            ObjectInterfaces *interfaces = (ObjectInterfaces*)target_struct;
+            if (interfaces->capabilities.is_drawable) {
+                interfaces->drawable->print(target_struct, core->screen, core->cursor);
+            }
         }
     }
 
-    Objects target = core->cursor->subject;
-    void *target_struct = core->objects[target];
-    print_cursor(core->cursor, core->screen, target_struct);
+    print_cursor(core->cursor, core->screen);
     print_screen(core->screen);
 }
 
@@ -172,7 +164,7 @@ void core_global_move(Core *core, Coords move) {
     map_move(core->map, move);
 
     MapObject target = map_get_current_object(core->map);
-    if (target.object != Unknown) {
+    if (target.object) {
         core->cursor->subject = target.object;
         core->cursor->coords = target.default_coords;
     }
@@ -304,10 +296,12 @@ int main(void) {
 
     Deck   deck   = generate_deck();
     Field  field  = init_field(&deck); // TODO: change deck get_card method
+    Stock  stock  = init_stock();
     Screen screen = init_screen();
-    Map map = init_map((Coords){.x = 1, .y = 0});
-    Cursor cursor = init_cursor(map_get_current_object(&map).object, map_get_current_object(&map).default_coords);
-    Core   core   = init_core(&map, &cursor, &screen, &deck, &field);
+    Map    map = init_map((Coords){.x = 1, .y = 0}, &deck, &field, &stock);
+    MapObject object = map_get_current_object(&map);
+    Cursor cursor = init_cursor(object.object, object.default_coords);
+    Core   core   = init_core(&map, &cursor, &screen);
 
     if (!validate_object_interfaces(&deck.interfaces) || 
         !validate_object_interfaces(&field.interfaces)) {
