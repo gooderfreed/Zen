@@ -17,8 +17,8 @@
 #include "../inc/solitare.h"
 
 Deck generate_deck(void) {
-    Deck deck;
-
+    Deck deck = {0};
+    
     int i = 0;
     for (Suit suit = Spades; suit < CARD_SUITS; suit++) {
         for (Numeral numeral = Ace; numeral <= CARD_NUMERALS; numeral++) {
@@ -31,16 +31,43 @@ Deck generate_deck(void) {
             deck.deck[i++] = card;
         }
     }
-    deck.pointer = &deck.deck;
+    deck.pointer = &deck.deck[0];
 
-    // deck.interface.select_cards = select_card_in_deck;
-    // deck.interface.get_card = get_card_in_deck;
-    // deck.interface.move
+    static const Drawable drawable = {
+        .print = print_deck
+    };
 
-    // deck.interface.place_cursor = place_cursor_in_deck;
+    static const Interactable interactable = {
+        .place_cursor = place_cursor_in_deck,
+        .move = move_in_deck
+    };
 
-    deck.interface.is_drawable  = true;
-    deck.interface.print = print_deck;
+    static const CardHandler card_handler = {
+        .can_give_cards = true,
+        .can_take_cards = false,
+        .select_cards = select_card_in_deck,
+        .get_cards = get_card_in_deck,
+        .place_cards = NULL,
+        .can_place = NULL
+    };
+
+    static const ButtonHandler button_handler = {
+    .is_button_position = is_deck_button_position,
+        .handle_button = handle_deck_button
+    };
+
+    deck.interfaces = (ObjectInterfaces){
+        .capabilities = {
+            .can_hold_cards = true,
+            .is_drawable = true,
+            .is_interactable = true,
+            .have_buttons = true
+        },
+        .drawable = &drawable,
+        .interactable = &interactable,
+        .card_handler = &card_handler,
+        .button_handler = &button_handler
+    };
 
     return deck;
 }
@@ -51,9 +78,11 @@ void next_card(Deck *deck) {
     do {
         deck->pointer++;
 
-        if (deck->pointer > &deck->deck[DECK_SIZE]) deck->pointer = NULL;
-        if (deck->pointer == start) break;
-
+        if (deck->pointer >= &deck->deck[DECK_SIZE]) deck->pointer = &deck->deck[0];
+        if (deck->pointer == start) {
+            deck->pointer = NULL;
+            break;
+        }
     } while (deck->pointer->object != Deck_enum);
 }
 
@@ -75,29 +104,63 @@ void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor) {
     
     if (deck->pointer) 
         print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
-    // else add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, card_border);
-    // print_card_deck(screen, deck->pointer);
+    else add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, card_border);
 }
 
-// void place_cursor_in_deck(const Cursor *cursor, Coords *coords) {
-//     coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
-//     coords->x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1;
-// }
-
-// Card *select_card_in_deck(void *deck_pointer, Coords cursor_coords) {
-//     (void) cursor_coords;
-//     Deck *deck = (Deck *)deck_pointer;
-//     deck->pointer->selected = !deck->pointer->selected;
+void move_in_deck(void *deck_pointer, Coords *coords, Coords delta) {
+    (void)deck_pointer;
     
-//     return deck->pointer;
-// }
+    if (delta.y != 0) return;
+    
+    short new_x = coords->x + delta.x;
+    if (new_x < 0 || new_x > 1) return;
+    
+    coords->x = new_x;
+}
 
-// Card *get_card_in_deck(void *deck_pointer, Cursor *cursor) {
-//     (void) cursor;
-//     Deck *deck = (Deck *)deck_pointer;
+void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coords *target_coords) {
+    (void)deck_pointer;
+    
+    target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
+    target_coords->x = cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1;
+}
 
-//     deck->pointer->selected = false;
-//     Card *card = draw_card(deck);
+void next_card_action(void *deck_pointer) {
+    Deck *deck = (Deck *)deck_pointer;
+    next_card(deck);
+}
 
-//     return card;
-// }
+bool is_deck_button_position(void *deck_pointer, Coords coords) {
+    (void)deck_pointer;
+    return coords.x == 0 && coords.y == 0;
+}
+
+void handle_deck_button(void *deck_pointer, Coords coords) {
+    if (coords.x == 0 && coords.y == 0) {
+        next_card_action(deck_pointer);
+    }
+}
+
+void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContainer *container) {
+    Deck *deck = (Deck *)deck_pointer;
+    (void)cursor_coords;
+    
+    if (container->size == 0) {
+        deck->pointer->selected = true;
+        container->container[container->size++] = deck->pointer;
+        container->source = Deck_enum;
+    } else {
+        deck->pointer->selected = false;
+        container->size = 0;
+        container->source = Unknown;
+    }
+}
+
+void get_card_in_deck(void *deck_pointer, CardsContainer *container) {
+    Deck *deck = (Deck *)deck_pointer;
+    (void)container;
+
+    deck->pointer->selected = false;
+    deck->pointer->object = Unknown;
+    next_card(deck);
+}

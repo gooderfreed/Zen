@@ -17,20 +17,36 @@
 #include "../inc/solitare.h"
 
 Field init_field(Deck *deck) {
-    Field field = {
-        .interface = {
+    Field field = {0};
+
+    // Настраиваем интерфейсы
+    static const Drawable drawable = {
+        .print = print_field
+    };
+
+    static const Interactable interactable = {
+        .place_cursor = place_cursor_in_field,
+        .move = move_in_field
+    };
+
+    static const CardHandler card_handler = {
+        .can_give_cards = true,
+        .can_take_cards = true,
+        .select_cards = select_cards_in_field,
+        .get_cards = get_cards_in_field,
+        .place_cards = place_cards_in_field,
+        .can_place = can_place_in_field
+    };
+
+    field.interfaces = (ObjectInterfaces){
+        .capabilities = {
+            .can_hold_cards = true,
             .is_drawable = true,
-
-            .get_cards = get_cards_in_field,
-            .can_place = can_place_in_field,
-            .place_cards = place_cards_in_field,
-            .select_cards = select_cards_in_field,
-
-            .place_cursor = place_cursor_in_field,
-            .move = move_in_field,
-
-            .print = print_field
-        }
+            .is_interactable = true
+        },
+        .drawable = &drawable,
+        .interactable = &interactable,
+        .card_handler = &card_handler
     };
 
     for (short row = 0; row < FIELD_WIDTH; row++) {
@@ -117,21 +133,21 @@ void get_cards_in_field(void *field_pointer, CardsContainer *container) {
 
 void select_cards_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container) {
     Field *field = (Field *)field_pointer;
-    bool select_mode = (container->size == 0);
-
-    for (int i = cursor_coords.y; field->field[i][cursor_coords.x] && i < FIELD_HEIGHT; ++i) {
-        Card *current_card = field->field[i][cursor_coords.x];
-        current_card->selected = select_mode;
-
-        if (select_mode) container->container[container->size++] = current_card;
-        else container->container[container->size++] = NULL;
-    }
-    container->source = Field_enum;
-
-    if (!select_mode) {
+    if (container->size) {
+        for (int i = 0; i < container->size; i++) {
+            container->container[i]->selected = false;
+            container->container[i] = NULL;
+        }
         container->size = 0;
         container->source = Unknown;
+        return;
     }
+
+    for (int i = cursor_coords.y; field->field[i][cursor_coords.x] && i < FIELD_HEIGHT; ++i) {
+        field->field[i][cursor_coords.x]->selected = true;
+        container->container[container->size++] = field->field[i][cursor_coords.x];
+    }
+    container->source = Field_enum;
 }
 
 bool can_place_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container) {

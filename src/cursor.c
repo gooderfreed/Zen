@@ -31,12 +31,16 @@ Cursor init_cursor(Objects start_object, Coords start_coords) {
 }
 
 void print_cursor(Cursor *cursor, Screen *screen, void *target_struct) {
-    Coords base_coords = {.x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
-                          .y = BORDER_OFFSET_Y + CARD_HEIGHT};
+    Coords base_coords = {
+        .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
+        .y = BORDER_OFFSET_Y + CARD_HEIGHT
+    };
 
-    ObjectInterface target_interface = *((ObjectInterface*)target_struct);
-
-    target_interface.place_cursor(target_struct, cursor->coords, &base_coords);
+    ObjectInterfaces *interfaces = (ObjectInterfaces*)target_struct;
+    
+    if (interfaces->capabilities.is_interactable) {
+        interfaces->interactable->place_cursor(target_struct, cursor->coords, &base_coords);
+    }
 
     if (base_coords.y < SCREEN_HEIGHT && base_coords.x < SCREEN_WIDTH) {
         screen->data[base_coords.y][base_coords.x] = '/';

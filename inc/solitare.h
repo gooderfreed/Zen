@@ -42,9 +42,11 @@
 
 #define DECK_OFFSET (CARD_HEIGHT + 2 * BORDER_OFFSET_Y)
 #define DECK_SIZE (CARD_SUITS * CARD_NUMERALS)
+#define DECK_DEFAULT_COORDS (Coords){.x = 0, .y = 0}
 
 #define FIELD_HEIGHT 19
 #define FIELD_WIDTH 7
+#define FIELD_DEFAULT_COORDS (Coords){.x = 3, .y = 3}
 
 #define SCREEN_HEIGHT (2 * (FIELD_HEIGHT - 1) + CARD_HEIGHT + DECK_OFFSET + BORDER_OFFSET_X)
 #define SCREEN_WIDTH (FIELD_WIDTH * CARD_WIDTH + 2 * BORDER_OFFSET_X)
@@ -107,17 +109,42 @@ struct Screen;
 struct Cursor;
 
 typedef struct {
+    void (*print)(void *, struct Screen *, const struct Cursor *);
+} Drawable;
+
+typedef struct {
+    void (*place_cursor)(void *, Coords , Coords *);
+    void (*move)        (void *, Coords *, Coords);
+} Interactable;
+
+typedef struct {
+    bool can_give_cards : 1;
+    bool can_take_cards : 1;
+
     void (*select_cards)(void *, Coords, CardsContainer *);
     void (*get_cards)   (void *, CardsContainer *);
     void (*place_cards) (void *, Coords, CardsContainer *);
     bool (*can_place)   (void *, Coords, CardsContainer *);
+} CardHandler;
 
-    void (*place_cursor)(void *, Coords , Coords *);
-    void (*move)        (void *, Coords *, Coords);
+typedef struct {
+    bool (*is_button_position)(void *, Coords);
+    void (*handle_button)(void *, Coords);
+} ButtonHandler;
 
-    bool is_drawable;
-    void (*print)(void *, struct Screen *, const struct Cursor *);
-} ObjectInterface;
+typedef struct {
+    struct {
+        bool can_hold_cards  : 1;
+        bool is_drawable     : 1;
+        bool is_interactable : 1;
+        bool have_buttons    : 1;
+    } capabilities;
+
+    const Drawable *drawable;
+    const Interactable *interactable;
+    const CardHandler *card_handler;
+    const ButtonHandler *button_handler;
+} ObjectInterfaces;
 
 typedef struct Cursor {
     Coords coords;
@@ -126,18 +153,18 @@ typedef struct Cursor {
 } Cursor;
 
 typedef struct {
-    ObjectInterface interface;
+    ObjectInterfaces interfaces;
     Card deck[DECK_SIZE + 1];
     Card *pointer;
 } Deck;
 
 typedef struct {
-    ObjectInterface interface;
+    ObjectInterfaces interfaces;
     Card *stock[CARD_SUITS][CARD_NUMERALS];
 } Stock;
 
 typedef struct {
-    ObjectInterface interface;
+    ObjectInterfaces interfaces;
     Card *field[FIELD_HEIGHT][FIELD_WIDTH];
 } Field;
 
@@ -147,23 +174,25 @@ typedef struct Screen {
     char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];
 } Screen;
 
+#define MAP_HEIGHT 1
+#define MAP_WIDTH 3
+
+typedef struct {
+    Objects object;
+    Coords default_coords;
+} MapObject;
+
+typedef struct {
+    MapObject objects[MAP_HEIGHT][MAP_WIDTH];
+    Coords global_coords;
+} Map;
+
 typedef struct {
     void *objects[OBJECTS_COUNT];
     Cursor *cursor;
     Screen *screen;
+    Map *map;
 } Core;
-
-
-// #define MAP_HEIGHT 1
-// #define MAP_WIDTH 3
-
-// typedef struct
-// {
-//     int size;
-//     Objects *array;
-// } MapObject;
-
-// typedef MapObject **Map[MAP_HEIGHT][MAP_WIDTH];
 
 
 //deck
@@ -173,9 +202,12 @@ void reset_deck(Deck *deck);
 Card *draw_card(Deck *deck);
 void shuffle_deck(Deck *deck);
 void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor);
-Card *get_card_in_deck(void *deck_pointer, Cursor *cursor);
-void place_cursor_in_deck(const Cursor *cursor, Coords *coords);
-Card *select_card_in_deck(void *deck_pointer, Coords cursor_coords);
+void move_in_deck(void *deck_pointer, Coords *coords, Coords delta);
+void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coords *target_coords);
+bool is_deck_button_position(void *deck_pointer, Coords coords);
+void handle_deck_button(void *deck_pointer, Coords coords);
+void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContainer *container);
+void get_card_in_deck(void *deck_pointer, CardsContainer *container);
 //deck
 
 //screen
@@ -210,10 +242,20 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 //card
 
 //cursor
-void move_cursor(Cursor *cursor, Coords move);
 void print_cursor(Cursor *cursor, Screen *screen, void *target_struct);
 Cursor init_cursor(Objects start_object, Coords start_coords);
-Coords try_move(const Cursor *cursor, int delta_x, int delta_y);
 //cursor
+
+// Interface validation
+bool validate_object_interfaces(const ObjectInterfaces *interfaces);
+
+// Добавим новые типы для валидации
+typedef bool (*ValidateFunc)(const void *interface);
+
+typedef struct {
+    bool capability_flag;       // Флаг из capabilities
+    const void *interface;      // Указатель на интерфейс
+    ValidateFunc validate;      // Функция валидации
+} InterfaceValidator;
 
 #endif
