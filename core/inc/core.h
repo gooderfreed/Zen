@@ -114,6 +114,10 @@ typedef struct ObjectInterfaces {
 #define clear() wprintf(L"\033[H\033[J")
 #define gotoxy(x,y) wprintf(L"\033[%d;%dH", (y), (x))
 #define KEY_ESC L''
+#define KEY_ENTER 10
+#define KEY_SPACE 32
+#define KEY_CTRL_A 1
+#define KEY_CTRL_D 4
 
 struct Screen {
     char *background[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -160,6 +164,13 @@ typedef struct {
 } Core;
 
 // Validator
+#define VALIDATOR(cap_field, iface_field, val_func) \
+    { \
+        .capability_flag = interfaces->capabilities.cap_field, \
+        .interface = interfaces->iface_field, \
+        .validate = val_func \
+    }
+
 typedef bool (*ValidateFunc)(const void *interface);
 
 typedef struct InterfaceValidator {

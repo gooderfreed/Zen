@@ -16,13 +16,6 @@
 
 #include "../inc/solitare.h"
 
-// void test(Core *core) {
-//     core_global_move(core, CURSOR_LEFT);
-//     core_move(core, CURSOR_RIGHT);
-//     core_action(core);
-//     core_action(core);
-// }
-
 static void set_noncanonical_mode(void) {
     struct termios term;
     tcgetattr(STDIN_FILENO, &term);
@@ -70,7 +63,7 @@ int main(void) {
     bool need_screen_update;
     while (true) {
         wint_t ch = getwchar();
-        wprintf(L"key: %i       \n", ch);
+        // wprintf(L"key: %i       \n", ch);
         need_screen_update = true;
         switch (ch) {
             case L'q': case L'й': case KEY_ESC:
@@ -78,24 +71,15 @@ int main(void) {
                 core_free(&core);
                 restore_terminal_settings();
                 exit(0);
-            case L'a': case L'ф': core_move(&core, CURSOR_LEFT);
-                break;
-            case L'd': case L'в': core_move(&core, CURSOR_RIGHT);
-                break;
-            case L'w': case L'ц': core_move(&core, CURSOR_UP);
-                break;
-            case L's': case L'ы': case L'і': core_move(&core, CURSOR_DOWN);
-                break;
-            case L' ': case L'\n': core_action(&core);
-                break;
-            case 1: core_global_move(&core, CURSOR_LEFT);
-                break;
-            case 4: core_global_move(&core, CURSOR_RIGHT);
-                break;
-
+            case L'a': case L'ф': core_move(&core, CURSOR_LEFT);            break;
+            case L'd': case L'в': core_move(&core, CURSOR_RIGHT);           break;
+            case L'w': case L'ц': core_move(&core, CURSOR_UP);              break;
+            case L's': case L'ы': case L'і': core_move(&core, CURSOR_DOWN); break;
+            case KEY_SPACE: case KEY_ENTER: core_action(&core);             break;
+            case KEY_CTRL_A: core_global_move(&core, CURSOR_LEFT);          break;
+            case KEY_CTRL_D: core_global_move(&core, CURSOR_RIGHT);         break;
             default: need_screen_update = false;
         }
-
 
         if (need_screen_update) {
             core_update_screen(&core);

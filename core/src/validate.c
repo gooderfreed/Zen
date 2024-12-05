@@ -125,40 +125,17 @@ static bool validate_dynamic(const void *interface) {
 
 bool validate_object_interfaces(const ObjectInterfaces *interfaces) {
     InterfaceValidator validators[] = {
-        {
-            .capability_flag = interfaces->capabilities.is_drawable,
-            .interface = interfaces->drawable,
-            .validate = validate_drawable
-        },
-        {
-            .capability_flag = interfaces->capabilities.is_interactable,
-            .interface = interfaces->interactable,
-            .validate = validate_interactable
-        },
-        {
-            .capability_flag = interfaces->capabilities.can_hold_cards,
-            .interface = interfaces->card_handler,
-            .validate = validate_card_handler
-        },
-        {
-            .capability_flag = interfaces->capabilities.have_buttons,
-            .interface = interfaces->button_handler,
-            .validate = validate_button_handler
-        },
-        {
-            .capability_flag = interfaces->capabilities.is_dynamic,
-            .interface = interfaces->dynamic,
-            .validate = validate_dynamic
-        }
+        VALIDATOR(is_drawable,     drawable,       validate_drawable),
+        VALIDATOR(is_interactable, interactable,   validate_interactable),
+        VALIDATOR(can_hold_cards,  card_handler,   validate_card_handler),
+        VALIDATOR(have_buttons,    button_handler, validate_button_handler),
+        VALIDATOR(is_dynamic,      dynamic,        validate_dynamic)
     };
 
     for (size_t i = 0; i < sizeof(validators) / sizeof(validators[0]); i++) {
         const InterfaceValidator *v = &validators[i];
-        
-        if (v->capability_flag) {
-            if (!v->validate(v->interface)) {
-                return false;
-            }
+        if (v->capability_flag && !v->validate(v->interface)) {
+            return false;
         }
     }
 
