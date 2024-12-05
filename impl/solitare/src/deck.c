@@ -26,7 +26,8 @@ Deck generate_deck(void) {
                 .suit = suit,
                 .numeral = numeral,
                 .selected = false,
-                .object = Deck_enum
+                .object = Deck_enum,
+                .coords = {.x = 1, .y = 0}
             };
             deck.deck[i++] = card;
         }
@@ -39,34 +40,36 @@ Deck generate_deck(void) {
 
     static const Interactable interactable = {
         .place_cursor = place_cursor_in_deck,
-        .move = move_in_deck
+        .move         = move_in_deck
     };
 
     static const CardHandler card_handler = {
         .can_give_cards = true,
+        .select_cards   = select_card_in_deck,
+        .get_cards      = get_card_in_deck,
+        .is_same_card   = is_same_card_in_deck,
+        
         .can_take_cards = false,
-        .select_cards = select_card_in_deck,
-        .get_cards = get_card_in_deck,
-        .place_cards = NULL,
-        .can_place = NULL
+        .place_cards    = NULL,
+        .can_place      = NULL
     };
 
     static const ButtonHandler button_handler = {
-    .is_button_position = is_deck_button_position,
-        .handle_button = handle_deck_button
+        .is_button_position = is_deck_button_position,
+        .handle_button      = handle_deck_button
     };
 
     deck.interfaces = (ObjectInterfaces){
         .capabilities = {
-            .can_hold_cards = true,
-            .is_drawable = true,
+            .can_hold_cards  = true,
+            .have_buttons    = true,
+            .is_drawable     = true,
             .is_interactable = true,
-            .have_buttons = true
         },
-        .drawable = &drawable,
-        .interactable = &interactable,
-        .card_handler = &card_handler,
-        .button_handler = &button_handler
+        .card_handler   = &card_handler,
+        .button_handler = &button_handler,
+        .drawable       = &drawable,
+        .interactable   = &interactable,
     };
 
     return deck;
@@ -125,7 +128,7 @@ void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coords *targ
     target_coords->x = cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1;
 }
 
-void next_card_action(void *deck_pointer) {
+static void next_card_action(void *deck_pointer) {
     Deck *deck = (Deck *)deck_pointer;
     next_card(deck);
 }
@@ -144,14 +147,16 @@ void handle_deck_button(void *deck_pointer, Coords coords) {
 void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContainer *container) {
     Deck *deck = (Deck *)deck_pointer;
     (void)cursor_coords;
-    
+
+    if (deck->pointer == NULL) return;
+
     if (container->size == 0) {
         deck->pointer->selected = true;
         container->container[container->size++] = deck->pointer;
         container->source = deck_pointer;
     } else {
         deck->pointer->selected = false;
-        container->size = 0;
+        container->container[--container->size] = NULL;
         container->source = NULL;
     }
 }
@@ -163,4 +168,10 @@ void get_card_in_deck(void *deck_pointer, CardsContainer *container) {
     deck->pointer->selected = false;
     deck->pointer->object = Unknown;
     next_card(deck);
+}
+
+bool is_same_card_in_deck(void *deck_pointer, Coords cursor_coords, Card *card) {
+    (void)cursor_coords;
+    Deck *deck = (Deck *)deck_pointer;
+    return deck->pointer == card;
 }

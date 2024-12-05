@@ -48,7 +48,7 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
     int y_0 = y;
 
     fill_area(screen, y_0, x_0, size_y, size_x, ' ');
-    colorize_area(screen, card, y_0 + 1, x_0 + 1, CARD_HEIGHT - 2, CARD_WIDTH - 2);
+    colorize_card(screen, card, y_0 + 1, x_0 + 1, CARD_HEIGHT - 2, CARD_WIDTH - 2);
     add_borders(screen, y_0, x_0, size_y, size_x, card_border);
 
     if (y != CARD_HEIGHT + 2 * BORDER_OFFSET_Y + 1 && y != BORDER_OFFSET_Y) {
@@ -76,4 +76,29 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
         screen->data[y_0 + CARD_HEIGHT - 2][x_0 + 1] = numeral[0];
         screen->data[y_0 + CARD_HEIGHT - 2][x_0 + 2] = numeral[1];
     }
+}
+
+void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width) {
+    if (y < 0 || x < 0 || y + height > SCREEN_HEIGHT || x + width > SCREEN_WIDTH) {
+        return;
+    }
+
+    for (int i = y; i < y + height; i++) {
+        for (int j = x; j < x + width; j++) {
+            if (i < SCREEN_HEIGHT && j < SCREEN_WIDTH) {
+                screen->background[i][j] = "\033[47";
+                screen->data[i][j] = ' ';
+                screen->foreground[i][j] = "";
+            }
+        }
+    }
+
+    screen->foreground[y][x] = (card->suit % 2 != 0) ? ";31" : ";30";
+    screen->foreground[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
+    screen->foreground[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
+
+    screen->foreground[y][x + width - 2] = ";30";
+    screen->foreground[y][x + width - 1] = ";30";
+    screen->foreground[y + height - 1][x] = ";30";
+    if (card->numeral % 10 == 0) screen->foreground[y + height - 1][x + 1] = ";30";
 }

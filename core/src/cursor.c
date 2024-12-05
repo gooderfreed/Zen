@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-#include "../inc/solitare.h"
+#include "../inc/core.h"
 
 
 Cursor init_cursor(void *start_object, Coords start_coords) {
@@ -33,15 +33,13 @@ Cursor init_cursor(void *start_object, Coords start_coords) {
 void print_cursor(Cursor *cursor, Screen *screen) {
     Coords base_coords = {
         .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
-        .y = BORDER_OFFSET_Y + CARD_HEIGHT
+        .y = CARD_HEIGHT
     };
-
     ObjectInterfaces *interfaces = (ObjectInterfaces*)cursor->subject;
-    
+
     if (interfaces->capabilities.is_interactable) {
         interfaces->interactable->place_cursor(cursor->subject, cursor->coords, &base_coords);
     }
-
     if (base_coords.y < SCREEN_HEIGHT && base_coords.x < SCREEN_WIDTH) {
         screen->data[base_coords.y][base_coords.x] = '/';
         screen->data[base_coords.y][base_coords.x + 1] = '\\';

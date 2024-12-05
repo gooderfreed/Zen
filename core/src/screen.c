@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-#include "../inc/solitare.h"
+#include "../inc/core.h"
 
 
 Screen init_screen(void) {
@@ -73,29 +73,4 @@ void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symb
             screen->foreground[i][j] = " ";
         }
     }
-}
-
-void colorize_area(Screen *screen, const Card *card, int y, int x, int height, int width) {
-    if (y < 0 || x < 0 || y + height > SCREEN_HEIGHT || x + width > SCREEN_WIDTH) {
-        return;
-    }
-
-    for (int i = y; i < y + height; i++) {
-        for (int j = x; j < x + width; j++) {
-            if (i < SCREEN_HEIGHT && j < SCREEN_WIDTH) {
-                screen->background[i][j] = "\033[47";
-                screen->data[i][j] = ' ';
-                screen->foreground[i][j] = "";
-            }
-        }
-    }
-
-    screen->foreground[y][x] = (card->suit % 2 != 0) ? ";31" : ";30";
-    screen->foreground[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
-    screen->foreground[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
-
-    screen->foreground[y][x + width - 2] = ";30";
-    screen->foreground[y][x + width - 1] = ";30";
-    screen->foreground[y + height - 1][x] = ";30";
-    if (card->numeral % 10 == 0) screen->foreground[y + height - 1][x + 1] = ";30";
 }

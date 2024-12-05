@@ -19,32 +19,33 @@
 Field init_field(Deck *deck) {
     Field field = {0};
 
-    // Настраиваем интерфейсы
     static const Drawable drawable = {
         .print = print_field
     };
 
     static const Interactable interactable = {
         .place_cursor = place_cursor_in_field,
-        .move = move_in_field
+        .move         = move_in_field
     };
 
     static const CardHandler card_handler = {
         .can_give_cards = true,
+        .select_cards   = select_cards_in_field,
+        .is_same_card   = is_same_card_in_field,
+        .get_cards      = get_cards_in_field,
+
         .can_take_cards = true,
-        .select_cards = select_cards_in_field,
-        .get_cards = get_cards_in_field,
-        .place_cards = place_cards_in_field,
-        .can_place = can_place_in_field
+        .can_place      = can_place_in_field,
+        .place_cards    = place_cards_in_field,
     };
 
     field.interfaces = (ObjectInterfaces){
         .capabilities = {
-            .can_hold_cards = true,
-            .is_drawable = true,
+            .can_hold_cards  = true,
+            .is_drawable     = true,
             .is_interactable = true
         },
-        .drawable = &drawable,
+        .drawable =     &drawable,
         .interactable = &interactable,
         .card_handler = &card_handler
     };
@@ -96,7 +97,7 @@ void print_field(void *field_pointer, Screen *screen, const Cursor *hovered_card
     }
 }
 
-int get_last_card_y(const Field *field, int x) {
+static int get_last_card_y(const Field *field, int x) {
     for (int i = FIELD_HEIGHT - 1; i >= 0; --i)
         if (field->field[i][x]) return i;
     return 0;
@@ -104,7 +105,7 @@ int get_last_card_y(const Field *field, int x) {
 
 void place_cursor_in_field(void *field_pointer, Coords cursor_coords, Coords *target_coords) {
     Field *field = (Field *)field_pointer;
-    int part = BORDER_OFFSET_Y + 1 + cursor_coords.y * 2;
+    int part = BORDER_OFFSET_Y + 1 + cursor_coords.y * 2 + BORDER_OFFSET_Y;
     bool is_last_card = FIELD_HEIGHT == cursor_coords.y || !field->field[cursor_coords.y + 1][cursor_coords.x];
 
     target_coords->y += part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1);
@@ -173,4 +174,9 @@ void place_cards_in_field(void *field_pointer, Coords cursor_coord, CardsContain
     }
     container->size = 0;
     container->source = NULL;
+}
+
+bool is_same_card_in_field(void *field_pointer, Coords cursor_coords, Card *card) {
+    Field *field = (Field *)field_pointer;
+    return field->field[cursor_coords.y][cursor_coords.x] == card;
 }

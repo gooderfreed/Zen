@@ -1,57 +1,29 @@
-NAME = solitare.a
-NAMEBIN = solitare
+# Find all Makefiles in impl directory
+IMPL_MAKEFILES := $(wildcard impl/*/Makefile)
+IMPL_DIRS := $(dir $(IMPL_MAKEFILES))
 
-SRC_DIR = src
-OBJ_DIR = obj
-INC_DIR = inc
-LIB_DIR = libmx
+# Colors for pretty output
+GREEN := \033[32m
+YELLOW := \033[33m
+RESET := \033[0m
 
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
-OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
-INC_FILES = $(wildcard $(INC_DIR)/*.h)
-# LIB_FILES = $(wildcard $(LIB_DIR)/$(LIB_DIR).a)
-# LIB_INC_FILES = $(wildcard $(LIB_DIR)/$(INC_DIR))
+# Default target - build everything
+.PHONY: all
+all: $(IMPL_DIRS)
 
-# -g -O3
+# Run make in each subdirectory
+.PHONY: $(IMPL_DIRS)
+$(IMPL_DIRS):
+	@echo "$(GREEN)Building '$(YELLOW)$(notdir $(patsubst %/,%,$@))$(GREEN)'...$(RESET)"
+	@$(MAKE) --no-print-directory -C $@
+	@echo "$(GREEN)Done '$(YELLOW)$(notdir $(patsubst %/,%,$@))$(GREEN)'$(RESET)"
 
-CC = clang
-CFLAGS = -std=c11 $(addprefix -W, \
-								all extra error pedantic conversion null-dereference\
-								cast-align unreachable-code strict-prototypes bad-function-cast)
-# CFLAGS = -std=c11 $(addprefix -W, \
-# 								everything)
-AR = ar
-AFLAGS = rcs
-MAKE = make -C
-
-MKDIR = mkdir -p
-RM = rm -rf
-
-all: $(NAMEBIN) clean
-
-$(NAMEBIN): $(OBJ_FILES)
-#	@$(MAKE) $(LIB_DIR)
-	@$(CC) $(CFLAGS) $^ -o $@
-#	@$(CC) $(CFLAGS) $^ -L$(LIB_DIR) -lmx -o $@
-
-$(OBJ_FILES): | $(OBJ_DIR)
-
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR)
-#	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(LIB_INC_FILES)
-
-$(OBJ_DIR):
-	@$(MKDIR) $@
-
+# Clean all subdirectories
+.PHONY: clean
 clean:
-	@$(RM) $(OBJ_DIR)
-	@$(RM) $(LIB_FILES)
-
-uninstall:
-	@$(RM) $(OBJ_DIR)
-	@$(RM) $(NAMEBIN)
-
-reinstall: uninstall all
-
-.PHONY: all uninstall clean reinstall
-
+	@for dir in $(IMPL_DIRS); do \
+		name=$$(basename $$dir); \
+		echo "$(GREEN)Cleaning '$(YELLOW)$$name$(GREEN)'...$(RESET)"; \
+		$(MAKE) --no-print-directory -C $$dir clean; \
+		echo "$(GREEN)Done cleaning '$(YELLOW)$$name$(GREEN)'$(RESET)"; \
+	done 

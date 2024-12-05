@@ -9,20 +9,18 @@ Stock init_stock(void) {
 
     static const Interactable interactable = {
         .place_cursor = place_cursor_in_stock,
-        .move = move_in_stock
+        .move         = move_in_stock
     };
 
     stock.interfaces = (ObjectInterfaces){
         .capabilities = {
-            .can_hold_cards = false,
-            .is_drawable = true,
+            .is_drawable     = true,
             .is_interactable = true,
-            .have_buttons = false
+            .can_hold_cards  = false,
+            .have_buttons    = false
         },
-        .drawable = &drawable,
-        .interactable = &interactable,
-        .card_handler = NULL,
-        .button_handler = NULL
+        .drawable       = &drawable,
+        .interactable   = &interactable,
     };
 
     return stock;
@@ -37,10 +35,8 @@ void print_stock(void *stock_pointer, Screen *screen, const Cursor *cursor) {
     for (int suit = 0; suit < CARD_SUITS; suit++) {
         int x = STOCK_X_BASE + suit * CARD_WIDTH;
         
-        // Рисуем пустые места для карт
         add_borders(screen, BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH, card_border);
         
-        // Если есть карта, рисуем её
         Card *top_card = NULL;
         for (int i = CARD_NUMERALS - 1; i >= 0; i--) {
             if (stock->stock[suit][i]) {
@@ -60,9 +56,7 @@ void move_in_stock(void *stock_pointer, Coords *coords, Coords delta) {
     if (delta.y != 0) return;
     
     short new_x = coords->x + delta.x;
-    if (new_x < 0 || new_x >= CARD_SUITS) return;
-    
-    coords->x = new_x;
+    coords->x = (new_x + CARD_SUITS) % CARD_SUITS;
 }
 
 void place_cursor_in_stock(void *stock_pointer, Coords cursor_coords, Coords *target_coords) {
