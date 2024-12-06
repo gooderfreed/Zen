@@ -39,7 +39,8 @@ Field init_field(Deck *deck) {
         .place_cards    = place_cards_in_field,
     };
 
-    field.interfaces = (ObjectInterfaces){
+    field.interfaces = (ObjectInterfaces) {
+        .name           = "Field",
         .capabilities = {
             .can_hold_cards  = true,
             .is_drawable     = true,

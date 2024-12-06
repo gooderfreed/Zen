@@ -88,6 +88,7 @@ typedef struct {
 } Dynamic;
 
 typedef struct ObjectInterfaces {
+    char *name;
     struct {
         bool can_hold_cards  : 1;
         bool have_buttons    : 1;
@@ -248,7 +249,7 @@ typedef struct {
         .validate = val_func \
     }
 
-typedef bool (*ValidateFunc)(const void *interface);
+typedef bool (*ValidateFunc)(const void *interface, const char *name);
 
 typedef struct InterfaceValidator {
     bool capability_flag;

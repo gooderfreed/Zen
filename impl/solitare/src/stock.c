@@ -12,7 +12,8 @@ Stock init_stock(void) {
         .move         = move_in_stock
     };
 
-    stock.interfaces = (ObjectInterfaces){
+    stock.interfaces = (ObjectInterfaces) {
+        .name           = "Stock",
         .capabilities = {
             .is_drawable     = true,
             .is_interactable = true,

@@ -59,7 +59,8 @@ Deck generate_deck(void) {
         .handle_button      = handle_deck_button
     };
 
-    deck.interfaces = (ObjectInterfaces){
+    deck.interfaces = (ObjectInterfaces) {
+        .name           = "Deck",
         .capabilities = {
             .can_hold_cards  = true,
             .have_buttons    = true,

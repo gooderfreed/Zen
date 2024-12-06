@@ -72,6 +72,7 @@ MyObject init_object(void) {
     };
 
     obj.interfaces = (ObjectInterfaces){
+        .name = "MyObject",
         .capabilities = {
             .is_drawable = true,
             .is_interactable = true
