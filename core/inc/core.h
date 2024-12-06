@@ -103,6 +103,83 @@ typedef struct ObjectInterfaces {
     const Dynamic       *dynamic;
 } ObjectInterfaces;
 
+// Получение интерфейса из объекта
+#define GET_INTERFACE(object, iface) \
+    (((ObjectInterfaces*)(object))->iface)
+
+// Проверка capability
+#define HAS_CAPABILITY(object, cap) \
+    (((ObjectInterfaces*)(object))->capabilities.cap)
+
+// Безопасное получение интерфейса с проверкой capability
+#define SAFE_GET_INTERFACE(object, iface, cap) \
+    (HAS_CAPABILITY(object, cap) ? GET_INTERFACE(object, iface) : NULL)
+
+// Card Handler macros
+#define CARD_HANDLER(object) \
+    GET_INTERFACE(object, card_handler)
+
+#define CAN_GIVE_CARDS(object) \
+    (HAS_CAPABILITY(object, can_hold_cards) && CARD_HANDLER(object)->can_give_cards)
+
+#define CAN_TAKE_CARDS(object) \
+    (HAS_CAPABILITY(object, can_hold_cards) && CARD_HANDLER(object)->can_take_cards)
+
+#define SELECT_CARDS(object, coords, container) \
+    (CARD_HANDLER(object)->select_cards(object, coords, container))
+
+#define IS_SAME_CARD(object, coords, card) \
+    (CARD_HANDLER(object)->is_same_card(object, coords, card))
+
+#define GET_CARDS(object, container) \
+    (CARD_HANDLER(object)->get_cards(object, container))
+
+#define PLACE_CARDS(object, coords, container) \
+    (CARD_HANDLER(object)->place_cards(object, coords, container))
+
+// Button Handler macros
+#define BUTTON_HANDLER(object) \
+    GET_INTERFACE(object, button_handler)
+
+#define IS_BUTTON(object, coords) \
+    (HAS_CAPABILITY(object, have_buttons) && BUTTON_HANDLER(object)->is_button_position(object, coords))
+
+#define HANDLE_BUTTON(object, coords) \
+    (BUTTON_HANDLER(object)->handle_button(object, coords))
+
+// Drawable macros
+#define DRAW_HANDLER(object) \
+    GET_INTERFACE(object, drawable)
+
+#define DRAWABLE(object) \
+    (HAS_CAPABILITY(object, is_drawable))
+
+#define DRAW(object, screen, cursor) \
+    (DRAW_HANDLER(object)->print(object, screen, cursor))
+
+// Dynamic macros
+#define DYNAMIC_HANDLER(object) \
+    GET_INTERFACE(object, dynamic)
+
+#define DYNAMIC(object) \
+    (HAS_CAPABILITY(object, is_dynamic))
+
+#define FREE(object) \
+    (DYNAMIC_HANDLER(object)->free(object))
+
+// Interactable macros
+#define INTERACT_HANDLER(object) \
+    GET_INTERFACE(object, interactable)
+
+#define INTERACTABLE(object) \
+    (HAS_CAPABILITY(object, is_interactable))
+
+#define MOVE(object, coords, delta) \
+    (INTERACT_HANDLER(object)->move(object, coords, delta))
+
+#define PLACE_CURSOR(object, coords, base_coords) \
+    (INTERACT_HANDLER(object)->place_cursor(object, coords, base_coords))
+
 // Screen
 #ifndef SCREEN_HEIGHT
     #define SCREEN_HEIGHT 1
@@ -178,6 +255,7 @@ typedef struct InterfaceValidator {
     const void *interface;
     ValidateFunc validate;
 } InterfaceValidator;
+
 
 // Prototypes
 // Core

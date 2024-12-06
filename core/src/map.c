@@ -30,8 +30,7 @@ void map_move(Map *map, Coords move) {
     }
 
     MapObject object = map->objects[new_coords.y][new_coords.x];
-    if (!object.object) return;
-    if (!((ObjectInterfaces*)object.object)->capabilities.is_interactable) return;
+    if (!(object.object && INTERACTABLE(object.object))) return;
 
     map->global_coords = new_coords;
 }

@@ -35,11 +35,11 @@ void print_cursor(Cursor *cursor, Screen *screen) {
         .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
         .y = CARD_HEIGHT
     };
-    ObjectInterfaces *interfaces = (ObjectInterfaces*)cursor->subject;
 
-    if (interfaces->capabilities.is_interactable) {
-        interfaces->interactable->place_cursor(cursor->subject, cursor->coords, &base_coords);
+    if (INTERACTABLE(cursor->subject)) {
+        PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
     }
+
     if (base_coords.y < SCREEN_HEIGHT && base_coords.x < SCREEN_WIDTH) {
         screen->data[base_coords.y][base_coords.x] = '/';
         screen->data[base_coords.y][base_coords.x + 1] = '\\';
