@@ -14,8 +14,17 @@
  * limitations under the License.
 */
 
+/*
+ * Validate implementation
+ * Handles object interface validation
+ */
 #include "../inc/core.h"
 
+/*
+ * Validate Drawable interface implementation
+ * Checks if interface pointer and required functions are present
+ * Prints error message if validation fails
+ */
 static bool validate_drawable(const void *interface, const char *name) {
     const Drawable *drawable = interface;
     if (!drawable) {
@@ -30,6 +39,11 @@ static bool validate_drawable(const void *interface, const char *name) {
     return true;
 }
 
+/*
+ * Validate Interactable interface implementation
+ * Checks if interface has required movement and cursor placement functions
+ * Prints detailed error messages for missing components
+ */
 static bool validate_interactable(const void *interface, const char *name) {
     const Interactable *interactable = interface;
     if (!interactable) {
@@ -50,6 +64,11 @@ static bool validate_interactable(const void *interface, const char *name) {
     return true;
 }
 
+/*
+ * Validate CardHandler interface implementation
+ * Ensures all required card manipulation functions are present
+ * Validates both card giving and taking capabilities separately
+ */
 static bool validate_card_handler(const void *interface, const char *name) {
     const CardHandler *handler = interface;
     if (!handler) {
@@ -88,6 +107,11 @@ static bool validate_card_handler(const void *interface, const char *name) {
     return true;
 }
 
+/*
+ * Validate ButtonHandler interface implementation
+ * Checks for required button position and handling functions
+ * Reports missing function implementations
+ */
 static bool validate_button_handler(const void *interface, const char *name) {
     const ButtonHandler *handler = interface;
     if (!handler) {
@@ -108,6 +132,11 @@ static bool validate_button_handler(const void *interface, const char *name) {
     return true;
 }
 
+/*
+ * Validate Dynamic interface implementation
+ * Ensures object cleanup function is properly defined
+ * Required for objects that need resource deallocation
+ */
 static bool validate_dynamic(const void *interface, const char *name) {
     const Dynamic *dynamic = interface;
     if (!dynamic) {
@@ -123,6 +152,11 @@ static bool validate_dynamic(const void *interface, const char *name) {
     return true;
 }
 
+/*
+ * Validate all interfaces for game object
+ * Runs appropriate validators based on object capabilities
+ * Returns false if any required interface validation fails
+ */
 bool validate_object_interfaces(const ObjectInterfaces *interfaces) {
     InterfaceValidator validators[] = {
         VALIDATOR(is_drawable,     drawable,       validate_drawable),

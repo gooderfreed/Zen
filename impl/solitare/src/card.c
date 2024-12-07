@@ -16,6 +16,10 @@
 
 #include "../inc/solitare.h"
 
+/*
+ * Arrays of card display elements
+ * Used for converting card values to display text
+ */
 char *numerals[] = {
     " A", " 2", " 3", " 4", " 5", " 6",
     " 7", " 8", " 9", "10", " J", " Q", " K"
@@ -25,6 +29,10 @@ wchar_t suits[] = {
     L'♠', L'♥', L'♣', L'♦'
 };
 
+/*
+ * Border characters for screen elements
+ * Used for drawing borders around cards and game areas
+ */
 wchar_t fat_border[8] = {
     L'═', L'║', L'╔', L'╗', L'╚', L'╝', L'╠', L'╣'
 };
@@ -33,14 +41,26 @@ wchar_t card_border[8] = {
     L'─', L'│', L'┌', L'┐', L'└', L'┘', L'├', L'┤'
 };
 
+/*
+ * Convert suit enum to display character
+ * Returns Unicode character for card suit
+ */
 wchar_t suit_to_text(Suit suit) {
     return suits[suit];
 }
 
+/*
+ * Convert numeral enum to display text
+ * Returns string representation of card value
+ */
 char *numeral_to_text(Numeral numeral) {
     return numerals[numeral - 1];
 }
 
+/*
+ * Draw card on screen at specified position
+ * Handles card borders, suit symbols, and numerals
+ */
 void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x) {
     if (!card) return;
 
@@ -78,6 +98,10 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
     }
 }
 
+/*
+ * Apply color formatting to card area
+ * Sets background color and text color based on suit
+ */
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width) {
     if (y < 0 || x < 0 || y + height > SCREEN_HEIGHT || x + width > SCREEN_WIDTH) {
         return;

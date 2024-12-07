@@ -14,8 +14,16 @@
  * limitations under the License.
 */
 
+/*
+ * Core engine implementation
+ * Contains main game loop logic and object management
+ */
 #include "../inc/core.h"
 
+/*
+ * Initialize core engine with provided components
+ * Validates all interfaces before returning
+ */
 Core init_core(Map *map, Cursor *cursor, Screen *screen) {
     Core core = {
         .screen = screen,
@@ -28,6 +36,10 @@ Core init_core(Map *map, Cursor *cursor, Screen *screen) {
     return core;
 }
 
+/*
+ * Handle cursor movement request
+ * Moves cursor if target object is interactable and allows movement
+ */
 void core_move(Core *core, Coords move) {
     Cursor *cursor = core->cursor;
     if (!INTERACTABLE(cursor->subject)) return;
@@ -35,36 +47,56 @@ void core_move(Core *core, Coords move) {
     Coords coords = {.x = cursor->coords.x, .y = cursor->coords.y};
     MOVE(cursor->subject, &coords, move);
 
+    // Update cursor position only if movement was successful
     if (coords.x != cursor->coords.x || coords.y != cursor->coords.y) {
         cursor->coords = coords;
     }
 }
 
+/*
+ * Handle action on current cursor position
+ * Implements main game logic for card manipulation:
+ * - Button handling
+ * - Card selection
+ * - Card movement between objects
+ */
 void core_action(Core *core) {
     Cursor *cursor = core->cursor;
 
+    // Handle button press if cursor is on a button
     if (IS_BUTTON(cursor->subject, cursor->coords)) {
         HANDLE_BUTTON(cursor->subject, cursor->coords);
         return;
     }
 
+    // Handle card operations
     if (cursor->cards.size != 0) {
         Card *first_card = cursor->cards.container[0];
 
-        if (cursor->subject == cursor->cards.source && IS_SAME_CARD(cursor->subject, cursor->coords, first_card)) {
+        // Toggle card selection if clicking on the same card
+        if (cursor->subject == cursor->cards.source && 
+            IS_SAME_CARD(cursor->subject, cursor->coords, first_card)) {
             SELECT_CARDS(cursor->subject, cursor->coords, &cursor->cards);
         }
-        else if (CAN_GIVE_CARDS(cursor->cards.source) && CAN_TAKE_CARDS(cursor->subject)) {
+        // Move cards if source can give and target can take
+        else if (CAN_GIVE_CARDS(cursor->cards.source) && 
+                 CAN_TAKE_CARDS(cursor->subject)) {
             GET_CARDS(cursor->cards.source, &cursor->cards);
             PLACE_CARDS(cursor->subject, cursor->coords, &cursor->cards);
         }
     }
+    // Select cards if no cards are currently selected
     else {
         SELECT_CARDS(cursor->subject, cursor->coords, &cursor->cards);
     }
 }
 
+/*
+ * Update screen with current game state
+ * Draws all visible objects and cursor
+ */
 void core_update_screen(Core *core) {
+    // Draw all objects on map
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             void *target_struct = core->map->objects[y][x].object;
@@ -76,20 +108,41 @@ void core_update_screen(Core *core) {
         }
     }
 
+    // Draw cursor and update screen
     print_cursor(core->cursor, core->screen);
     print_screen(core->screen);
 }
 
+/*
+ * Handle global map movement
+ * Saves current position, moves map and restores position for new object
+ */
 void core_global_move(Core *core, Coords move) {
-    map_move(core->map, move);
+    // Save current position if object supports it
+    if (POSITIONABLE(core->cursor->subject)) {
+        SAVE_POSITION(core->cursor->subject, core->cursor->coords);
+    }
 
+    // Move map and get new object
+    map_move(core->map, move);
     MapObject target = map_get_current_object(core->map);
+
+    // Update cursor for new object
     if (target.object) {
         core->cursor->subject = target.object;
-        core->cursor->coords = target.default_coords;
+        if (POSITIONABLE(core->cursor->subject)) {
+            RESTORE_POSITION(core->cursor->subject, &core->cursor->coords);
+        }
+        else {
+            core->cursor->coords = target.default_coords;
+        }
     }
 }
 
+/*
+ * Free all dynamic objects on map
+ * Called during shutdown to prevent memory leaks
+ */
 void core_free(Core *core) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
@@ -103,6 +156,11 @@ void core_free(Core *core) {
     }
 }
 
+/*
+ * Validate interfaces of all objects on map
+ * Ensures all objects have correctly implemented required interfaces
+ * Exits program if validation fails
+ */
 void core_validate_interfaces(Core *core) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {

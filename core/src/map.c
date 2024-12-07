@@ -14,8 +14,17 @@
  * limitations under the License.
 */
 
+/*
+ * Map implementation
+ * Handles map object management and cursor movement
+ */
 #include "../inc/core.h"
 
+/*
+ * Move cursor on map to new position
+ * Validates move and checks if target position is interactable
+ * Does nothing if move is invalid or target is not interactable
+ */
 void map_move(Map *map, Coords move) {
     if (move.x == 0 && move.y == 0) return;
 
@@ -35,6 +44,10 @@ void map_move(Map *map, Coords move) {
     map->global_coords = new_coords;
 }
 
+/*
+ * Get object at current cursor position
+ * Returns MapObject structure containing object data
+ */
 MapObject map_get_current_object(Map *map) {
     return map->objects[map->global_coords.y][map->global_coords.x];
 } 

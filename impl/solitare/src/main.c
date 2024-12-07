@@ -41,6 +41,15 @@ int main(void) {
     Stock  stock  = init_stock();
     Screen screen = init_screen();
 
+    (void)field;
+    (void)stock;
+    (void)screen;
+
+    // wprintf(L"Field [%zu bytes]:\n", sizeof(Field));
+    // wprintf(L"Deck [%zu bytes]:\n", sizeof(Deck));
+    // wprintf(L"Stock [%zu bytes]:\n", sizeof(Stock));
+    // wprintf(L"Screen [%zu bytes]:\n", sizeof(Screen));
+
     Map map = {
         .objects = {
             {

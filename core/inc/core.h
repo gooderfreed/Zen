@@ -14,22 +14,48 @@
  * limitations under the License.
 */
 
+/* * Core engine header - defines interfaces and base structures for card games
+ * This is the main interface file that all implementations must include
+ */
+
 #ifndef CORE_H
 #define CORE_H
 
 #include <stdbool.h>
 #include <wchar.h>
 
-// Base structures
+/*
+ * Dynamic memory configuration
+ * Define DYNAMIC to enable all dynamic memory features
+ */
+#ifdef DYNAMIC
+    #define CONTAINER_DYNAMIC
+    #define SCREEN_DYNAMIC
+    #define MAP_DYNAMIC
+#endif
 
-// Coords
+// Base game structures
+// -------------------
+
+// primitive types
+typedef struct Screen Screen;
+typedef struct Cursor Cursor;
+typedef struct Card Card;
+
+/*
+ * Coords - Basic 3D coordinate structure
+ * Used for positioning objects in the game space
+ */
 typedef struct Coords {
     short y;
     short x;
     short z;
 } Coords;
 
-// Card
+/*
+ * Card - Base card structure that can be extended by implementations
+ * Default implementation provides only coordinates
+ */
 #ifndef CARD_HEIGHT
     #define CARD_HEIGHT 1
 #endif
@@ -43,7 +69,10 @@ typedef struct Card {
 } Card;
 #endif
 
-// Container
+/*
+ * CardsContainer - Container for card operations
+ * Used for moving cards between objects and tracking their source
+ */
 #ifndef CONTAINER_SIZE
     #define CONTAINER_SIZE 1
 #endif
@@ -51,22 +80,38 @@ typedef struct Card {
 typedef struct CardsContainer {
     int size;
     void *source;
-    struct Card *container[CONTAINER_SIZE];
+    #ifdef CONTAINER_DYNAMIC
+        int length;
+        struct Card **container;
+    #else
+        Card *container[CONTAINER_SIZE];
+    #endif
 } CardsContainer;
 
-// Interfaces
-typedef struct Screen Screen;
-typedef struct Cursor Cursor;
+// Interface definitions
+// -------------------
 
+/*
+ * Drawable - Interface for objects that can be drawn on screen
+ * Implementations must provide print method
+ */
 typedef struct {
     void (*print)(void *, Screen *, const Cursor *);
 } Drawable;
 
+/*
+ * Interactable - Interface for objects that can be interacted with
+ * Provides cursor placement and movement capabilities
+ */
 typedef struct {
     void (*place_cursor)(void *, Coords, Coords *);
     void (*move)(void *, Coords *, Coords);
 } Interactable;
 
+/*
+ * CardHandler - Interface for objects that can work with cards
+ * Provides full card manipulation capabilities
+ */
 typedef struct {
     bool can_give_cards : 1;
     bool can_take_cards : 1;
@@ -78,15 +123,37 @@ typedef struct {
     bool (*is_same_card)(void *, Coords, struct Card *);
 } CardHandler;
 
+/*
+ * ButtonHandler - Interface for objects that can handle buttons
+ * Provides button position and handling capabilities
+ */
 typedef struct {
     bool (*is_button_position)(void *, Coords);
     void (*handle_button)(void *, Coords);
 } ButtonHandler;
 
+/*
+ * PositionHandler - Interface for objects that can handle position
+ * Provides position restoration and saving capabilities
+ */
+typedef struct {
+    Coords restore_coords;
+    void (*restore_pos)(void *object, Coords *current_coords);
+    void (*save_current_pos)(void *object, Coords current_coords);
+} PositionHandler;
+
+/*
+ * Dynamic - Interface for objects that can be dynamically allocated
+ * Provides free method
+ */
 typedef struct {
     void (*free)(void *);
 } Dynamic;
 
+/*
+ * ObjectInterfaces - Interface for objects that can be interacted with
+ * Provides access to all interfaces and capabilities
+ */
 typedef struct ObjectInterfaces {
     char *name;
     struct {
@@ -95,26 +162,34 @@ typedef struct ObjectInterfaces {
         bool is_drawable     : 1;
         bool is_interactable : 1;
         bool is_dynamic      : 1;
+        bool is_positionable : 1;
     } capabilities;
 
-    const CardHandler   *card_handler;
-    const ButtonHandler *button_handler;
-    const Drawable      *drawable;
-    const Interactable  *interactable;
-    const Dynamic       *dynamic;
+    const CardHandler     *card_handler;
+    const ButtonHandler   *button_handler;
+    PositionHandler *position_handler;
+    const Drawable        *drawable;
+    const Interactable    *interactable;
+    const Dynamic         *dynamic;
 } ObjectInterfaces;
 
-// Получение интерфейса из объекта
+// Interface macros
+// ---------------
+
+/*
+ * Base interface access macros
+ * Provide safe access to object interfaces and capabilities
+ */
 #define GET_INTERFACE(object, iface) \
     (((ObjectInterfaces*)(object))->iface)
 
-// Проверка capability
 #define HAS_CAPABILITY(object, cap) \
     (((ObjectInterfaces*)(object))->capabilities.cap)
 
-// Безопасное получение интерфейса с проверкой capability
-#define SAFE_GET_INTERFACE(object, iface, cap) \
-    (HAS_CAPABILITY(object, cap) ? GET_INTERFACE(object, iface) : NULL)
+/*
+ * Specialized interface macros for each handler type
+ * Provide clean syntax for common operations
+ */
 
 // Card Handler macros
 #define CARD_HANDLER(object) \
@@ -181,7 +256,29 @@ typedef struct ObjectInterfaces {
 #define PLACE_CURSOR(object, coords, base_coords) \
     (INTERACT_HANDLER(object)->place_cursor(object, coords, base_coords))
 
-// Screen
+// Position Handler macros
+#define POSITION_HANDLER(object) \
+    GET_INTERFACE(object, position_handler)
+
+#define POSITIONABLE(object) \
+    (HAS_CAPABILITY(object, is_positionable))
+
+#define RESTORE_POSITION(object, coords) \
+    (POSITION_HANDLER(object)->restore_pos(object, coords))
+
+#define SAVE_POSITION(object, coords) \
+    (POSITION_HANDLER(object)->save_current_pos(object, coords))
+
+#define GET_RESTORE_COORDS(object) \
+    (POSITION_HANDLER(object)->restore_coords)
+
+// Screen related definitions
+// ------------------------
+
+/*
+ * Screen dimensions
+ * Can be overridden by implementation
+ */
 #ifndef SCREEN_HEIGHT
     #define SCREEN_HEIGHT 1
 #endif
@@ -189,34 +286,71 @@ typedef struct ObjectInterfaces {
     #define SCREEN_WIDTH 1
 #endif
 
+/*
+ * Terminal control macros
+ * Basic terminal manipulation commands
+ */
 #define clear() wprintf(L"\033[H\033[J")
 #define gotoxy(x,y) wprintf(L"\033[%d;%dH", (y), (x))
+
+/*
+ * Key definitions
+ * Common keyboard input codes
+ */
 #define KEY_ESC L''
 #define KEY_ENTER 10
 #define KEY_SPACE 32
 #define KEY_CTRL_A 1
 #define KEY_CTRL_D 4
 
+/*
+ * Screen structure
+ * Represents the game screen with background, foreground and actual data layers
+ */
 struct Screen {
-    char *background[SCREEN_HEIGHT][SCREEN_WIDTH];
-    wchar_t data[SCREEN_HEIGHT][SCREEN_WIDTH];
-    char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];
+    #ifdef SCREEN_DYNAMIC
+        int height;
+        int width;
+        char ***background;
+        wchar_t **data;
+        char ***foreground;
+    #else
+        char *background[SCREEN_HEIGHT][SCREEN_WIDTH];  // Background colors/effects
+        wchar_t data[SCREEN_HEIGHT][SCREEN_WIDTH];      // Actual characters
+        char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];  // Foreground colors/effects
+    #endif
 };
 
-// Cursor
+// Cursor related definitions
+// ------------------------
+
+/*
+ * Cursor movement vectors
+ * Predefined movement directions for cursor
+ */
 #define CURSOR_UP    (Coords){.x = 0,  .y = -1}
 #define CURSOR_DOWN  (Coords){.x = 0,  .y = 1}
 #define CURSOR_LEFT  (Coords){.x = -1, .y = 0}
 #define CURSOR_RIGHT (Coords){.x = 1,  .y = 0}
 #define CURSOR_STAY  (Coords){.x = 0,  .y = 0}
 
+/*
+ * Cursor structure
+ * Represents cursor state including position, selected cards and current object
+ */
 struct Cursor {
-    Coords coords;
-    CardsContainer cards;
-    void *subject;
+    Coords coords;          // Current cursor position
+    CardsContainer cards;   // Currently selected cards
+    void *subject;          // Object under cursor
 };
 
-// Map
+// Map related definitions
+// ---------------------
+
+/*
+ * Map dimensions
+ * Can be overridden by implementation
+ */
 #ifndef MAP_HEIGHT
     #define MAP_HEIGHT 1
 #endif
@@ -224,24 +358,47 @@ struct Cursor {
     #define MAP_WIDTH 1
 #endif
 
+/*
+ * MapObject structure
+ * Represents a single object on the map with its position
+ */
 typedef struct MapObject {
-    void *object;
-    Coords default_coords;
+    void *object;           // Pointer to the actual object
+    Coords default_coords;  // Default position for this object
 } MapObject;
 
+/*
+ * Map structure
+ * Represents the game map with objects and global position
+ */
 typedef struct Map {
-    MapObject objects[MAP_HEIGHT][MAP_WIDTH];
-    Coords global_coords;
+    #ifdef MAP_DYNAMIC
+        int height;
+        int width;
+        MapObject **objects;
+    #else
+        MapObject objects[MAP_HEIGHT][MAP_WIDTH];  // Grid of objects
+    #endif
+    Coords global_coords;                      // Global map position
 } Map;
 
-// Core
+/*
+ * Core structure
+ * Main game engine structure containing all necessary components
+ */
 typedef struct {
-    Cursor *cursor;
-    Screen *screen;
-    Map *map;
+    Cursor *cursor;  // Game cursor
+    Screen *screen;  // Game screen
+    Map *map;        // Game map
 } Core;
 
-// Validator
+// Validation related definitions
+// ---------------------------
+
+/*
+ * Interface validator macro
+ * Creates validator structure for interface checking
+ */
 #define VALIDATOR(cap_field, iface_field, val_func) \
     { \
         .capability_flag = interfaces->capabilities.cap_field, \
@@ -249,17 +406,29 @@ typedef struct {
         .validate = val_func \
     }
 
+/*
+ * Validation function type
+ * Function pointer type for interface validators
+ */
 typedef bool (*ValidateFunc)(const void *interface, const char *name);
 
+/*
+ * Interface validator structure
+ * Used to validate interface implementation
+ */
 typedef struct InterfaceValidator {
-    bool capability_flag;
-    const void *interface;
-    ValidateFunc validate;
+    bool capability_flag;         // Is this interface enabled
+    const void *interface;        // Interface pointer
+    ValidateFunc validate;        // Validation function
 } InterfaceValidator;
 
+// Function prototypes
+// -----------------
 
-// Prototypes
-// Core
+/*
+ * Core functions
+ * Main engine functionality
+ */
 Core init_core(Map *map, Cursor *cursor, Screen *screen);
 void core_move(Core *core, Coords move);
 void core_action(Core *core);
@@ -268,22 +437,34 @@ void core_global_move(Core *core, Coords move);
 void core_validate_interfaces(Core *core);
 void core_free(Core *core);
 
-// Screen
+/*
+ * Screen functions
+ * Screen manipulation and drawing
+ */
 Screen init_screen(void);
 void print_screen(const Screen *screen);
 void add_separator(Screen *screen, int y, int x, wchar_t *borders);
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol);
 void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders);
 
-// Cursor
+/*
+ * Cursor functions
+ * Cursor manipulation and rendering
+ */
 Cursor init_cursor(void *start_object, Coords start_coords);
 void print_cursor(Cursor *cursor, Screen *screen);
 
-// Map
+/*
+ * Map functions
+ * Map manipulation and object access
+ */
 void map_move(Map *map, Coords move);
 MapObject map_get_current_object(Map *map);
 
-// Validator
+/*
+ * Validation functions
+ * Interface validation
+ */
 bool validate_object_interfaces(const ObjectInterfaces *interfaces);
 
 #endif

@@ -14,8 +14,130 @@
  * limitations under the License.
 */
 
+/*
+ * Deck implementation
+ * Handles deck object management and card drawing
+ */
 #include "../inc/solitare.h"
 
+/*
+ * Draw deck on screen
+ * Shows deck pile and current top card
+ */
+static void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor) {
+    (void) cursor;
+    Deck *deck = (Deck *)deck_pointer;
+    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, DECK_OFFSET - 1, 2 * CARD_WIDTH, L' ');
+    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░');
+    add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, card_border);
+    
+    if (deck->pointer) 
+        print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
+    else add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, card_border);
+}
+
+/*
+ * Handle cursor movement in deck area
+ * Restricts movement to horizontal only between deck and current card
+ */
+static void move_in_deck(void *deck_pointer, Coords *coords, Coords delta) {
+    (void)deck_pointer;
+    
+    if (delta.y != 0) return;
+    
+    short new_x = coords->x + delta.x;
+    if (new_x < 0 || new_x > 1) return;
+    
+    coords->x = new_x;
+}
+
+/*
+ * Position cursor relative to deck elements
+ * Places cursor at bottom of deck or current card
+ */
+static void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coords *target_coords) {
+    (void)deck_pointer;
+    
+    target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
+    target_coords->x = cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1;
+}
+
+/*
+ * Move to next card in deck
+ * Cycles through deck until finding next available card
+ */
+static void next_card_action(void *deck_pointer) {
+    Deck *deck = (Deck *)deck_pointer;
+    next_card(deck);
+}
+
+/*
+ * Check if cursor is on the deck button
+ * Compares cursor position to deck button coordinates
+ */
+static bool is_deck_button_position(void *deck_pointer, Coords coords) {
+    (void)deck_pointer;
+    return coords.x == 0 && coords.y == 0;
+}
+
+/*
+ * Handle deck button click
+ * Advances to next card in deck
+ */
+static void handle_deck_button(void *deck_pointer, Coords coords) {
+    if (coords.x == 0 && coords.y == 0) {
+        next_card_action(deck_pointer);
+    }
+}
+
+/*
+ * Select card in deck
+ * Adds selected card to container and marks it as selected
+ */
+static void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContainer *container) {
+    Deck *deck = (Deck *)deck_pointer;
+    (void)cursor_coords;
+
+    if (deck->pointer == NULL) return;
+
+    if (container->size == 0) {
+        deck->pointer->selected = true;
+        container->container[container->size++] = deck->pointer;
+        container->source = deck_pointer;
+    } else {
+        deck->pointer->selected = false;
+        container->container[--container->size] = NULL;
+        container->source = NULL;
+    }
+}
+
+/*
+ * Get card from deck
+ * Removes selected card from deck and advances to next card
+ */
+static void get_card_in_deck(void *deck_pointer, CardsContainer *container) {
+    Deck *deck = (Deck *)deck_pointer;
+    (void)container;
+
+    deck->pointer->selected = false;
+    deck->pointer->object = Unknown;
+    next_card(deck);
+}
+
+/*
+ * Check if cursor is on the same card in deck
+ * Compares cursor position to deck pointer
+ */
+static bool is_same_card_in_deck(void *deck_pointer, Coords cursor_coords, Card *card) {
+    (void)cursor_coords;
+    Deck *deck = (Deck *)deck_pointer;
+    return deck->pointer == card;
+}
+
+/*
+ * Generate a deck of cards
+ * Initializes deck structure and fills it with cards
+ */
 Deck generate_deck(void) {
     Deck deck = {0};
     
@@ -76,6 +198,10 @@ Deck generate_deck(void) {
     return deck;
 }
 
+/*
+ * Move to next card in deck
+ * Cycles through deck until finding next available card
+ */
 void next_card(Deck *deck) {
     Card *start = deck->pointer;
 
@@ -90,6 +216,10 @@ void next_card(Deck *deck) {
     } while (deck->pointer->object != Deck_enum);
 }
 
+/*
+ * Remove current card from deck
+ * Returns removed card and advances to next card
+ */
 Card *draw_card(Deck *deck) {
     Card *card = deck->pointer;
 
@@ -99,80 +229,3 @@ Card *draw_card(Deck *deck) {
     return card;
 }
 
-void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor) {
-    (void) cursor;
-    Deck *deck = (Deck *)deck_pointer;
-    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, DECK_OFFSET - 2, 2 * CARD_WIDTH, L' ');
-    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░');
-    add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, card_border);
-    
-    if (deck->pointer) 
-        print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
-    else add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, card_border);
-}
-
-void move_in_deck(void *deck_pointer, Coords *coords, Coords delta) {
-    (void)deck_pointer;
-    
-    if (delta.y != 0) return;
-    
-    short new_x = coords->x + delta.x;
-    if (new_x < 0 || new_x > 1) return;
-    
-    coords->x = new_x;
-}
-
-void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coords *target_coords) {
-    (void)deck_pointer;
-    
-    target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
-    target_coords->x = cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1;
-}
-
-static void next_card_action(void *deck_pointer) {
-    Deck *deck = (Deck *)deck_pointer;
-    next_card(deck);
-}
-
-bool is_deck_button_position(void *deck_pointer, Coords coords) {
-    (void)deck_pointer;
-    return coords.x == 0 && coords.y == 0;
-}
-
-void handle_deck_button(void *deck_pointer, Coords coords) {
-    if (coords.x == 0 && coords.y == 0) {
-        next_card_action(deck_pointer);
-    }
-}
-
-void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContainer *container) {
-    Deck *deck = (Deck *)deck_pointer;
-    (void)cursor_coords;
-
-    if (deck->pointer == NULL) return;
-
-    if (container->size == 0) {
-        deck->pointer->selected = true;
-        container->container[container->size++] = deck->pointer;
-        container->source = deck_pointer;
-    } else {
-        deck->pointer->selected = false;
-        container->container[--container->size] = NULL;
-        container->source = NULL;
-    }
-}
-
-void get_card_in_deck(void *deck_pointer, CardsContainer *container) {
-    Deck *deck = (Deck *)deck_pointer;
-    (void)container;
-
-    deck->pointer->selected = false;
-    deck->pointer->object = Unknown;
-    next_card(deck);
-}
-
-bool is_same_card_in_deck(void *deck_pointer, Coords cursor_coords, Card *card) {
-    (void)cursor_coords;
-    Deck *deck = (Deck *)deck_pointer;
-    return deck->pointer == card;
-}

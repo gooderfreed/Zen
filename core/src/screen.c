@@ -14,9 +14,16 @@
  * limitations under the License.
 */
 
+/*
+ * Screen implementation
+ * Handles terminal output and screen buffer management
+ */
 #include "../inc/core.h"
 
-
+/*
+ * Initialize empty screen
+ * Creates screen structure with cleared buffers
+ */
 Screen init_screen(void) {
     Screen screen;
 
@@ -31,6 +38,10 @@ Screen init_screen(void) {
     return screen;
 }
 
+/*
+ * Add borders to specified area of screen
+ * Creates a border using provided border characters
+ */
 void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders) {
     for (int i = 0; i < width; ++i) {
         screen->data[y][x + i] = borders[0];
@@ -47,6 +58,10 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
     screen->data[y + height - 1][x + width - 1] = borders[5];
 }
 
+/*
+ * Add separator line to screen
+ * Used for visual separation of screen areas
+ */
 void add_separator(Screen *screen, int y, int x, wchar_t *borders) {
     for (int i = 0; i < SCREEN_WIDTH; ++i) {
         screen->data[y][x + i] = borders[0];
@@ -55,6 +70,10 @@ void add_separator(Screen *screen, int y, int x, wchar_t *borders) {
     screen->data[y][SCREEN_WIDTH - 1] = borders[7];
 }
 
+/*
+ * Print screen content to terminal
+ * Outputs the entire screen buffer with formatting
+ */
 void print_screen(const Screen *screen) {
     gotoxy(0, 0);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
@@ -65,8 +84,12 @@ void print_screen(const Screen *screen) {
     }
 }
 
+/*
+ * Fill rectangular area with specified symbol
+ * Clears background and foreground formatting in the area
+ */
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol) {
-    for (int i = y; i < y + height + 1; i++) {
+    for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
             screen->background[i][j] = "\033[0";
             screen->data[i][j] = symbol;

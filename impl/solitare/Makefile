@@ -1,27 +1,33 @@
-NAME = solitare.a
+# Solitaire implementation Makefile
+# Builds both core library and solitaire implementation
 NAMEBIN = solitare
 
-# Project directories
+# Project structure
+# ----------------
 SRC_DIR = src
 OBJ_DIR = obj
 INC_DIR = inc
 CORE_DIR = ../../core
 
-# Source paths for solitaire
+# Source files
+# -----------
+# Solitaire sources
 SRC_FILES = $(wildcard $(SRC_DIR)/*.c) 
 OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
-INC_FILES = $(wildcard $(INC_DIR)/*.h)
 
-# Core library and its sources
+# Core library sources
 CORE_SRC_DIR = $(CORE_DIR)/src
 CORE_INC_DIR = $(CORE_DIR)/inc
 CORE_SRC_FILES = $(wildcard $(CORE_SRC_DIR)/*.c)
 CORE_OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(CORE_SRC_FILES:%.c=%.o)))
 CORE_INC_FILES = $(wildcard $(CORE_INC_DIR)/*.h)
 
+# Compiler settings
+# ----------------
 CC = clang
-CFLAGS = -std=c11 $(addprefix -f, no-common stack-protector-strong) \
-				  $(addprefix -W, all extra error pedantic conversion null-dereference\
+# Extensive warning flags for maximum code quality
+CFLAGS = -std=c11 -O3 $(addprefix -f, no-common stack-protector-strong) \
+				      $(addprefix -W, all extra error pedantic conversion null-dereference\
 						cast-align unreachable-code strict-prototypes bad-function-cast \
 						strict-aliasing shadow double-promotion missing-prototypes \
 						missing-declarations pointer-arith format=2)

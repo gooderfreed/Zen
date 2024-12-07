@@ -14,9 +14,17 @@
  * limitations under the License.
 */
 
+/*
+ * Cursor implementation
+ * Handles cursor state and visualization
+ */
 #include "../inc/core.h"
 
 
+/*
+ * Initialize cursor with starting object and position
+ * Returns cursor structure ready for use
+ */
 Cursor init_cursor(void *start_object, Coords start_coords) {
     Cursor cursor = {
         .coords = start_coords,
@@ -27,19 +35,27 @@ Cursor init_cursor(void *start_object, Coords start_coords) {
         },
         .subject = start_object,
     };
+
     return cursor;
 }
 
+/*
+ * Print cursor on screen
+ * Handles cursor visualization based on current state and position
+ */
 void print_cursor(Cursor *cursor, Screen *screen) {
+    // Get base coordinates for cursor
     Coords base_coords = {
         .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
         .y = CARD_HEIGHT
     };
 
+    // If subject is interactable, let it place the cursor
     if (INTERACTABLE(cursor->subject)) {
         PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
     }
-
+    
+    // Draw cursor symbol at calculated position
     if (base_coords.y < SCREEN_HEIGHT && base_coords.x < SCREEN_WIDTH) {
         screen->data[base_coords.y][base_coords.x] = '/';
         screen->data[base_coords.y][base_coords.x + 1] = '\\';
