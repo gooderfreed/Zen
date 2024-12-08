@@ -110,19 +110,19 @@ void colorize_card(Screen *screen, const Card *card, int y, int x, int height, i
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
             if (i < SCREEN_HEIGHT && j < SCREEN_WIDTH) {
-                screen->background[i][j] = "\033[47";
+                screen->background[i][j] = COLOR_WHITE;
                 screen->data[i][j] = ' ';
-                screen->foreground[i][j] = "";
+                screen->foreground[i][j] = COLOR_RESET;
             }
         }
     }
 
-    screen->foreground[y][x] = (card->suit % 2 != 0) ? ";31" : ";30";
-    screen->foreground[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
-    screen->foreground[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1] = (card->suit % 2 != 0) ? ";31" : ";30";
+    screen->foreground[y][x] = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
+    screen->foreground[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1] = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
+    screen->foreground[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1] = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
 
-    screen->foreground[y][x + width - 2] = ";30";
-    screen->foreground[y][x + width - 1] = ";30";
-    screen->foreground[y + height - 1][x] = ";30";
-    if (card->numeral % 10 == 0) screen->foreground[y + height - 1][x + 1] = ";30";
+    screen->foreground[y][x + width - 2] = COLOR_BLACK;
+    screen->foreground[y][x + width - 1] = COLOR_BLACK;
+    screen->foreground[y + height - 1][x] = COLOR_BLACK;
+    if (card->numeral % 10 == 0) screen->foreground[y + height - 1][x + 1] = COLOR_BLACK;
 }

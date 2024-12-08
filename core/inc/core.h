@@ -294,6 +294,68 @@ typedef struct ObjectInterfaces {
 #define gotoxy(x,y) wprintf(L"\033[%d;%dH", (y), (x))
 
 /*
+ * Color definitions
+ * Basic color definitions for foreground and background
+ */
+typedef enum {
+    COLOR_RESET,
+
+    COLOR_BLACK,
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW,
+    COLOR_BLUE,
+    COLOR_MAGENTA,
+    COLOR_CYAN,
+    COLOR_WHITE,
+
+    COLOR_BRIGHT_BLACK,
+    COLOR_BRIGHT_RED,
+    COLOR_BRIGHT_GREEN,
+    COLOR_BRIGHT_YELLOW,
+    COLOR_BRIGHT_BLUE,
+    COLOR_BRIGHT_MAGENTA,
+    COLOR_BRIGHT_CYAN,
+    COLOR_BRIGHT_WHITE,
+} Color;
+
+const char *get_foreground(Color color);
+const char *get_background(Color color);
+
+/*
+ * Screen structure
+ * Represents the game screen with background, foreground and actual data layers
+ */
+#ifndef CUSTOM_SCREEN
+struct Screen {
+    #ifdef SCREEN_DYNAMIC
+        int height;
+        int width;
+        Color **background;
+        wchar_t **data;
+        Color **foreground;
+    #else
+        Color background[SCREEN_HEIGHT][SCREEN_WIDTH];  // Background colors/effects
+        wchar_t data[SCREEN_HEIGHT][SCREEN_WIDTH];      // Actual characters
+        Color foreground[SCREEN_HEIGHT][SCREEN_WIDTH];  // Foreground colors/effects
+    #endif
+};
+
+/*
+ * Screen functions
+ * Screen manipulation and drawing
+ */
+Screen init_screen(void);
+void print_screen(const Screen *screen);
+void add_separator(Screen *screen, int y, int x, wchar_t *borders);
+void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol);
+void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders);
+#endif
+
+// Cursor related definitions
+// ------------------------
+
+/*
  * Key definitions
  * Common keyboard input codes
  */
@@ -302,27 +364,6 @@ typedef struct ObjectInterfaces {
 #define KEY_SPACE 32
 #define KEY_CTRL_A 1
 #define KEY_CTRL_D 4
-
-/*
- * Screen structure
- * Represents the game screen with background, foreground and actual data layers
- */
-struct Screen {
-    #ifdef SCREEN_DYNAMIC
-        int height;
-        int width;
-        char ***background;
-        wchar_t **data;
-        char ***foreground;
-    #else
-        char *background[SCREEN_HEIGHT][SCREEN_WIDTH];  // Background colors/effects
-        wchar_t data[SCREEN_HEIGHT][SCREEN_WIDTH];      // Actual characters
-        char *foreground[SCREEN_HEIGHT][SCREEN_WIDTH];  // Foreground colors/effects
-    #endif
-};
-
-// Cursor related definitions
-// ------------------------
 
 /*
  * Cursor movement vectors
@@ -436,16 +477,6 @@ void core_update_screen(Core *core);
 void core_global_move(Core *core, Coords move);
 void core_validate_interfaces(Core *core);
 void core_free(Core *core);
-
-/*
- * Screen functions
- * Screen manipulation and drawing
- */
-Screen init_screen(void);
-void print_screen(const Screen *screen);
-void add_separator(Screen *screen, int y, int x, wchar_t *borders);
-void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol);
-void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders);
 
 /*
  * Cursor functions

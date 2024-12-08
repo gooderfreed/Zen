@@ -16,6 +16,8 @@
 
 #include "../inc/solitare.h"
 
+// #define DEBUG
+#ifndef DEBUG
 static void set_noncanonical_mode(void) {
     struct termios term;
     tcgetattr(STDIN_FILENO, &term);
@@ -31,6 +33,7 @@ static void restore_terminal_settings(void) {
     term.c_lflag |= ICANON | ECHO;
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
+#endif
 
 int main(void) {
     setlocale(LC_ALL, "");
@@ -41,15 +44,7 @@ int main(void) {
     Stock  stock  = init_stock();
     Screen screen = init_screen();
 
-    (void)field;
-    (void)stock;
-    (void)screen;
-
-    // wprintf(L"Field [%zu bytes]:\n", sizeof(Field));
-    // wprintf(L"Deck [%zu bytes]:\n", sizeof(Deck));
-    // wprintf(L"Stock [%zu bytes]:\n", sizeof(Stock));
-    // wprintf(L"Screen [%zu bytes]:\n", sizeof(Screen));
-
+    #ifndef DEBUG
     Map map = {
         .objects = {
             {
@@ -95,4 +90,5 @@ int main(void) {
             need_screen_update = false;
         }
     }
+    #endif
 }

@@ -26,11 +26,12 @@ CORE_INC_FILES = $(wildcard $(CORE_INC_DIR)/*.h)
 # ----------------
 CC = clang
 # Extensive warning flags for maximum code quality
-CFLAGS = -std=c11 -O3 $(addprefix -f, no-common stack-protector-strong) \
+CFLAGS = -std=c11 -Os $(addprefix -f, merge-all-constants function-sections data-sections lto short-enums no-common stack-protector-strong) \
 				      $(addprefix -W, all extra error pedantic conversion null-dereference\
 						cast-align unreachable-code strict-prototypes bad-function-cast \
 						strict-aliasing shadow double-promotion missing-prototypes \
 						missing-declarations pointer-arith format=2)
+
 AR = ar
 AFLAGS = rcs
 MKDIR = mkdir -p

@@ -133,6 +133,31 @@ static bool validate_button_handler(const void *interface, const char *name) {
 }
 
 /*
+ * Validate PositionHandler interface implementation
+ * Checks for required position restoration and saving functions
+ * Reports missing function implementations
+ */
+static bool validate_position_handler(const void *interface, const char *name) {
+    const PositionHandler *handler = interface;
+    if (!handler) {
+        wprintf(L"Error in '%s': PositionHandler interface is NULL\n", name);
+        return false;
+    }
+
+    if (!handler->restore_pos) {
+        wprintf(L"Error in '%s': PositionHandler interface is missing 'restore_pos' function\n", name);
+        return false;
+    }
+
+    if (!handler->save_current_pos) {
+        wprintf(L"Error in '%s': PositionHandler interface is missing 'save_current_pos' function\n", name);
+        return false;
+    }
+
+    return true;
+}
+
+/*
  * Validate Dynamic interface implementation
  * Ensures object cleanup function is properly defined
  * Required for objects that need resource deallocation
@@ -163,6 +188,7 @@ bool validate_object_interfaces(const ObjectInterfaces *interfaces) {
         VALIDATOR(is_interactable, interactable,   validate_interactable),
         VALIDATOR(can_hold_cards,  card_handler,   validate_card_handler),
         VALIDATOR(have_buttons,    button_handler, validate_button_handler),
+        VALIDATOR(is_positionable, position_handler, validate_position_handler),
         VALIDATOR(is_dynamic,      dynamic,        validate_dynamic)
     };
 
