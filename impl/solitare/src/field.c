@@ -112,19 +112,13 @@ static void get_cards_in_field(void *field_pointer, CardsContainer *container) {
  */
 static void select_cards_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container) {
     Field *field = (Field *)field_pointer;
-    if (container->size) {
-        for (int i = 0; i < container->size; i++) {
-            container->container[i]->selected = false;
-            container->container[i] = NULL;
-        }
-        container->size = 0;
-        container->source = NULL;
-        return;
-    }
+    bool is_empty = container_is_empty(container);
 
     for (int i = cursor_coords.y; field->field[i][cursor_coords.x] && i < FIELD_HEIGHT; ++i) {
-        field->field[i][cursor_coords.x]->selected = true;
-        container->container[container->size++] = field->field[i][cursor_coords.x];
+        field->field[i][cursor_coords.x]->selected = !field->field[i][cursor_coords.x]->selected;
+
+        if (!is_empty) container_clear_container(container);
+        else container_add_element(container, field->field[i][cursor_coords.x]);
     }
     container->source = field_pointer;
 }

@@ -73,20 +73,34 @@ typedef struct Card {
  * CardsContainer - Container for card operations
  * Used for moving cards between objects and tracking their source
  */
+#ifndef CONTAINER_DYNAMIC
 #ifndef CONTAINER_SIZE
     #define CONTAINER_SIZE 1
+#endif
 #endif
 
 typedef struct CardsContainer {
     int size;
     void *source;
-    #ifdef CONTAINER_DYNAMIC
-        int length;
-        struct Card **container;
-    #else
+    #ifndef CONTAINER_DYNAMIC
         Card *container[CONTAINER_SIZE];
+    #else
+        int length;
+        Card **container;
     #endif
 } CardsContainer;
+
+#ifndef CUSTOM_CONTAINER_IMPL
+    void container_add_element(CardsContainer *container, void *element);
+    void container_clear_container(CardsContainer *container);
+    bool container_is_empty(CardsContainer *container);
+    #ifndef CONTAINER_DYNAMIC
+        CardsContainer container_init(void);
+    #else
+        CardsContainer container_init(int length);
+        void container_free(CardsContainer *container);
+    #endif
+#endif
 
 // Interface definitions
 // -------------------

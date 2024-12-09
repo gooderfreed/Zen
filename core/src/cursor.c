@@ -28,11 +28,7 @@
 Cursor init_cursor(void *start_object, Coords start_coords) {
     Cursor cursor = {
         .coords = start_coords,
-        .cards = {
-            .container = {0},
-            .size = 0,
-            .source = NULL
-        },
+        .cards = container_init(),
         .subject = start_object,
     };
 
