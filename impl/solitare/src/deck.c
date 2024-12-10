@@ -63,30 +63,17 @@ static void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coord
 }
 
 /*
- * Move to next card in deck
- * Cycles through deck until finding next available card
+ * Handle next card button click
+ * Advances to next card in deck and clears cursor container
  */
-static void next_card_action(void *deck_pointer) {
-    Deck *deck = (Deck *)deck_pointer;
-    next_card(deck);
-}
-
-/*
- * Check if cursor is on the deck button
- * Compares cursor position to deck button coordinates
- */
-static bool is_deck_button_position(void *deck_pointer, Coords coords) {
-    (void)deck_pointer;
-    return coords.x == 0 && coords.y == 0;
-}
-
-/*
- * Handle deck button click
- * Advances to next card in deck
- */
-static void handle_deck_button(void *deck_pointer, Coords coords) {
-    if (coords.x == 0 && coords.y == 0) {
-        next_card_action(deck_pointer);
+static void handle_next_card_button(void *deck_pointer, void *context) {
+    next_card((Deck *)deck_pointer);
+    Container *container = (Container *)context;
+    if (container->size > 0) {
+        while (!container_is_empty(container)) {
+            Card *card = (Card *)container_pop_element(container);
+            card->selected = false;
+        }
     }
 }
 
@@ -174,10 +161,17 @@ Deck generate_deck(void) {
         .place_cards    = NULL,
         .can_place      = NULL
     };
+    
+    static Button next_card_button = {
+        .coords = {.x = 0, .y = 0},
+        .on_click = handle_next_card_button,
+    };
 
-    static const ButtonHandler button_handler = {
-        .is_button_position = is_deck_button_position,
-        .handle_button      = handle_deck_button
+    static ButtonHandler button_handler = {
+        .buttons_count = 1,
+        .buttons = {
+            [0] = &next_card_button
+        },
     };
 
     deck.interfaces = (ObjectInterfaces) {

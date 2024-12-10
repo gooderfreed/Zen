@@ -109,23 +109,11 @@ static bool validate_card_handler(const void *interface, const char *name) {
 
 /*
  * Validate ButtonHandler interface implementation
- * Checks for required button position and handling functions
- * Reports missing function implementations
  */
 static bool validate_button_handler(const void *interface, const char *name) {
     const ButtonHandler *handler = interface;
     if (!handler) {
         wprintf(L"Error in '%s': ButtonHandler interface is NULL\n", name);
-        return false;
-    }
-
-    if (!handler->is_button_position) {
-        wprintf(L"Error in '%s': ButtonHandler interface is missing 'is_button_position' function\n", name);
-        return false;
-    }
-
-    if (!handler->handle_button) {
-        wprintf(L"Error in '%s': ButtonHandler interface is missing 'handle_button' function\n", name);
         return false;
     }
 

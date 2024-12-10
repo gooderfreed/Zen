@@ -25,10 +25,10 @@
  * Initialize cursor with starting object and position
  * Returns cursor structure ready for use
  */
-Cursor init_cursor(void *start_object, Coords start_coords) {
+Cursor init_cursor(void *start_object, Coords start_coords, Container *cursor_cards) {
     Cursor cursor = {
         .coords = start_coords,
-        .cards = container_init(),
+        .cards = cursor_cards,
         .subject = start_object,
     };
 

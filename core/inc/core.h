@@ -144,10 +144,38 @@ typedef struct {
  * ButtonHandler - Interface for objects that can handle buttons
  * Provides button position and handling capabilities
  */
+#ifndef BUTTON_HANDLER_SIZE
+    #define BUTTON_HANDLER_SIZE 1
+#endif
+
 typedef struct {
-    bool (*is_button_position)(void *, Coords);
-    void (*handle_button)(void *, Coords);
+    Coords coords;
+    void *context;
+    void (*on_click)(void *source, void *context);
+} Button;
+
+typedef struct {
+    #ifndef BUTTON_HANDLER_DYNAMIC
+        Button *buttons[BUTTON_HANDLER_SIZE];
+    #else
+        Button **buttons;
+        int length;
+    #endif
+    int buttons_count;
 } ButtonHandler;
+
+#ifndef CUSTOM_BUTTON_HANDLER_IMPL
+    #ifdef BUTTON_HANDLER_DYNAMIC
+        Button **buttons_init(int length)
+    #endif
+    void add_button(ButtonHandler *button_handler, Button *button);
+    void remove_button(ButtonHandler *button_handler, int index);
+    void set_button_context(ButtonHandler *button_handler, int index, void *context);
+    Button *get_button(ButtonHandler *button_handler, int index);
+    bool is_button(void *object, Coords coords);
+    Button *get_button_by_coords(void *object, Coords coords);
+    void handle_button(void *object, Coords coords);
+#endif
 
 /*
  * PositionHandler - Interface for objects that can handle position
@@ -183,7 +211,7 @@ typedef struct ObjectInterfaces {
     } capabilities;
 
     const CardHandler     *card_handler;
-    const ButtonHandler   *button_handler;
+    ButtonHandler   *button_handler;
     PositionHandler *position_handler;
     const Drawable        *drawable;
     const Interactable    *interactable;
@@ -237,11 +265,9 @@ typedef struct ObjectInterfaces {
 #define BUTTON_HANDLER(object) \
     GET_INTERFACE(object, button_handler)
 
-#define IS_BUTTON(object, coords) \
-    (HAS_CAPABILITY(object, have_buttons) && BUTTON_HANDLER(object)->is_button_position(object, coords))
+#define HAVE_BUTTONS(object) \
+    (HAS_CAPABILITY(object, have_buttons) && BUTTON_HANDLER(object)->buttons_count > 0)
 
-#define HANDLE_BUTTON(object, coords) \
-    (BUTTON_HANDLER(object)->handle_button(object, coords))
 
 // Drawable macros
 #define DRAW_HANDLER(object) \
@@ -312,6 +338,8 @@ typedef struct ObjectInterfaces {
  */
 #define clear() wprintf(L"\033[H\033[J")
 #define gotoxy(x,y) wprintf(L"\033[%d;%dH", (y), (x))
+#define hide_cursor() wprintf(L"\033[?25l")
+#define show_cursor() wprintf(L"\033[?25h")
 
 /*
  * Color definitions
@@ -401,7 +429,7 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
  */
 struct Cursor {
     Coords coords;          // Current cursor position
-    Container cards;        // Currently selected cards
+    Container *cards;        // Currently selected cards
     void *subject;          // Object under cursor
 };
 
@@ -502,7 +530,7 @@ void core_free(Core *core);
  * Cursor functions
  * Cursor manipulation and rendering
  */
-Cursor init_cursor(void *start_object, Coords start_coords);
+Cursor init_cursor(void *start_object, Coords start_coords, Container *cursor_cards);
 void print_cursor(Cursor *cursor, Screen *screen);
 
 /*

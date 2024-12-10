@@ -64,32 +64,32 @@ void core_action(Core *core) {
     Cursor *cursor = core->cursor;
 
     // Handle button press if cursor is on a button
-    if (IS_BUTTON(cursor->subject, cursor->coords)) {
-        HANDLE_BUTTON(cursor->subject, cursor->coords);
+    if (is_button(cursor->subject, cursor->coords)) {
+        handle_button(cursor->subject, cursor->coords);
         return;
     }
 
     // Handle card operations
-    if (cursor->cards.size != 0) {
-        Card *first_card = cursor->cards.container[0];
+    if (cursor->cards->size != 0) {
+        Card *first_card = cursor->cards->container[0];
 
         // Toggle card selection if clicking on the same card
-        if (cursor->subject == cursor->cards.source &&
+        if (cursor->subject == cursor->cards->source &&
             IS_SAME_CARD(cursor->subject, cursor->coords, first_card)) {
-            SELECT_CARDS(cursor->subject, cursor->coords, &cursor->cards);
+            SELECT_CARDS(cursor->subject, cursor->coords, cursor->cards);
             return;
         }
         // Move cards if source can give and target can take
-        if (CAN_GIVE_CARDS(cursor->cards.source) && 
+        if (CAN_GIVE_CARDS(cursor->cards->source) && 
                  CAN_TAKE_CARDS(cursor->subject) &&
-                 CAN_PLACE_CARDS(cursor->subject, cursor->coords, &cursor->cards)) {
-            GET_CARDS(cursor->cards.source, &cursor->cards);
-            PLACE_CARDS(cursor->subject, cursor->coords, &cursor->cards);
+                 CAN_PLACE_CARDS(cursor->subject, cursor->coords, cursor->cards)) {
+            GET_CARDS(cursor->cards->source, cursor->cards);
+            PLACE_CARDS(cursor->subject, cursor->coords, cursor->cards);
         }
     }
     // Select cards if no cards are currently selected
     else {
-        SELECT_CARDS(cursor->subject, cursor->coords, &cursor->cards);
+        SELECT_CARDS(cursor->subject, cursor->coords, cursor->cards);
     }
 }
 

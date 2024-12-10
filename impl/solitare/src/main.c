@@ -40,10 +40,13 @@ int main(void) {
     hide_cursor();
     clear();
 
+    Container cursor_cards = container_init();
     Deck   deck   = generate_deck();
     Field  field  = init_field(&deck); // TODO: change deck get_card method
     Stock  stock  = init_stock();
     Screen screen = init_screen();
+    
+    set_button_context(BUTTON_HANDLER(&deck), 0, &cursor_cards);
 
     #ifndef DEBUG
     Map map = {
@@ -56,13 +59,14 @@ int main(void) {
     };
 
     MapObject object = map_get_current_object(&map);
-    Cursor    cursor = init_cursor(object.object, object.default_coords);
+    Cursor    cursor = init_cursor(object.object, object.default_coords, &cursor_cards);
     Core      core   = init_core(&map, &cursor, &screen);
 
     add_borders(&screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, fat_border);
     add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, fat_border);
 
     core_update_screen(&core);
+
 
     set_noncanonical_mode();
     bool need_screen_update;
