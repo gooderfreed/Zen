@@ -96,13 +96,13 @@ static void move_in_field(void *field_pointer, Coords *coords, Coords delta) {
  * Get cards from field
  * Removes selected cards from field and marks them as not selected
  */
-static void get_cards_in_field(void *field_pointer, CardsContainer *container) {
+static void get_cards_in_field(void *field_pointer, Container *container) {
     Field *field = (Field *)field_pointer;
-    Card *target_card = container->container[0];
 
-    for (int i = target_card->coords.y; field->field[i][target_card->coords.x] && i < FIELD_HEIGHT; ++i) {
-        field->field[i][target_card->coords.x]->selected = false;
-        field->field[i][target_card->coords.x] = NULL;
+    for (int i = 0; i < container->size; i++) {
+        Card *card = (Card *)container_get_element(container, i);
+        card->selected = false;
+        field->field[card->coords.y][card->coords.x] = NULL;
     }
 }
 
@@ -110,24 +110,27 @@ static void get_cards_in_field(void *field_pointer, CardsContainer *container) {
  * Select cards in field
  * Adds selected cards to container and marks them as selected
  */
-static void select_cards_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container) {
+static void select_cards_in_field(void *field_pointer, Coords cursor_coords, Container *container) {
     Field *field = (Field *)field_pointer;
-    bool is_empty = container_is_empty(container);
+    if (!container_is_empty(container)) {
+        while (!container_is_empty(container)) {
+            ((Card *)container_pop_element(container))->selected = false;
+        }
+        return;
+    }
 
     for (int i = cursor_coords.y; field->field[i][cursor_coords.x] && i < FIELD_HEIGHT; ++i) {
-        field->field[i][cursor_coords.x]->selected = !field->field[i][cursor_coords.x]->selected;
-
-        if (!is_empty) container_clear_container(container);
-        else container_add_element(container, field->field[i][cursor_coords.x]);
+        field->field[i][cursor_coords.x]->selected = true;
+        container_add_element(container, field->field[i][cursor_coords.x]);
     }
-    container->source = field_pointer;
+    container_set_source(container, field_pointer);
 }
 
 /*
  * Check if cursor can place cards in field
  * Checks if there is enough space and if the target card is not selected
  */
-static bool can_place_in_field(void *field_pointer, Coords cursor_coords, CardsContainer *container) {
+static bool can_place_in_field(void *field_pointer, Coords cursor_coords, Container *container) {
     Field *field = (Field *)field_pointer;
 
     return (cursor_coords.y + container->size < FIELD_HEIGHT && 
@@ -140,20 +143,17 @@ static bool can_place_in_field(void *field_pointer, Coords cursor_coords, CardsC
  * Place cards in field
  * Places selected cards in field at specified cursor coordinates
  */
-static void place_cards_in_field(void *field_pointer, Coords cursor_coord, CardsContainer *container) {
+static void place_cards_in_field(void *field_pointer, Coords cursor_coord, Container *container) {
     Field *field = (Field *)field_pointer;
     bool y_offset = (field->field[cursor_coord.y][cursor_coord.x]);
 
-    for (int i = 0; i < container->size; ++i) {
-        Card *card = container->container[i];
+    while (!container_is_empty(container)) {
+        Card *card = container_pop_element(container);
         card->object = Field_enum;
         card->coords.x = cursor_coord.x;
-        card->coords.y = (short)(cursor_coord.y + y_offset + i);
-        field->field[cursor_coord.y + y_offset + i][cursor_coord.x] = card;
-        container->container[i] = NULL;
+        card->coords.y = (short)(cursor_coord.y + y_offset + container->size);
+        field->field[cursor_coord.y + y_offset + container->size][cursor_coord.x] = card;
     }
-    container->size = 0;
-    container->source = NULL;
 }
 
 /*

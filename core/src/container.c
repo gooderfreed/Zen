@@ -14,17 +14,6 @@
  * limitations under the License.
 */
 
-// #ifndef CUSTOM_CONTAINER_IMPL
-//     void container_add_element(CardsContainer *container, void *element);
-//     #ifdef CONTAINER_DYNAMIC
-//         CardsContainer container_init(int length);
-//         void container_free(CardsContainer *container);
-//     #else
-//         CardsContainer container_init(void);
-//         void container_clear_container(CardsContainer *container);
-//     #endif
-// #endif
-
 #ifndef CUSTOM_CONTAINER_IMPL
 
 /*
@@ -37,7 +26,7 @@
  * Clear container of cards
  * Sets all elements to NULL and resets size and source
  */
-void container_clear_container(CardsContainer *container) {
+void container_clear_container(Container *container) {
     for (int i = 0; i < container->size; i++) {
         container->container[i] = NULL;
     }
@@ -49,8 +38,16 @@ void container_clear_container(CardsContainer *container) {
  * Check if container is empty
  * Returns true if container has no elements
  */
-bool container_is_empty(CardsContainer *container) {
+inline bool container_is_empty(Container *container) {
     return container->size == 0;
+}
+
+/*
+ * Set source of container
+ * Sets source of container to specified pointer
+ */
+inline void container_set_source(Container *container, void *source) {
+    container->source = source;
 }
 
 #ifdef CONTAINER_DYNAMIC
@@ -58,12 +55,12 @@ bool container_is_empty(CardsContainer *container) {
      * Initialize container of cards
      * Allocates memory for container and sets initial size and source
      */
-    CardsContainer container_init(int length) {
-        CardsContainer container = {
+    Container container_init(int length) {
+        Container container = {
             .size = 0,
             .source = NULL,
             .length = length,
-            .container = (Card **)malloc(length * sizeof(Card *))
+            .container = (void **)malloc(length * sizeof(void *))
         };
         return container;
     }
@@ -72,7 +69,7 @@ bool container_is_empty(CardsContainer *container) {
      * Add element to container
      * Adds element to container if there is enough space
      */
-    void container_add_element(CardsContainer *container, void *element) {
+    void container_add_element(Container *container, void *element) {
         if (container->size >= container->length) return;
         container->container[container->size++] = element;
     }
@@ -81,7 +78,7 @@ bool container_is_empty(CardsContainer *container) {
      * Free container of cards
      * Frees memory allocated for container
      */
-    void container_free(CardsContainer *container) {
+    void container_free(Container *container) {
         free(container->container);
     }
 #else
@@ -89,8 +86,8 @@ bool container_is_empty(CardsContainer *container) {
      * Initialize container of cards
      * Sets initial size and source
      */
-    CardsContainer container_init(void) {
-        CardsContainer container = {
+    Container container_init(void) {
+        Container container = {
             .size = 0,
             .source = NULL,
             .container = {0}
@@ -102,9 +99,30 @@ bool container_is_empty(CardsContainer *container) {
      * Add element to container
      * Adds element to container if there is enough space
      */
-    void container_add_element(CardsContainer *container, void *element) {
+    void container_add_element(Container *container, void *element) {
         if (container->size >= CONTAINER_SIZE) return;
         container->container[container->size++] = element;
+    }
+
+    /*
+     * Get element from container
+     * Returns element at specified index
+     */
+    void *container_get_element(Container *container, int index) {
+        if (index >= container->size) return NULL;
+        return container->container[index];
+    }
+
+    /*
+     * Pop element from container
+     * Pops element from container and returns it
+     */
+    void *container_pop_element(Container *container) {
+        if (container->size == 0) return NULL;
+        void *element = container->container[--container->size];
+        container->container[container->size] = NULL;
+        if (container->size == 0) container->source = NULL;
+        return element;
     }
 #endif
 

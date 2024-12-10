@@ -74,13 +74,15 @@ void core_action(Core *core) {
         Card *first_card = cursor->cards.container[0];
 
         // Toggle card selection if clicking on the same card
-        if (cursor->subject == cursor->cards.source && 
+        if (cursor->subject == cursor->cards.source &&
             IS_SAME_CARD(cursor->subject, cursor->coords, first_card)) {
             SELECT_CARDS(cursor->subject, cursor->coords, &cursor->cards);
+            return;
         }
         // Move cards if source can give and target can take
-        else if (CAN_GIVE_CARDS(cursor->cards.source) && 
-                 CAN_TAKE_CARDS(cursor->subject)) {
+        if (CAN_GIVE_CARDS(cursor->cards.source) && 
+                 CAN_TAKE_CARDS(cursor->subject) &&
+                 CAN_PLACE_CARDS(cursor->subject, cursor->coords, &cursor->cards)) {
             GET_CARDS(cursor->cards.source, &cursor->cards);
             PLACE_CARDS(cursor->subject, cursor->coords, &cursor->cards);
         }

@@ -79,26 +79,29 @@ typedef struct Card {
 #endif
 #endif
 
-typedef struct CardsContainer {
+typedef struct Container {
     int size;
     void *source;
     #ifndef CONTAINER_DYNAMIC
-        Card *container[CONTAINER_SIZE];
+        void *container[CONTAINER_SIZE];
     #else
         int length;
-        Card **container;
+        void **container;
     #endif
-} CardsContainer;
+} Container;
 
 #ifndef CUSTOM_CONTAINER_IMPL
-    void container_add_element(CardsContainer *container, void *element);
-    void container_clear_container(CardsContainer *container);
-    bool container_is_empty(CardsContainer *container);
+    void container_add_element(Container *container, void *element);
+    void container_clear_container(Container *container);
+    bool container_is_empty(Container *container);
+    void container_set_source(Container *container, void *source);
+    void *container_pop_element(Container *container);
+    void *container_get_element(Container *container, int index);
     #ifndef CONTAINER_DYNAMIC
-        CardsContainer container_init(void);
+        Container container_init(void);
     #else
-        CardsContainer container_init(int length);
-        void container_free(CardsContainer *container);
+        Container container_init(int length);
+        void container_free(Container *container);
     #endif
 #endif
 
@@ -130,10 +133,10 @@ typedef struct {
     bool can_give_cards : 1;
     bool can_take_cards : 1;
 
-    void (*select_cards)(void *, Coords, CardsContainer *);
-    void (*get_cards)(void *, CardsContainer *);
-    void (*place_cards)(void *, Coords, CardsContainer *);
-    bool (*can_place)(void *, Coords, CardsContainer *);
+    void (*select_cards)(void *, Coords, Container *);
+    void (*get_cards)(void *, Container *);
+    void (*place_cards)(void *, Coords, Container *);
+    bool (*can_place)(void *, Coords, Container *);
     bool (*is_same_card)(void *, Coords, struct Card *);
 } CardHandler;
 
@@ -214,6 +217,9 @@ typedef struct ObjectInterfaces {
 
 #define CAN_TAKE_CARDS(object) \
     (HAS_CAPABILITY(object, can_hold_cards) && CARD_HANDLER(object)->can_take_cards)
+
+#define CAN_PLACE_CARDS(object, coords, container) \
+    (CARD_HANDLER(object)->can_place(object, coords, container))
 
 #define SELECT_CARDS(object, coords, container) \
     (CARD_HANDLER(object)->select_cards(object, coords, container))
@@ -395,7 +401,7 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
  */
 struct Cursor {
     Coords coords;          // Current cursor position
-    CardsContainer cards;   // Currently selected cards
+    Container cards;        // Currently selected cards
     void *subject;          // Object under cursor
 };
 

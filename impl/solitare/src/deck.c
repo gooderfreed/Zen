@@ -94,7 +94,7 @@ static void handle_deck_button(void *deck_pointer, Coords coords) {
  * Select card in deck
  * Adds selected card to container and marks it as selected
  */
-static void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsContainer *container) {
+static void select_card_in_deck(void *deck_pointer, Coords cursor_coords, Container *container) {
     Deck *deck = (Deck *)deck_pointer;
     (void)cursor_coords;
 
@@ -102,12 +102,11 @@ static void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsC
 
     if (container->size == 0) {
         deck->pointer->selected = true;
-        container->container[container->size++] = deck->pointer;
-        container->source = deck_pointer;
+        container_add_element(container, deck->pointer);
+        container_set_source(container, deck_pointer);
     } else {
         deck->pointer->selected = false;
-        container->container[--container->size] = NULL;
-        container->source = NULL;
+        container_pop_element(container);
     }
 }
 
@@ -115,7 +114,7 @@ static void select_card_in_deck(void *deck_pointer, Coords cursor_coords, CardsC
  * Get card from deck
  * Removes selected card from deck and advances to next card
  */
-static void get_card_in_deck(void *deck_pointer, CardsContainer *container) {
+static void get_card_in_deck(void *deck_pointer, Container *container) {
     Deck *deck = (Deck *)deck_pointer;
     (void)container;
 
