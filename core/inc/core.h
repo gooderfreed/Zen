@@ -395,9 +395,9 @@ struct Screen {
  */
 Screen init_screen(void);
 void print_screen(const Screen *screen);
-void add_separator(Screen *screen, int y, int x, wchar_t *borders);
-void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol);
-void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders);
+void add_separator(Screen *screen, int y, int x, Color background, Color foreground, wchar_t *borders);
+void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
+void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
 #endif
 
 // Cursor related definitions

@@ -29,7 +29,7 @@ static void print_field(void *field_pointer, Screen *screen, const Cursor *hover
     int contentHeight = 2 * FIELD_HEIGHT - 1 + CARD_HEIGHT - 2;
     int contentWidth = SCREEN_WIDTH - BORDER_OFFSET_X - 1;
 
-    fill_area(screen, DECK_OFFSET + BORDER_OFFSET_Y, BORDER_OFFSET_X, contentHeight, contentWidth, ' ');
+    fill_area(screen, DECK_OFFSET + BORDER_OFFSET_Y, BORDER_OFFSET_X, contentHeight, contentWidth, ' ', COLOR_GREEN, COLOR_RESET);
 
     int y_offset_base = DECK_OFFSET + BORDER_OFFSET_Y;
     int hovered_x = hovered_card->coords.x;
@@ -46,7 +46,7 @@ static void print_field(void *field_pointer, Screen *screen, const Cursor *hover
             Card *current_card = field->field[y][x];
 
             if (y == 0 && !current_card) {
-                add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, fat_border);
+                add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
             }
             else {
                 print_card(screen, current_card, y_0 + additional_offset, x_0, CARD_HEIGHT, CARD_WIDTH);

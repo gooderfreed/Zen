@@ -62,8 +62,8 @@ int main(void) {
     Cursor    cursor = init_cursor(object.object, object.default_coords, &cursor_cards);
     Core      core   = init_core(&map, &cursor, &screen);
 
-    add_borders(&screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, fat_border);
-    add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, fat_border);
+    add_borders(&screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_BLUE, fat_border);
+    add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
 
     core_update_screen(&core);
 

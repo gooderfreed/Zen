@@ -28,12 +28,12 @@ static void print_stock(void *stock_pointer, Screen *screen, const Cursor *curso
     (void)cursor;
     Stock *stock = (Stock *)stock_pointer;
     
-    fill_area(screen, BORDER_OFFSET_X, STOCK_X_BASE, STOCK_AREA_HEIGHT, STOCK_AREA_WIDTH, L' ');
+    fill_area(screen, BORDER_OFFSET_X, STOCK_X_BASE, STOCK_AREA_HEIGHT, STOCK_AREA_WIDTH, L' ', COLOR_BLACK, COLOR_RESET);
 
     for (int suit = 0; suit < CARD_SUITS; suit++) {
         int x = STOCK_X_BASE + suit * CARD_WIDTH;
         
-        add_borders(screen, BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH, card_border);
+        add_borders(screen, BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH, COLOR_BLACK, COLOR_WHITE, card_border);
         
         Card *top_card = NULL;
         for (int i = CARD_NUMERALS - 1; i >= 0; i--) {

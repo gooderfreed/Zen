@@ -88,8 +88,8 @@ Screen init_screen(void) {
 
     for (int i = 0; i < SCREEN_HEIGHT; i++) {
         for (int j = 0; j < SCREEN_WIDTH; j++) {
-            screen.background[i][j] = COLOR_RESET;
-            screen.data[i][j] = '#';
+            screen.background[i][j] = COLOR_BLACK;
+            screen.data[i][j] = ' ';
             screen.foreground[i][j] = COLOR_RESET;
         }
     }
@@ -101,14 +101,24 @@ Screen init_screen(void) {
  * Add borders to specified area of screen
  * Creates a border using provided border characters
  */
-void add_borders(Screen *screen, int y, int x, int height, int width, const wchar_t *borders) {
+void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders) {
     for (int i = 0; i < width; ++i) {
+        screen->background[y][x + i] = background;
         screen->data[y][x + i] = borders[0];
+        screen->foreground[y][x + i] = foreground;
+
+        screen->background[y + height - 1][x + i] = background;
         screen->data[y + height - 1][x + i] = borders[0];
+        screen->foreground[y + height - 1][x + i] = foreground;
     }
     for (int i = 0; i < height; ++i) {
+        screen->background[y + i][x] = background;
         screen->data[y + i][x] = borders[1];
+        screen->foreground[y + i][x] = foreground;
+        
+        screen->background[y + i][x + width - 1] = background;
         screen->data[y + i][x + width - 1] = borders[1];
+        screen->foreground[y + i][x + width - 1] = foreground;
     }
 
     screen->data[y][x] = borders[2];
@@ -121,9 +131,11 @@ void add_borders(Screen *screen, int y, int x, int height, int width, const wcha
  * Add separator line to screen
  * Used for visual separation of screen areas
  */
-void add_separator(Screen *screen, int y, int x, wchar_t *borders) {
+void add_separator(Screen *screen, int y, int x, Color background, Color foreground , wchar_t *borders) {
     for (int i = 0; i < SCREEN_WIDTH; ++i) {
+        screen->background[y][x + i] = background;
         screen->data[y][x + i] = borders[0];
+        screen->foreground[y][x + i] = foreground;
     }
     screen->data[y][x] = borders[6];
     screen->data[y][SCREEN_WIDTH - 1] = borders[7];
@@ -145,14 +157,14 @@ void print_screen(const Screen *screen) {
 
 /*
  * Fill rectangular area with specified symbol
- * Clears background and foreground formatting in the area
+ * Fills the area with specified symbol, background and foreground formatting
  */
-void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol) {
+void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground) {
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
-            screen->background[i][j] = COLOR_RESET;
+            screen->background[i][j] = background;
             screen->data[i][j] = symbol;
-            screen->foreground[i][j] = COLOR_RESET;
+            screen->foreground[i][j] = foreground;
         }
     }
 }
