@@ -37,6 +37,7 @@ static void restore_terminal_settings(void) {
 
 int main(void) {
     setlocale(LC_ALL, "");
+    hide_cursor();
     clear();
 
     Deck   deck   = generate_deck();
@@ -72,6 +73,7 @@ int main(void) {
         switch (ch) {
             case L'q': case L'й': case KEY_ESC:
                 clear();
+                show_cursor();
                 core_free(&core);
                 restore_terminal_settings();
                 exit(0);

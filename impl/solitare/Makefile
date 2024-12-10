@@ -41,6 +41,7 @@ all: $(NAMEBIN) clean
 
 $(NAMEBIN): $(OBJ_FILES) $(CORE_OBJ_FILES)
 	@$(CC) $(CFLAGS) $^ -o $@
+	@strip $@
 
 $(OBJ_FILES): | $(OBJ_DIR)
 
