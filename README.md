@@ -3,7 +3,7 @@ A lightweight game engine written in pure C, designed for console-based card bas
 
 ## Overview
 MiniCore is a minimalistic yet powerful framework that provides:
-- Flexible object-oriented architecture
+- Flexible *"object-oriented"* architecture
 - Interface-based component system
 - Screen rendering capabilities
 - Input handling
@@ -12,10 +12,13 @@ MiniCore is a minimalistic yet powerful framework that provides:
 ## Features
 - **Modular Design**: Core/Implementation separation
 - **Interface System**: 
+  - CardHandler
   - Drawable
   - Interactable
-  - CardHandler
+  - Dynamic
   - ButtonHandler
+  - PositionHandler
+  - Updateable
 - **Screen Management**: ASCII/Unicode rendering
 - **Input Handling**: Keyboard events
 - **Memory Efficient**: No dynamic allocations by default
@@ -24,8 +27,8 @@ MiniCore is a minimalistic yet powerful framework that provides:
 The framework comes with a Solitaire card game implementation showcasing the engine's capabilities:
 - Card game mechanics
 - Unicode card rendering
-- Multi-language support
-- Terminal-based UI
+- Terminal-based UI\
+![Klondike Solitaire Implementation](.github/solitaire.png)
 
 ## Building
 **Clone the repository**
