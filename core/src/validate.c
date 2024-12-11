@@ -166,18 +166,39 @@ static bool validate_dynamic(const void *interface, const char *name) {
 }
 
 /*
+ * Validate Updateable interface implementation
+ * Ensures object update function is properly defined
+ * Required for objects that need periodic updates
+ */
+static bool validate_updateable(const void *interface, const char *name) {
+    const Updateable *updateable = interface;
+    if (!updateable) {
+        wprintf(L"Error in '%s': Updateable interface is NULL\n", name);
+        return false;
+    }
+
+    if (!updateable->update) {
+        wprintf(L"Error in '%s': Updateable interface is missing 'update' function\n", name);
+        return false;
+    }
+
+    return true;
+}
+
+/*
  * Validate all interfaces for game object
  * Runs appropriate validators based on object capabilities
  * Returns false if any required interface validation fails
  */
 bool validate_object_interfaces(const ObjectInterfaces *interfaces) {
     InterfaceValidator validators[] = {
-        VALIDATOR(is_drawable,     drawable,       validate_drawable),
-        VALIDATOR(is_interactable, interactable,   validate_interactable),
-        VALIDATOR(can_hold_cards,  card_handler,   validate_card_handler),
-        VALIDATOR(have_buttons,    button_handler, validate_button_handler),
+        VALIDATOR(is_drawable,     drawable,         validate_drawable),
+        VALIDATOR(is_interactable, interactable,     validate_interactable),
+        VALIDATOR(can_hold_cards,  card_handler,     validate_card_handler),
+        VALIDATOR(have_buttons,    button_handler,   validate_button_handler),
         VALIDATOR(is_positionable, position_handler, validate_position_handler),
-        VALIDATOR(is_dynamic,      dynamic,        validate_dynamic)
+        VALIDATOR(is_dynamic,      dynamic,          validate_dynamic),
+        VALIDATOR(requires_update, updateable,       validate_updateable)
     };
 
     for (size_t i = 0; i < sizeof(validators) / sizeof(validators[0]); i++) {

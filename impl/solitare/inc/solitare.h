@@ -99,7 +99,9 @@ typedef struct Deck {
 typedef struct Stock {
     ObjectInterfaces interfaces;                     // Core engine interfaces
     Card *stock[CARD_SUITS][CARD_NUMERALS];          // Foundation piles for each suit
+    Card *top_cards[CARD_SUITS];
 } Stock;
+
 
 /*
  * Field structure
@@ -109,6 +111,15 @@ typedef struct Field {
     ObjectInterfaces interfaces;                   // Core engine interfaces
     Card *field[FIELD_HEIGHT][FIELD_WIDTH];        // Tableau columns for card placement
 } Field;
+
+/*
+ * Stock context structure 
+ * Contains pointers to deck and field for auto-update
+ */
+typedef struct StockContext {
+    Deck *deck;
+    Field *field;
+} StockContext;
 
 //field
 Field init_field(Deck *deck);

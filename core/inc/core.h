@@ -133,11 +133,11 @@ typedef struct {
     bool can_give_cards : 1;
     bool can_take_cards : 1;
 
-    void (*select_cards)(void *, Coords, Container *);
-    void (*get_cards)(void *, Container *);
-    void (*place_cards)(void *, Coords, Container *);
-    bool (*can_place)(void *, Coords, Container *);
-    bool (*is_same_card)(void *, Coords, struct Card *);
+    void (*select_cards)(void *self, Coords, Container *);
+    void (*get_cards)(void *self, Container *);
+    void (*place_cards)(void *self, Coords, Container *);
+    bool (*can_place)(void *self, Coords, Container *);
+    bool (*is_same_card)(void *self, Coords, Card *);
 } CardHandler;
 
 /*
@@ -151,7 +151,7 @@ typedef struct {
 typedef struct {
     Coords coords;
     void *context;
-    void (*on_click)(void *source, void *context);
+    void (*on_click)(void *self, void *context);
 } Button;
 
 typedef struct {
@@ -183,8 +183,8 @@ typedef struct {
  */
 typedef struct {
     Coords restore_coords;
-    void (*restore_pos)(void *object, Coords *current_coords);
-    void (*save_current_pos)(void *object, Coords current_coords);
+    void (*restore_pos)(void *self, Coords *current_coords);
+    void (*save_current_pos)(void *self, Coords current_coords);
 } PositionHandler;
 
 /*
@@ -192,8 +192,13 @@ typedef struct {
  * Provides free method
  */
 typedef struct {
-    void (*free)(void *);
+    void (*free)(void *self);
 } Dynamic;
+
+typedef struct {
+    void *context;
+    void (*update)(void *self, void *context);
+} Updateable;
 
 /*
  * ObjectInterfaces - Interface for objects that can be interacted with
@@ -208,14 +213,16 @@ typedef struct ObjectInterfaces {
         bool is_interactable : 1;
         bool is_dynamic      : 1;
         bool is_positionable : 1;
+        bool requires_update : 1;
     } capabilities;
 
     const CardHandler     *card_handler;
-    ButtonHandler   *button_handler;
-    PositionHandler *position_handler;
     const Drawable        *drawable;
     const Interactable    *interactable;
     const Dynamic         *dynamic;
+    ButtonHandler         *button_handler;
+    PositionHandler       *position_handler;
+    Updateable            *updateable;
 } ObjectInterfaces;
 
 // Interface macros
@@ -318,6 +325,16 @@ typedef struct ObjectInterfaces {
 #define GET_RESTORE_COORDS(object) \
     (POSITION_HANDLER(object)->restore_coords)
 
+// Updateable macros
+#define UPDATEABLE(object) \
+    (HAS_CAPABILITY(object, requires_update))
+
+#define UPDATE_HANDLER(object) \
+    GET_INTERFACE(object, updateable)
+
+#define UPDATE(object) \
+    (UPDATE_HANDLER(object)->update(object, UPDATE_HANDLER(object)->context))
+
 // Screen related definitions
 // ------------------------
 
@@ -393,7 +410,7 @@ struct Screen {
  * Screen functions
  * Screen manipulation and drawing
  */
-Screen init_screen(void);
+Screen init_screen(Color background, Color foreground, wchar_t symbol);
 void print_screen(const Screen *screen);
 void add_separator(Screen *screen, int y, int x, Color background, Color foreground, wchar_t *borders);
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
@@ -519,8 +536,9 @@ typedef struct InterfaceValidator {
  * Main engine functionality
  */
 Core init_core(Map *map, Cursor *cursor, Screen *screen);
-void core_move(Core *core, Coords move);
+void core_local_move(Core *core, Coords move);
 void core_action(Core *core);
+void core_update(Core *core);
 void core_update_screen(Core *core);
 void core_global_move(Core *core, Coords move);
 void core_validate_interfaces(Core *core);
@@ -538,6 +556,7 @@ void print_cursor(Cursor *cursor, Screen *screen);
  * Map manipulation and object access
  */
 void map_move(Map *map, Coords move);
+MapObject map_get_object(Map *map, Coords coords);
 MapObject map_get_current_object(Map *map);
 
 /*

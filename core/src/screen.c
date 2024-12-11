@@ -83,14 +83,14 @@ const char *get_background(Color color) {
  * Initialize empty screen
  * Creates screen structure with cleared buffers
  */
-Screen init_screen(void) {
+Screen init_screen(Color background, Color foreground, wchar_t symbol) {
     Screen screen;
 
     for (int i = 0; i < SCREEN_HEIGHT; i++) {
         for (int j = 0; j < SCREEN_WIDTH; j++) {
-            screen.background[i][j] = COLOR_BLACK;
-            screen.data[i][j] = ' ';
-            screen.foreground[i][j] = COLOR_RESET;
+            screen.background[i][j] = background;
+            screen.data[i][j] = symbol;
+            screen.foreground[i][j] = foreground;
         }
     }
 

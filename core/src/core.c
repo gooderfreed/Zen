@@ -37,10 +37,10 @@ Core init_core(Map *map, Cursor *cursor, Screen *screen) {
 }
 
 /*
- * Handle cursor movement request
+ * Handle cursor movement request in current object
  * Moves cursor if target object is interactable and allows movement
  */
-void core_move(Core *core, Coords move) {
+void core_local_move(Core *core, Coords move) {
     Cursor *cursor = core->cursor;
     if (!INTERACTABLE(cursor->subject)) return;
 
@@ -66,6 +66,7 @@ void core_action(Core *core) {
     // Handle button press if cursor is on a button
     if (is_button(cursor->subject, cursor->coords)) {
         handle_button(cursor->subject, cursor->coords);
+        core_update(core);
         return;
     }
 
@@ -77,10 +78,9 @@ void core_action(Core *core) {
         if (cursor->subject == cursor->cards->source &&
             IS_SAME_CARD(cursor->subject, cursor->coords, first_card)) {
             SELECT_CARDS(cursor->subject, cursor->coords, cursor->cards);
-            return;
         }
         // Move cards if source can give and target can take
-        if (CAN_GIVE_CARDS(cursor->cards->source) && 
+        else if (CAN_GIVE_CARDS(cursor->cards->source) && 
                  CAN_TAKE_CARDS(cursor->subject) &&
                  CAN_PLACE_CARDS(cursor->subject, cursor->coords, cursor->cards)) {
             GET_CARDS(cursor->cards->source, cursor->cards);
@@ -89,8 +89,11 @@ void core_action(Core *core) {
     }
     // Select cards if no cards are currently selected
     else {
-        SELECT_CARDS(cursor->subject, cursor->coords, cursor->cards);
+        if (CAN_GIVE_CARDS(cursor->subject)) {
+            SELECT_CARDS(cursor->subject, cursor->coords, cursor->cards);
+        }
     }
+    core_update(core);
 }
 
 /*
@@ -148,12 +151,32 @@ void core_global_move(Core *core, Coords move) {
 void core_free(Core *core) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            void *target_struct = core->map->objects[y][x].object;
-            if (!target_struct) continue;
+            MapObject object = core->map->objects[y][x];
+            if (!object.object) continue;
 
-            if (DYNAMIC(target_struct)) {
-                FREE(target_struct);
+            if (DYNAMIC(object.object)) {
+                FREE(object.object);
             }
+        }
+    }
+}
+
+/*
+ * Update all objects on map
+ * Calls update for each object
+ */
+void core_update(Core *core) {
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            MapObject object = core->map->objects[y][x];
+            if (!object.object) continue;
+
+            if (UPDATEABLE(object.object)) {
+                UPDATE(object.object);
+            }
+            //     ObjectInterfaces *interfaces = (ObjectInterfaces *)object.object;
+            //     interfaces->updateable->update(object.object, interfaces->updateable->context);
+            // }
         }
     }
 }
@@ -166,10 +189,10 @@ void core_free(Core *core) {
 void core_validate_interfaces(Core *core) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            void *target_struct = core->map->objects[y][x].object;
-            if (!target_struct) continue;
+            MapObject object = core->map->objects[y][x];
+            if (!object.object) continue;
             
-            ObjectInterfaces *interfaces = (ObjectInterfaces*)target_struct;
+            ObjectInterfaces *interfaces = (ObjectInterfaces*)object.object;
             if (!validate_object_interfaces(interfaces)) {
                 exit(1);
             }

@@ -112,6 +112,7 @@ static void get_cards_in_field(void *field_pointer, Container *container) {
  */
 static void select_cards_in_field(void *field_pointer, Coords cursor_coords, Container *container) {
     Field *field = (Field *)field_pointer;
+    // If container is not empty, clear it
     if (!container_is_empty(container)) {
         while (!container_is_empty(container)) {
             ((Card *)container_pop_element(container))->selected = false;
@@ -119,24 +120,50 @@ static void select_cards_in_field(void *field_pointer, Coords cursor_coords, Con
         return;
     }
 
+    // Select cards in field
     for (int i = cursor_coords.y; field->field[i][cursor_coords.x] && i < FIELD_HEIGHT; ++i) {
-        field->field[i][cursor_coords.x]->selected = true;
-        container_add_element(container, field->field[i][cursor_coords.x]);
+        Card *current_card = field->field[i][cursor_coords.x];
+        Card *next_card = (i + 1 < FIELD_HEIGHT) ? field->field[i + 1][cursor_coords.x] : NULL;
+
+        // If move is valid, select card
+        if (!next_card ||
+            (current_card->numeral - next_card->numeral == 1 && 
+            current_card->suit - next_card->suit % 2 != 0)) {
+            current_card->selected = true;
+            container_add_element(container, current_card);
+        }
+        else {
+            // If move is not valid, clear container
+            while (!container_is_empty(container)) {
+                ((Card *)container_pop_element(container))->selected = false;
+            }
+            return;
+        }
     }
     container_set_source(container, field_pointer);
 }
 
 /*
  * Check if cursor can place cards in field
- * Checks if there is enough space and if the target card is not selected
+ * Checks if move is valid
  */
 static bool can_place_in_field(void *field_pointer, Coords cursor_coords, Container *container) {
     Field *field = (Field *)field_pointer;
 
-    return (cursor_coords.y + container->size < FIELD_HEIGHT && 
-            field->field[cursor_coords.y + 1][cursor_coords.x] == NULL && 
-            (field->field[cursor_coords.y][cursor_coords.x] == NULL || 
-            !field->field[cursor_coords.y][cursor_coords.x]->selected));
+    if (cursor_coords.y + container->size >= FIELD_HEIGHT) return false;
+    if (field->field[cursor_coords.y + 1][cursor_coords.x] != NULL) return false;
+    if (field->field[cursor_coords.y][cursor_coords.x] != NULL && field->field[cursor_coords.y][cursor_coords.x]->selected) return false;
+
+    Card *card = (Card *)container_get_element(container, 0);
+    if (field->field[cursor_coords.y][cursor_coords.x] == NULL) {
+        if (card->numeral != King) return false;
+    }
+    else {
+        if (field->field[cursor_coords.y][cursor_coords.x]->suit - card->suit % 2 == 0) return false;
+        if (field->field[cursor_coords.y][cursor_coords.x]->numeral - card->numeral != 1) return false;
+    }
+    
+    return true;
 }
 
 /*

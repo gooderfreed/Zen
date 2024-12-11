@@ -40,12 +40,19 @@ int main(void) {
     hide_cursor();
     clear();
 
-    Container cursor_cards = container_init();
     Deck   deck   = generate_deck();
     Field  field  = init_field(&deck); // TODO: change deck get_card method
+
     Stock  stock  = init_stock();
-    Screen screen = init_screen();
+    StockContext stock_context = {
+        .deck = &deck,
+        .field = &field
+    };
+    stock.interfaces.updateable->context = &stock_context;
+
+    Screen screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
     
+    Container cursor_cards = container_init();
     set_button_context(BUTTON_HANDLER(&deck), 0, &cursor_cards);
 
     #ifndef DEBUG
@@ -80,14 +87,14 @@ int main(void) {
                 show_cursor();
                 core_free(&core);
                 restore_terminal_settings();
-                exit(0);
-            case L'a': case L'ф': core_move(&core, CURSOR_LEFT);            break;
-            case L'd': case L'в': core_move(&core, CURSOR_RIGHT);           break;
-            case L'w': case L'ц': core_move(&core, CURSOR_UP);              break;
-            case L's': case L'ы': case L'і': core_move(&core, CURSOR_DOWN); break;
-            case KEY_SPACE: case KEY_ENTER: core_action(&core);             break;
-            case KEY_CTRL_A: core_global_move(&core, CURSOR_LEFT);          break;
-            case KEY_CTRL_D: core_global_move(&core, CURSOR_RIGHT);         break;
+                return 0;
+            case L'a': case L'ф': core_local_move(&core, CURSOR_LEFT);            break;
+            case L'd': case L'в': core_local_move(&core, CURSOR_RIGHT);           break;
+            case L'w': case L'ц': core_local_move(&core, CURSOR_UP);              break;
+            case L's': case L'ы': case L'і': core_local_move(&core, CURSOR_DOWN); break;
+            case KEY_SPACE: case KEY_ENTER: core_action(&core);                   break;
+            case KEY_CTRL_A: core_global_move(&core, CURSOR_LEFT);                break;
+            case KEY_CTRL_D: core_global_move(&core, CURSOR_RIGHT);               break;
             default: need_screen_update = false;
         }
 

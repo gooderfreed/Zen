@@ -51,3 +51,11 @@ void map_move(Map *map, Coords move) {
 MapObject map_get_current_object(Map *map) {
     return map->objects[map->global_coords.y][map->global_coords.x];
 } 
+
+/*
+ * Get object at position
+ * Returns MapObject structure containing object data
+ */
+MapObject map_get_object(Map *map, Coords coords) {
+    return map->objects[coords.y][coords.x];
+} 
