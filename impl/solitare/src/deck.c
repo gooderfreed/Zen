@@ -28,12 +28,15 @@ static void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor)
     (void) cursor;
     Deck *deck = (Deck *)deck_pointer;
     fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, DECK_OFFSET - 1, 2 * CARD_WIDTH, L' ', COLOR_GREEN, COLOR_RESET);
-    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░', COLOR_RESET, COLOR_RESET);
-    add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
-    
-    if (deck->pointer) 
+    if (deck->pointer) {
         print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
-    else add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
+        fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░', COLOR_RESET, COLOR_RESET);
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
+    }
+    else {
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
+    }
 }
 
 /*
@@ -69,7 +72,7 @@ static void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coord
 static void handle_next_card_button(void *deck_pointer, void *context) {
     next_card((Deck *)deck_pointer);
     Container *container = (Container *)context;
-    if (container->size > 0) {
+    if (container->size > 0 && ((Deck *)deck_pointer)->pointer) {
         while (!container_is_empty(container)) {
             Card *card = (Card *)container_pop_element(container);
             card->selected = false;
@@ -118,6 +121,22 @@ static bool is_same_card_in_deck(void *deck_pointer, Coords cursor_coords, Card 
     (void)cursor_coords;
     Deck *deck = (Deck *)deck_pointer;
     return deck->pointer == card;
+}
+
+/*
+ * Shuffle deck array using Fisher-Yates algorithm
+ * Randomly permutes all cards in the deck
+ */
+static void deck_shuffle(Deck *deck) {
+    for (int i = DECK_SIZE - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        
+        Card temp = deck->deck[i];
+        deck->deck[i] = deck->deck[j];
+        deck->deck[j] = temp;
+    }
+    
+    deck->pointer = &deck->deck[0];
 }
 
 /*
@@ -188,6 +207,7 @@ Deck generate_deck(void) {
         .interactable   = &interactable,
     };
 
+    deck_shuffle(&deck);
     return deck;
 }
 
@@ -197,6 +217,7 @@ Deck generate_deck(void) {
  */
 void next_card(Deck *deck) {
     Card *start = deck->pointer;
+    if (start == NULL) return;
 
     do {
         deck->pointer++;

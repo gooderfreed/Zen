@@ -79,7 +79,8 @@ typedef struct Card {
     Numeral numeral;    // Card value (Ace through King)
     Suit suit;          // Card suit (Spades, Hearts, etc)
     Objects object;     // Owner object type
-    bool selected;      // Selection state
+    bool selected : 1;  // Selection state
+    bool hidden   : 1;  // Hidden state
 } Card;
 
 /*
@@ -123,7 +124,8 @@ typedef struct StockContext {
 
 //field
 Field init_field(Deck *deck);
-
+int get_last_card_y(const Field *field, int x);
+bool is_card_useful_for_field(Field *field, Card *card);
 //stock
 Stock init_stock(void);
 

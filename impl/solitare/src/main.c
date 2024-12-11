@@ -39,6 +39,7 @@ int main(void) {
     setlocale(LC_ALL, "");
     hide_cursor();
     clear();
+    srand((unsigned int)time(NULL));
 
     Deck   deck   = generate_deck();
     Field  field  = init_field(&deck); // TODO: change deck get_card method

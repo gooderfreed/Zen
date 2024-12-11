@@ -59,7 +59,7 @@ static void print_field(void *field_pointer, Screen *screen, const Cursor *hover
  * Get last card y position in field
  * Finds the highest y position of a card in the specified column
  */
-static int get_last_card_y(const Field *field, int x) {
+int get_last_card_y(const Field *field, int x) {
     for (int i = FIELD_HEIGHT - 1; i >= 0; --i)
         if (field->field[i][x]) return i;
     return 0;
@@ -88,7 +88,7 @@ static void move_in_field(void *field_pointer, Coords *coords, Coords delta) {
     Field *field = (Field *)field_pointer;
 
     coords->x = (new_x + FIELD_WIDTH) % FIELD_WIDTH;
-    if (new_y >= 0 && new_y < FIELD_HEIGHT && field->field[new_y][coords->x]) coords->y = new_y;
+    if (new_y >= 0 && new_y < FIELD_HEIGHT && field->field[new_y][coords->x] && !field->field[new_y][coords->x]->hidden) coords->y = new_y;
     if (delta.y == 0) coords->y = (short)get_last_card_y(field, coords->x);
 }
 
@@ -103,6 +103,8 @@ static void get_cards_in_field(void *field_pointer, Container *container) {
         Card *card = (Card *)container_get_element(container, i);
         card->selected = false;
         field->field[card->coords.y][card->coords.x] = NULL;
+        if (card->coords.y - 1 >= 0 && field->field[card->coords.y - 1][card->coords.x]) 
+            field->field[card->coords.y - 1][card->coords.x]->hidden = false;
     }
 }
 
@@ -155,12 +157,13 @@ static bool can_place_in_field(void *field_pointer, Coords cursor_coords, Contai
     if (field->field[cursor_coords.y][cursor_coords.x] != NULL && field->field[cursor_coords.y][cursor_coords.x]->selected) return false;
 
     Card *card = (Card *)container_get_element(container, 0);
-    if (field->field[cursor_coords.y][cursor_coords.x] == NULL) {
+    Card *target_card = field->field[cursor_coords.y][cursor_coords.x];
+    if (target_card == NULL) {
         if (card->numeral != King) return false;
     }
     else {
-        if (field->field[cursor_coords.y][cursor_coords.x]->suit - card->suit % 2 == 0) return false;
-        if (field->field[cursor_coords.y][cursor_coords.x]->numeral - card->numeral != 1) return false;
+        if (target_card->suit % 2 == card->suit % 2) return false;
+        if (target_card->numeral - card->numeral != 1) return false;
     }
     
     return true;
@@ -209,6 +212,25 @@ static void restore_pos_in_field(void *field_pointer, Coords *current_coords) {
     Field *field = (Field *)field_pointer;
     current_coords->x = GET_RESTORE_COORDS(field).x;
     current_coords->y = (short)get_last_card_y(field, current_coords->x);
+}
+
+/*
+ * Check if card is useful for field
+ * Checks if card can be placed in field
+ */
+bool is_card_useful_for_field(Field *field, Card *card) {
+    for (int x = 0; x < FIELD_WIDTH; x++) {
+        int y = get_last_card_y(field, x);
+        Card *target = field->field[y][x];
+        if (!target) continue;
+        
+        Container container = {0};
+        container_add_element(&container, card);
+        if (can_place_in_field(field, (Coords) {.x = (short)x, .y = (short)(y)}, &container)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /*
@@ -266,6 +288,7 @@ Field init_field(Deck *deck) {
                 card->coords.x = row;
                 card->coords.y = col;
                 card->object = Field_enum;
+                card->hidden = col == row ? false : true;
                 field.field[col][row] = card;
             }
         }

@@ -69,22 +69,42 @@ static void place_cursor_in_stock(void *stock_pointer, Coords cursor_coords, Coo
 }
 
 /*
+ * Check if a card can be placed in the stock pile
+ * Ensures the card is of the correct suit and follows the foundation pile rules
+ */
+static bool can_place_in_stock_pile(Stock *stock, Card *card) {
+    if (!stock->top_cards[card->suit]) {
+        if (card->numeral != Ace) return false;
+    }
+    else if (card->numeral - stock->top_cards[card->suit]->numeral != 1) return false;
+
+    return true;
+}
+
+/*
  * Check if a card can be placed in the stock
  * Ensures the card is of the correct suit and follows the foundation pile rules
  */
 static bool can_place_in_stock(void *stock_pointer, Coords cursor_coords, Container *container) {
+    (void)cursor_coords;
     Stock *stock = (Stock *)stock_pointer;
     if (container->size != 1) return false;
 
     Card *card = container_get_element(container, 0);
     if (card->suit != (Suit)cursor_coords.x) return false;
 
-    if (!stock->top_cards[card->suit]) {
-        if (card->numeral != Ace) return false;
-    }
-    else if (card->numeral != stock->top_cards[card->suit]->numeral + 1) return false;
+    return can_place_in_stock_pile(stock, card);
+}
 
-    return true;
+/*
+ * Place a card in the stock pile
+ * Updates the stock with the new card and adjusts the top card pointer
+ */
+static void place_card_in_stock_pile(Stock *stock, Card *card) {
+    card->object = Stock_enum;
+    card->selected = false;
+    stock->stock[card->suit][card->numeral - 1] = card;
+    stock->top_cards[card->suit] = card;
 }
 
 /*
@@ -97,8 +117,7 @@ static void place_cards_in_stock(void *stock_pointer, Coords cursor_coords, Cont
     Stock *stock = (Stock *)stock_pointer;
     Card *card = container_pop_element(container);
 
-    stock->stock[card->suit][card->numeral] = card;
-    stock->top_cards[card->suit] = card;
+    place_card_in_stock_pile(stock, card);
 }
 
 /*
@@ -111,6 +130,28 @@ static void save_current_pos_in_stock(void *stock_pointer, Coords current_coords
 }
 
 /*
+ * Check if a card can be placed in the stock
+ * Ensures that stock is balanced
+ */
+static bool is_stock_balanced(Stock *stock, Card *card) {
+    int min_value = King;
+    int max_value = Ace;
+    for (int suit = Ace; suit < CARD_SUITS; suit++) {
+        int value = 0;
+        if (stock->top_cards[suit]) {
+            value = stock->top_cards[suit]->numeral;
+        }
+        min_value = (min_value < value) ? min_value : value;
+        max_value = (max_value > value) ? max_value : value;
+    }
+    
+    if (card->numeral > min_value + 2) return false;
+    if (card->numeral - min_value == 2 && card->numeral == max_value) return false;
+    
+    return true;
+}
+
+/*
  * Restore position in stock
  * Sets restore coordinates to current coordinates
  */
@@ -119,18 +160,55 @@ static void restore_pos_in_stock(void *stock_pointer, Coords *current_coords) {
     *current_coords = GET_RESTORE_COORDS(stock);
 }
 
+
+/*
+ * Update stock
+ * Places cards from deck and field into stock
+ */
 static void update_stock(void *stock_pointer, void *context) {
     Stock *stock = (Stock *)stock_pointer;
     StockContext *stock_context = (StockContext *)context;
 
-    (void)stock;
-    wprintf(L"update_stock\n");
-
     if (stock_context->deck->pointer == NULL) return;
+    
+    // Place cards from deck to stock
+    bool can_place_from_stock = true;
+    while (can_place_from_stock) {
+        Card *target = stock_context->deck->pointer;
+        if (can_place_in_stock_pile(stock, target)
+            && !is_card_useful_for_field(stock_context->field, target)
+            && is_stock_balanced(stock, target)
+            ) {
+            place_card_in_stock_pile(stock, target);
+            next_card(stock_context->deck);
+        }
+        else {
+            can_place_from_stock = false;
+        }
+    }
 
-    // Card *card = draw_card(stock_context->deck);
-    // stock->stock[card->suit][card->numeral] = card;
-    // stock->top_cards[card->suit] = card;
+    // Place cards from field to stock
+    Field *field = (Field *)stock_context->field;
+    bool can_place_from_field = true;
+    while (can_place_from_field) {
+        can_place_from_field = false;
+        for (int x = 0; x < FIELD_WIDTH; x++) {
+            int y = get_last_card_y(field, x);
+            Card *target = field->field[y][x];
+            if (!target) continue;
+            
+            if (can_place_in_stock_pile(stock, target)
+                && !is_card_useful_for_field(field, target)
+                && is_stock_balanced(stock, target)) {
+                place_card_in_stock_pile(stock, target);
+                field->field[y][x] = NULL;
+                if (y - 1 >= 0 && field->field[y - 1][x]) {
+                    field->field[y - 1][x]->hidden = false;
+                }
+                can_place_from_field = true;
+            }
+        }
+    }
 }
 
 /*
@@ -168,17 +246,17 @@ Stock init_stock(void) {
     };
 
     stock.interfaces = (ObjectInterfaces) {
-        .name           = "Stock",
-        .capabilities = {
+        .name             = "Stock",
+        .capabilities     = {
             .is_drawable     = true,
             .is_interactable = true,
             .can_hold_cards  = true,
             .is_positionable = true,
             .requires_update = true
         },
-        .drawable       = &drawable,
-        .interactable   = &interactable,
-        .card_handler   = &card_handler,
+        .drawable         = &drawable,
+        .interactable     = &interactable,
+        .card_handler     = &card_handler,
         .position_handler = &position_handler,
         .updateable       = &updateable
     };
