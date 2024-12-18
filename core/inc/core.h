@@ -93,10 +93,10 @@ typedef struct Container {
 #ifndef CUSTOM_CONTAINER_IMPL
     void container_add_element(Container *container, void *element);
     void container_clear_container(Container *container);
-    bool container_is_empty(Container *container);
+    bool container_is_empty(const Container *container);
     void container_set_source(Container *container, void *source);
     void *container_pop_element(Container *container);
-    void *container_get_element(Container *container, int index);
+    void *container_get_element(const Container *container, const int index);
     #ifndef CONTAINER_DYNAMIC
         Container container_init(void);
     #else
@@ -113,7 +113,7 @@ typedef struct Container {
  * Implementations must provide print method
  */
 typedef struct {
-    void (*print)(void *, Screen *, const Cursor *);
+    void (*print)(const void *, Screen *, const Cursor *);
 } Drawable;
 
 /*
@@ -121,8 +121,8 @@ typedef struct {
  * Provides cursor placement and movement capabilities
  */
 typedef struct {
-    void (*place_cursor)(void *, Coords, Coords *);
-    void (*move)(void *, Coords *, Coords);
+    void (*place_cursor)(const void *self, const Coords, Coords *);
+    void (*move)(const void *self, Coords *, const Coords);
 } Interactable;
 
 /*
@@ -133,11 +133,12 @@ typedef struct {
     bool can_give_cards : 1;
     bool can_take_cards : 1;
 
-    void (*select_cards)(void *self, Coords, Container *);
-    void (*get_cards)(void *self, Container *);
-    void (*place_cards)(void *self, Coords, Container *);
-    bool (*can_place)(void *self, Coords, Container *);
-    bool (*is_same_card)(void *self, Coords, Card *);
+    void (*select_cards)(void       *self, const Coords, Container *);
+    void (*place_cards) (void       *self, const Coords, Container *);
+    void (*get_cards)   (void       *self,               Container *);
+
+    bool (*can_place)   (const void *self, const Coords, const Container *);
+    bool (*is_same_card)(const void *self, const Coords, const Card *);
 } CardHandler;
 
 /*
@@ -412,7 +413,7 @@ struct Screen {
  */
 Screen init_screen(Color background, Color foreground, wchar_t symbol);
 void print_screen(const Screen *screen);
-void add_separator(Screen *screen, int y, int x, Color background, Color foreground, wchar_t *borders);
+void add_separator(Screen *screen, int y, int x, Color background, Color foreground, const wchar_t *borders);
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
 void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
 #endif

@@ -24,9 +24,9 @@
  * Draw stock piles on screen
  * Shows foundation piles for each suit with top cards
  */
-static void print_stock(void *stock_pointer, Screen *screen, const Cursor *cursor) {
+static void print_stock(const void *stock_pointer, Screen *screen, const Cursor *cursor) {
     (void)cursor;
-    Stock *stock = (Stock *)stock_pointer;
+    const Stock *stock = (const Stock *)stock_pointer;
     
     fill_area(screen, BORDER_OFFSET_X, STOCK_X_BASE, STOCK_AREA_HEIGHT, STOCK_AREA_WIDTH, L' ', COLOR_GREEN, COLOR_RESET);
 
@@ -48,7 +48,7 @@ static void print_stock(void *stock_pointer, Screen *screen, const Cursor *curso
  * Handle cursor movement in stock area
  * Allows horizontal movement between foundation piles
  */
-static void move_in_stock(void *stock_pointer, Coords *coords, Coords delta) {
+static void move_in_stock(const void *stock_pointer, Coords *coords, const Coords delta) {
     (void)stock_pointer;
     
     if (delta.y != 0) return;
@@ -61,7 +61,7 @@ static void move_in_stock(void *stock_pointer, Coords *coords, Coords delta) {
  * Position cursor relative to stock piles
  * Places cursor at bottom of selected foundation pile
  */
-static void place_cursor_in_stock(void *stock_pointer, Coords cursor_coords, Coords *target_coords) {
+static void place_cursor_in_stock(const void *stock_pointer, const Coords cursor_coords, Coords *target_coords) {
     (void)stock_pointer;
     
     target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
@@ -72,7 +72,7 @@ static void place_cursor_in_stock(void *stock_pointer, Coords cursor_coords, Coo
  * Check if a card can be placed in the stock pile
  * Ensures the card is of the correct suit and follows the foundation pile rules
  */
-static bool can_place_in_stock_pile(Stock *stock, Card *card) {
+static bool can_place_in_stock_pile(const Stock *stock, const Card *card) {
     if (!stock->top_cards[card->suit]) {
         if (card->numeral != Ace) return false;
     }
@@ -85,9 +85,9 @@ static bool can_place_in_stock_pile(Stock *stock, Card *card) {
  * Check if a card can be placed in the stock
  * Ensures the card is of the correct suit and follows the foundation pile rules
  */
-static bool can_place_in_stock(void *stock_pointer, Coords cursor_coords, Container *container) {
+static bool can_place_in_stock(const void *stock_pointer, const Coords cursor_coords, const Container *container) {
     (void)cursor_coords;
-    Stock *stock = (Stock *)stock_pointer;
+    const Stock *stock = (const Stock *)stock_pointer;
     if (container->size != 1) return false;
 
     Card *card = container_get_element(container, 0);
@@ -168,6 +168,7 @@ static void restore_pos_in_stock(void *stock_pointer, Coords *current_coords) {
 static void update_stock(void *stock_pointer, void *context) {
     Stock *stock = (Stock *)stock_pointer;
     StockContext *stock_context = (StockContext *)context;
+    bool aggressive = false;
 
     if (stock_context->deck->pointer == NULL) return;
     
@@ -176,11 +177,15 @@ static void update_stock(void *stock_pointer, void *context) {
     while (can_place_from_stock) {
         Card *target = stock_context->deck->pointer;
         if (can_place_in_stock_pile(stock, target)
-            && !is_card_useful_for_field(stock_context->field, target)
-            && is_stock_balanced(stock, target)
-            ) {
+            && (aggressive || !is_card_useful_for_field(stock_context->field, target))
+            && is_stock_balanced(stock, target)) {
+            
+            if (target->selected && !container_is_empty(stock_context->cursor_container)) {
+                container_pop_element(stock_context->cursor_container);
+            }
             place_card_in_stock_pile(stock, target);
             next_card(stock_context->deck);
+            if (!have_hidden_cards(stock_context->deck)) aggressive = true;
         }
         else {
             can_place_from_stock = false;
@@ -198,13 +203,25 @@ static void update_stock(void *stock_pointer, void *context) {
             if (!target) continue;
             
             if (can_place_in_stock_pile(stock, target)
-                && !is_card_useful_for_field(field, target)
+                && (aggressive || !is_card_useful_for_field(field, target))
                 && is_stock_balanced(stock, target)) {
                 place_card_in_stock_pile(stock, target);
+
+                for (int i = 0; i < stock_context->cursor_container->size; i++) {
+                    Card *card = container_get_element(stock_context->cursor_container, i);
+                    if (!card) break;
+
+                    if (target == card) {
+                        container_pop_element(stock_context->cursor_container);
+                        break;
+                    }
+                }
+
                 field->field[y][x] = NULL;
                 if (y - 1 >= 0 && field->field[y - 1][x]) {
                     field->field[y - 1][x]->hidden = false;
                 }
+                if (!have_hidden_cards(stock_context->deck)) aggressive = true;
                 can_place_from_field = true;
             }
         }

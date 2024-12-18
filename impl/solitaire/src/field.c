@@ -24,8 +24,8 @@
  * Print field content to screen
  * Draws the field with cards and borders
  */
-static void print_field(void *field_pointer, Screen *screen, const Cursor *hovered_card) {
-    Field *field = (Field *)field_pointer;
+static void print_field(const void *field_pointer, Screen *screen, const Cursor *hovered_card) {
+    const Field *field = (const Field *)field_pointer;
     int contentHeight = 2 * FIELD_HEIGHT - 1 + CARD_HEIGHT - 2;
     int contentWidth = SCREEN_WIDTH - BORDER_OFFSET_X - 1;
 
@@ -69,8 +69,8 @@ int get_last_card_y(const Field *field, int x) {
  * Place cursor in field
  * Calculates target coordinates based on cursor position and updates them
  */
-static void place_cursor_in_field(void *field_pointer, Coords cursor_coords, Coords *target_coords) {
-    Field *field = (Field *)field_pointer;
+static void place_cursor_in_field(const void *field_pointer, const Coords cursor_coords, Coords *target_coords) {
+    const Field *field = (const Field *)field_pointer;
     int part = BORDER_OFFSET_Y + 1 + cursor_coords.y * 2 + BORDER_OFFSET_Y;
     bool is_last_card = FIELD_HEIGHT == cursor_coords.y || !field->field[cursor_coords.y + 1][cursor_coords.x];
 
@@ -82,7 +82,7 @@ static void place_cursor_in_field(void *field_pointer, Coords cursor_coords, Coo
  * Move cursor in field
  * Updates cursor coordinates based on delta and ensures they are within valid bounds
  */
-static void move_in_field(void *field_pointer, Coords *coords, Coords delta) {
+static void move_in_field(const void *field_pointer, Coords *coords, const Coords delta) {
     short new_x = coords->x + delta.x;
     short new_y = coords->y + delta.y;
     Field *field = (Field *)field_pointer;
@@ -149,8 +149,8 @@ static void select_cards_in_field(void *field_pointer, Coords cursor_coords, Con
  * Check if cursor can place cards in field
  * Checks if move is valid
  */
-static bool can_place_in_field(void *field_pointer, Coords cursor_coords, Container *container) {
-    Field *field = (Field *)field_pointer;
+static bool can_place_in_field(const void *field_pointer, const Coords cursor_coords, const Container *container) {
+    const Field *field = (const Field *)field_pointer;
 
     if (cursor_coords.y + container->size >= FIELD_HEIGHT) return false;
     if (field->field[cursor_coords.y + 1][cursor_coords.x] != NULL) return false;
@@ -190,8 +190,8 @@ static void place_cards_in_field(void *field_pointer, Coords cursor_coord, Conta
  * Check if cursor is on the same card in field
  * Compares cursor position to field card
  */
-static bool is_same_card_in_field(void *field_pointer, Coords cursor_coords, Card *card) {
-    Field *field = (Field *)field_pointer;
+static bool is_same_card_in_field(const void *field_pointer, const Coords cursor_coords, const Card *card) {
+    const Field *field = (const Field *)field_pointer;
     return field->field[cursor_coords.y][cursor_coords.x] == card;
 }
 
@@ -218,15 +218,15 @@ static void restore_pos_in_field(void *field_pointer, Coords *current_coords) {
  * Check if card is useful for field
  * Checks if card can be placed in field
  */
-bool is_card_useful_for_field(Field *field, Card *card) {
+bool is_card_useful_for_field(const Field *field, const Card *card) {
     for (int x = 0; x < FIELD_WIDTH; x++) {
         int y = get_last_card_y(field, x);
         Card *target = field->field[y][x];
         if (!target) continue;
         
         Container container = {0};
-        container_add_element(&container, card);
-        if (can_place_in_field(field, (Coords) {.x = (short)x, .y = (short)(y)}, &container)) {
+        container_add_element(&container, (Card *)card);
+        if (can_place_in_field((Field *)field, (Coords) {.x = (short)x, .y = (short)(y)}, &container)) {
             return true;
         }
     }

@@ -24,9 +24,9 @@
  * Draw deck on screen
  * Shows deck pile and current top card
  */
-static void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor) {
+static void print_deck(const void *deck_pointer, Screen *screen, const Cursor *cursor) {
+    const Deck *deck = (const Deck *)deck_pointer;
     (void) cursor;
-    Deck *deck = (Deck *)deck_pointer;
     fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, DECK_OFFSET - 1, 2 * CARD_WIDTH, L' ', COLOR_GREEN, COLOR_RESET);
     if (deck->pointer) {
         print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
@@ -43,7 +43,7 @@ static void print_deck(void *deck_pointer, Screen *screen, const Cursor *cursor)
  * Handle cursor movement in deck area
  * Restricts movement to horizontal only between deck and current card
  */
-static void move_in_deck(void *deck_pointer, Coords *coords, Coords delta) {
+static void move_in_deck(const void *deck_pointer, Coords *coords, const Coords delta) {
     (void)deck_pointer;
     
     if (delta.y != 0) return;
@@ -58,7 +58,7 @@ static void move_in_deck(void *deck_pointer, Coords *coords, Coords delta) {
  * Position cursor relative to deck elements
  * Places cursor at bottom of deck or current card
  */
-static void place_cursor_in_deck(void *deck_pointer, Coords cursor_coords, Coords *target_coords) {
+static void place_cursor_in_deck(const void *deck_pointer, const Coords cursor_coords, Coords *target_coords) {
     (void)deck_pointer;
     
     target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
@@ -84,7 +84,7 @@ static void handle_next_card_button(void *deck_pointer, void *context) {
  * Select card in deck
  * Adds selected card to container and marks it as selected
  */
-static void select_card_in_deck(void *deck_pointer, Coords cursor_coords, Container *container) {
+static void select_card_in_deck(void *deck_pointer, const Coords cursor_coords, Container *container) {
     Deck *deck = (Deck *)deck_pointer;
     (void)cursor_coords;
 
@@ -117,9 +117,9 @@ static void get_card_in_deck(void *deck_pointer, Container *container) {
  * Check if cursor is on the same card in deck
  * Compares cursor position to deck pointer
  */
-static bool is_same_card_in_deck(void *deck_pointer, Coords cursor_coords, Card *card) {
+static bool is_same_card_in_deck(const void *deck_pointer, const Coords cursor_coords, const Card *card) {
     (void)cursor_coords;
-    Deck *deck = (Deck *)deck_pointer;
+    const Deck *deck = (const Deck *)deck_pointer;
     return deck->pointer == card;
 }
 
@@ -224,7 +224,8 @@ void next_card(Deck *deck) {
 
         if (deck->pointer >= &deck->deck[DECK_SIZE]) deck->pointer = &deck->deck[0];
         if (deck->pointer == start) {
-            deck->pointer = NULL;
+            if (deck->pointer->object != Deck_enum)
+                deck->pointer = NULL;
             break;
         }
     } while (deck->pointer->object != Deck_enum);
@@ -241,5 +242,16 @@ Card *draw_card(Deck *deck) {
     next_card(deck);
 
     return card;
+}
+
+/*
+ * Check if deck has hidden cards
+ * Iterates through deck and checks if any card is hidden
+ */
+bool have_hidden_cards(const Deck *deck) {
+    for (int i = 0; i < DECK_SIZE; i++) {
+        if (deck->deck[i].hidden) return true;
+    }
+    return false;
 }
 

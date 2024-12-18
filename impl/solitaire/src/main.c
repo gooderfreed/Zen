@@ -16,8 +16,6 @@
 
 #include "../inc/solitare.h"
 
-// #define DEBUG
-#ifndef DEBUG
 static void set_noncanonical_mode(void) {
     struct termios term;
     tcgetattr(STDIN_FILENO, &term);
@@ -33,7 +31,6 @@ static void restore_terminal_settings(void) {
     term.c_lflag |= ICANON | ECHO;
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
-#endif
 
 int main(void) {
     setlocale(LC_ALL, "");
@@ -41,22 +38,23 @@ int main(void) {
     clear();
     srand((unsigned int)time(NULL));
 
+    Container cursor_cards = container_init();
+    
     Deck   deck   = generate_deck();
     Field  field  = init_field(&deck); // TODO: change deck get_card method
 
     Stock  stock  = init_stock();
     StockContext stock_context = {
         .deck = &deck,
-        .field = &field
+        .field = &field,
+        .cursor_container = &cursor_cards
     };
     stock.interfaces.updateable->context = &stock_context;
 
     Screen screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
     
-    Container cursor_cards = container_init();
     set_button_context(BUTTON_HANDLER(&deck), 0, &cursor_cards);
 
-    #ifndef DEBUG
     Map map = {
         .objects = {
             {
@@ -104,5 +102,4 @@ int main(void) {
             need_screen_update = false;
         }
     }
-    #endif
 }

@@ -20,12 +20,12 @@
  * Arrays of card display elements
  * Used for converting card values to display text
  */
-char *numerals[] = {
+static const char *numerals[] = {
     " A", " 2", " 3", " 4", " 5", " 6",
     " 7", " 8", " 9", "10", " J", " Q", " K"
 };
 
-wchar_t suits[] = {
+static const wchar_t suits[] = {
     L'♠', L'♥', L'♣', L'♦'
 };
 
@@ -33,11 +33,11 @@ wchar_t suits[] = {
  * Border characters for screen elements
  * Used for drawing borders around cards and game areas
  */
-wchar_t fat_border[8] = {
+const wchar_t fat_border[8] = {
     L'═', L'║', L'╔', L'╗', L'╚', L'╝', L'╠', L'╣'
 };
 
-wchar_t card_border[8] = {
+const wchar_t card_border[8] = {
     L'─', L'│', L'┌', L'┐', L'└', L'┘', L'├', L'┤'
 };
 
@@ -45,7 +45,7 @@ wchar_t card_border[8] = {
  * Convert suit enum to display character
  * Returns Unicode character for card suit
  */
-wchar_t suit_to_text(Suit suit) {
+wchar_t suit_to_text(const Suit suit) {
     return suits[suit];
 }
 
@@ -53,7 +53,7 @@ wchar_t suit_to_text(Suit suit) {
  * Convert numeral enum to display text
  * Returns string representation of card value
  */
-char *numeral_to_text(Numeral numeral) {
+const char *numeral_to_text(const Numeral numeral) {
     return numerals[numeral - 1];
 }
 
@@ -96,7 +96,7 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
     screen->data[y_0 + CARD_HEIGHT / 2][x_0 + CARD_WIDTH / 2 - 1] = suit;
     screen->data[y_0 + CARD_HEIGHT - 2][x_0 + CARD_WIDTH - 3] = suit;
 
-    char *numeral = numeral_to_text(card->numeral);
+    const char *numeral = numeral_to_text(card->numeral);
     screen->data[y_0 + 1][x_0 + CARD_WIDTH - 3] = numeral[0];
     screen->data[y_0 + 1][x_0 + CARD_WIDTH - 2] = numeral[1];
     if (numeral[0] == ' ') {

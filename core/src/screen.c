@@ -131,7 +131,7 @@ void add_borders(Screen *screen, int y, int x, int height, int width, Color back
  * Add separator line to screen
  * Used for visual separation of screen areas
  */
-void add_separator(Screen *screen, int y, int x, Color background, Color foreground , wchar_t *borders) {
+void add_separator(Screen *screen, int y, int x, Color background, Color foreground , const wchar_t *borders) {
     for (int i = 0; i < SCREEN_WIDTH; ++i) {
         screen->background[y][x + i] = background;
         screen->data[y][x + i] = borders[0];

@@ -120,12 +120,13 @@ typedef struct Field {
 typedef struct StockContext {
     Deck *deck;
     Field *field;
+    Container *cursor_container;
 } StockContext;
 
 //field
 Field init_field(Deck *deck);
 int get_last_card_y(const Field *field, int x);
-bool is_card_useful_for_field(Field *field, Card *card);
+bool is_card_useful_for_field(const Field *field, const Card *card);
 //stock
 Stock init_stock(void);
 
@@ -133,12 +134,13 @@ Stock init_stock(void);
 Deck generate_deck(void);
 void next_card(Deck *deck);
 Card *draw_card(Deck *deck);
+bool have_hidden_cards(const Deck *deck);
 
 //card
-extern wchar_t fat_border[8];
-extern wchar_t card_border[8];
-wchar_t suit_to_text(Suit suit);
-char *numeral_to_text(Numeral numeral);
+extern const wchar_t fat_border[8];
+extern const wchar_t card_border[8];
+wchar_t suit_to_text(const Suit suit);
+const char *numeral_to_text(const Numeral numeral);
 void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x);
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
 

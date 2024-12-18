@@ -55,4 +55,4 @@ dkms.conf
 .vscode/
 
 # Projects executable
-impl/*/solitare
+impl/*/solitaire

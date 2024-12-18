@@ -45,7 +45,7 @@ make
 
 Go to the implementation directory
 ```bash
-cd impl/solitare
+cd impl/solitaire
 ```
 Build the project
 ```bash

@@ -38,7 +38,7 @@ void container_clear_container(Container *container) {
  * Check if container is empty
  * Returns true if container has no elements
  */
-inline bool container_is_empty(Container *container) {
+inline bool container_is_empty(const Container *container) {
     return container->size == 0;
 }
 
@@ -108,7 +108,7 @@ inline void container_set_source(Container *container, void *source) {
      * Get element from container
      * Returns element at specified index
      */
-    void *container_get_element(Container *container, int index) {
+    void *container_get_element(const Container *container, const int index) {
         if (index >= container->size) return NULL;
         return container->container[index];
     }
