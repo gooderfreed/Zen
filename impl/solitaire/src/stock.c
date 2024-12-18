@@ -160,6 +160,23 @@ static void restore_pos_in_stock(void *stock_pointer, Coords *current_coords) {
     *current_coords = GET_RESTORE_COORDS(stock);
 }
 
+/*
+ * Try to place a card in the stock
+ * Checks if the card can be placed in the stock and if it is balanced
+ */
+static bool try_place(Stock *stock, Card *target, Container *cursor_container) {
+    if (!target) return false;
+    if (can_place_in_stock_pile(stock, target)
+        && is_stock_balanced(stock, target)) {
+        
+        if (target->selected && !container_is_empty(cursor_container)) {
+            container_pop_element(cursor_container);
+        }
+        place_card_in_stock_pile(stock, target);
+        return true;
+    }
+    return false;
+}
 
 /*
  * Update stock
@@ -168,61 +185,28 @@ static void restore_pos_in_stock(void *stock_pointer, Coords *current_coords) {
 static void update_stock(void *stock_pointer, void *context) {
     Stock *stock = (Stock *)stock_pointer;
     StockContext *stock_context = (StockContext *)context;
-    bool aggressive = false;
-
-    if (stock_context->deck->pointer == NULL) return;
     
-    // Place cards from deck to stock
-    bool can_place_from_stock = true;
-    while (can_place_from_stock) {
-        Card *target = stock_context->deck->pointer;
-        if (can_place_in_stock_pile(stock, target)
-            && (aggressive || !is_card_useful_for_field(stock_context->field, target))
-            && is_stock_balanced(stock, target)) {
-            
-            if (target->selected && !container_is_empty(stock_context->cursor_container)) {
-                container_pop_element(stock_context->cursor_container);
-            }
-            place_card_in_stock_pile(stock, target);
-            next_card(stock_context->deck);
-            if (!have_hidden_cards(stock_context->deck)) aggressive = true;
-        }
-        else {
-            can_place_from_stock = false;
-        }
-    }
-
-    // Place cards from field to stock
+    Deck *deck = (Deck *)stock_context->deck;
     Field *field = (Field *)stock_context->field;
-    bool can_place_from_field = true;
-    while (can_place_from_field) {
-        can_place_from_field = false;
+
+    bool can_place = true;
+    while (can_place) {
+        can_place = false;
+        // Place cards from deck to stock
+        if (try_place(stock, deck->pointer, stock_context->cursor_container)) {
+            next_card(deck);
+            can_place = true;
+        }
+        // Place cards from field to stock
         for (int x = 0; x < FIELD_WIDTH; x++) {
             int y = get_last_card_y(field, x);
             Card *target = field->field[y][x];
-            if (!target) continue;
-            
-            if (can_place_in_stock_pile(stock, target)
-                && (aggressive || !is_card_useful_for_field(field, target))
-                && is_stock_balanced(stock, target)) {
-                place_card_in_stock_pile(stock, target);
-
-                for (int i = 0; i < stock_context->cursor_container->size; i++) {
-                    Card *card = container_get_element(stock_context->cursor_container, i);
-                    if (!card) break;
-
-                    if (target == card) {
-                        container_pop_element(stock_context->cursor_container);
-                        break;
-                    }
-                }
-
+            if (try_place(stock, target, stock_context->cursor_container)) {
                 field->field[y][x] = NULL;
                 if (y - 1 >= 0 && field->field[y - 1][x]) {
                     field->field[y - 1][x]->hidden = false;
                 }
-                if (!have_hidden_cards(stock_context->deck)) aggressive = true;
-                can_place_from_field = true;
+                can_place = true;
             }
         }
     }

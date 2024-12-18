@@ -215,25 +215,6 @@ static void restore_pos_in_field(void *field_pointer, Coords *current_coords) {
 }
 
 /*
- * Check if card is useful for field
- * Checks if card can be placed in field
- */
-bool is_card_useful_for_field(const Field *field, const Card *card) {
-    for (int x = 0; x < FIELD_WIDTH; x++) {
-        int y = get_last_card_y(field, x);
-        Card *target = field->field[y][x];
-        if (!target) continue;
-        
-        Container container = {0};
-        container_add_element(&container, (Card *)card);
-        if (can_place_in_field((Field *)field, (Coords) {.x = (short)x, .y = (short)(y)}, &container)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-/*
  * Initialize field with cards from deck
  * Sets up field structure and interfaces
  */

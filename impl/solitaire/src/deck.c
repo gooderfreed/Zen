@@ -217,7 +217,7 @@ Deck generate_deck(void) {
  */
 void next_card(Deck *deck) {
     Card *start = deck->pointer;
-    if (start == NULL) return;
+    if (!start) return;
 
     do {
         deck->pointer++;

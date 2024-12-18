@@ -126,7 +126,6 @@ typedef struct StockContext {
 //field
 Field init_field(Deck *deck);
 int get_last_card_y(const Field *field, int x);
-bool is_card_useful_for_field(const Field *field, const Card *card);
 //stock
 Stock init_stock(void);
 

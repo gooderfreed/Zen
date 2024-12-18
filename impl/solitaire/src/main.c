@@ -32,6 +32,7 @@ static void restore_terminal_settings(void) {
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
+
 int main(void) {
     setlocale(LC_ALL, "");
     hide_cursor();
@@ -40,10 +41,10 @@ int main(void) {
 
     Container cursor_cards = container_init();
     
-    Deck   deck   = generate_deck();
-    Field  field  = init_field(&deck); // TODO: change deck get_card method
+    Deck  deck  = generate_deck();
+    Field field = init_field(&deck); // TODO: change deck get_card method
+    Stock stock = init_stock();
 
-    Stock  stock  = init_stock();
     StockContext stock_context = {
         .deck = &deck,
         .field = &field,
@@ -72,7 +73,6 @@ int main(void) {
     add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
 
     core_update_screen(&core);
-
 
     set_noncanonical_mode();
     bool need_screen_update;
