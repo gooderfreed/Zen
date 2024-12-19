@@ -61,6 +61,11 @@ static bool validate_interactable(const void *interface, const char *name) {
         return false;
     }
 
+    if (!interactable->get_default_coords) {
+        wprintf(L"Error in '%s': Interactable interface is missing 'get_default_coords' function\n", name);
+        return false;
+    }
+
     return true;
 }
 

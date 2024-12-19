@@ -82,6 +82,15 @@ static bool can_place_in_stock_pile(const Stock *stock, const Card *card) {
 }
 
 /*
+ * Get default coords
+ * Gets the default coords of the stock
+ */
+static Coords get_default_coords(const void *stock_pointer) {
+    (void)stock_pointer;
+    return (Coords) {.x = 1, .y = 0};
+}
+
+/*
  * Check if a card can be placed in the stock
  * Ensures the card is of the correct suit and follows the foundation pile rules
  */
@@ -224,8 +233,9 @@ Stock init_stock(void) {
     };
 
     static const Interactable interactable = {
-        .place_cursor = place_cursor_in_stock,
-        .move         = move_in_stock
+        .place_cursor        = place_cursor_in_stock,
+        .move                = move_in_stock,
+        .get_default_coords  = get_default_coords
     };
 
     static const CardHandler card_handler = {

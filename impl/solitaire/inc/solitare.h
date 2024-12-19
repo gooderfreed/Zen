@@ -23,9 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <locale.h>
-#include <termios.h>
-#include <unistd.h>
 #include <string.h>
 
 /*
@@ -114,6 +111,14 @@ typedef struct Field {
 } Field;
 
 /*
+ * Menu structure
+ * Represents the menu of the game
+ */
+typedef struct Menu {
+    ObjectInterfaces interfaces;              // Core engine interfaces
+} Menu;
+
+/*
  * Stock context structure 
  * Contains pointers to deck and field for auto-update
  */
@@ -142,5 +147,8 @@ wchar_t suit_to_text(const Suit suit);
 const char *numeral_to_text(const Numeral numeral);
 void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x);
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
+
+//menu
+Menu init_menu(void);
 
 #endif

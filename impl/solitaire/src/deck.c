@@ -66,6 +66,15 @@ static void place_cursor_in_deck(const void *deck_pointer, const Coords cursor_c
 }
 
 /*
+ * Get default coords
+ * Gets the default coords of the deck
+ */
+static Coords get_default_coords(const void *deck_pointer) {
+    (void)deck_pointer;
+    return (Coords) {.x = 0, .y = 0};
+}
+
+/*
  * Handle next card button click
  * Advances to next card in deck and clears cursor container
  */
@@ -166,8 +175,9 @@ Deck generate_deck(void) {
     };
 
     static const Interactable interactable = {
-        .place_cursor = place_cursor_in_deck,
-        .move         = move_in_deck
+        .place_cursor        = place_cursor_in_deck,
+        .move                = move_in_deck,
+        .get_default_coords  = get_default_coords
     };
 
     static const CardHandler card_handler = {

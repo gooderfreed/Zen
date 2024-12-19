@@ -93,6 +93,15 @@ static void move_in_field(const void *field_pointer, Coords *coords, const Coord
 }
 
 /*
+ * Get default coords
+ * Gets the default coords of the field
+ */
+static Coords get_default_coords(const void *field_pointer) {
+    Field *field = (Field *)field_pointer;
+    return (Coords) {.x = 3, .y = (short)get_last_card_y(field, 3)};
+}
+
+/*
  * Get cards from field
  * Removes selected cards from field and marks them as not selected
  */
@@ -226,8 +235,9 @@ Field init_field(Deck *deck) {
     };
 
     static const Interactable interactable = {
-        .place_cursor = place_cursor_in_field,
-        .move         = move_in_field
+        .place_cursor        = place_cursor_in_field,
+        .move                = move_in_field,
+        .get_default_coords  = get_default_coords
     };
 
     static const CardHandler card_handler = {
@@ -242,9 +252,9 @@ Field init_field(Deck *deck) {
     };
 
     static PositionHandler position_handler = {
-        .restore_coords = {0},
+        .restore_coords   = {0},
         .save_current_pos = save_current_pos_in_field,
-        .restore_pos = restore_pos_in_field
+        .restore_pos      = restore_pos_in_field
     };
 
     field.interfaces = (ObjectInterfaces) {

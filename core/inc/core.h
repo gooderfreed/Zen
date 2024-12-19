@@ -23,6 +23,9 @@
 
 #include <stdbool.h>
 #include <wchar.h>
+#include <termios.h>
+#include <unistd.h>
+#include <locale.h>
 
 /*
  * Dynamic memory configuration
@@ -123,6 +126,7 @@ typedef struct {
 typedef struct {
     void (*place_cursor)(const void *self, const Coords, Coords *);
     void (*move)(const void *self, Coords *, const Coords);
+    Coords (*get_default_coords)(const void *self);
 } Interactable;
 
 /*
@@ -310,6 +314,9 @@ typedef struct ObjectInterfaces {
 #define PLACE_CURSOR(object, coords, base_coords) \
     (INTERACT_HANDLER(object)->place_cursor(object, coords, base_coords))
 
+#define GET_DEFAULT_COORDS(object) \
+    (INTERACT_HANDLER(object)->get_default_coords(object))
+
 // Position Handler macros
 #define POSITION_HANDLER(object) \
     GET_INTERFACE(object, position_handler)
@@ -335,6 +342,13 @@ typedef struct ObjectInterfaces {
 
 #define UPDATE(object) \
     (UPDATE_HANDLER(object)->update(object, UPDATE_HANDLER(object)->context))
+
+#define SET_UPDATE_CONTEXT(object, context_) \
+    (UPDATE_HANDLER(object)->context = context_)
+
+// Button related macros
+#define SET_BUTTON_CONTEXT(object, index, context) \
+    (set_button_context(BUTTON_HANDLER(object), index, context))
 
 // Screen related definitions
 // ------------------------
@@ -365,6 +379,8 @@ typedef struct ObjectInterfaces {
  */
 typedef enum {
     COLOR_RESET,
+
+    COLOR_BOLD,
 
     COLOR_BLACK,
     COLOR_RED,
@@ -416,6 +432,9 @@ void print_screen(const Screen *screen);
 void add_separator(Screen *screen, int y, int x, Color background, Color foreground, const wchar_t *borders);
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
 void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
+void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background);
+void set_noncanonical_mode(void);
+void restore_terminal_settings(void);
 #endif
 
 // Cursor related definitions
@@ -464,6 +483,9 @@ struct Cursor {
 #ifndef MAP_WIDTH
     #define MAP_WIDTH 1
 #endif
+#ifndef MAP_LAYERS
+    #define MAP_LAYERS 1
+#endif
 
 /*
  * MapObject structure
@@ -471,8 +493,23 @@ struct Cursor {
  */
 typedef struct MapObject {
     void *object;           // Pointer to the actual object
-    Coords default_coords;  // Default position for this object
 } MapObject;
+
+/*
+ * Map layer structure
+ * Represents a single layer on the map
+ */
+typedef struct MapLayer {
+    #ifdef MAP_DYNAMIC
+        int height;
+        int width;
+        MapObject **objects;
+    #else
+        MapObject objects[MAP_HEIGHT][MAP_WIDTH];
+    #endif
+    Coords default_layer_coords;
+    void (*prepare_screen)(Screen *screen);
+} MapLayer;
 
 /*
  * Map structure
@@ -480,11 +517,10 @@ typedef struct MapObject {
  */
 typedef struct Map {
     #ifdef MAP_DYNAMIC
-        int height;
-        int width;
-        MapObject **objects;
+        int layers_count;
+        MapLayer *layers;
     #else
-        MapObject objects[MAP_HEIGHT][MAP_WIDTH];  // Grid of objects
+        MapLayer layers[MAP_LAYERS];
     #endif
     Coords global_coords;                      // Global map position
 } Map;
@@ -544,6 +580,7 @@ void core_update_screen(Core *core);
 void core_global_move(Core *core, Coords move);
 void core_validate_interfaces(Core *core);
 void core_free(Core *core);
+void core_change_layer(Core *core, int layer);
 
 /*
  * Cursor functions
@@ -551,14 +588,17 @@ void core_free(Core *core);
  */
 Cursor init_cursor(void *start_object, Coords start_coords, Container *cursor_cards);
 void print_cursor(Cursor *cursor, Screen *screen);
+void set_cursor(Cursor *cursor, Coords coords, void *target_subject);
 
 /*
  * Map functions
  * Map manipulation and object access
  */
 void map_move(Map *map, Coords move);
-MapObject map_get_object(Map *map, Coords coords);
+void map_move_layer(Map *map, int layer);
+MapLayer *map_get_current_layer(Map *map);
 MapObject map_get_current_object(Map *map);
+MapObject map_get_object(Map *map, Coords coords);
 
 /*
  * Validation functions

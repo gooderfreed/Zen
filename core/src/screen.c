@@ -28,6 +28,7 @@
 const char *get_foreground(Color color) {
     static const char *foreground_colors[] = {
         [COLOR_RESET] = "",
+        [COLOR_BOLD] = ";1",
 
         [COLOR_BLACK] = ";30",
         [COLOR_RED] = ";31",
@@ -57,6 +58,8 @@ const char *get_foreground(Color color) {
 const char *get_background(Color color) {
     static const char *background_colors[] = {
         [COLOR_RESET] = "\033[0",
+        [COLOR_BOLD] = "\033[1",
+
         [COLOR_BLACK] = "\033[40",
         [COLOR_RED] = "\033[41",
         [COLOR_GREEN] = "\033[42",
@@ -85,6 +88,11 @@ const char *get_background(Color color) {
  */
 Screen init_screen(Color background, Color foreground, wchar_t symbol) {
     Screen screen;
+
+    setlocale(LC_ALL, "");
+    hide_cursor();
+    // show_cursor();
+    clear();
 
     for (int i = 0; i < SCREEN_HEIGHT; i++) {
         for (int j = 0; j < SCREEN_WIDTH; j++) {
@@ -167,5 +175,44 @@ void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symb
             screen->foreground[i][j] = foreground;
         }
     }
+}
+
+/*
+ * Insert text into screen
+ * Inserts text into the screen at the specified position
+ */
+void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background) {
+    int text_length;
+    for (text_length = 0; text[text_length] != '\0'; text_length++);
+    
+    for (int i = 0; i < text_length; i++) {
+        screen->data[y][x + i] = text[i];
+        screen->foreground[y][x + i] = foreground;
+        screen->background[y][x + i] = background;
+    }
+}
+
+/*
+ * Set noncanonical mode for terminal
+ * Sets the terminal to noncanonical mode
+ */
+void set_noncanonical_mode(void) {
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+
+    term.c_lflag &= (tcflag_t)~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+/*
+ * Restore terminal settings
+ * Restores the terminal to its original settings
+ */
+void restore_terminal_settings(void) {
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+
+    term.c_lflag |= ICANON | ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 #endif

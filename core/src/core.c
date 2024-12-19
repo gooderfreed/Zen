@@ -32,6 +32,10 @@ Core init_core(Map *map, Cursor *cursor, Screen *screen) {
     };
 
     core_validate_interfaces(&core);
+    MapLayer *layer = map_get_current_layer(core.map);
+    if (layer->prepare_screen) {
+        layer->prepare_screen(core.screen);
+    }
 
     return core;
 }
@@ -102,9 +106,10 @@ void core_action(Core *core) {
  */
 void core_update_screen(Core *core) {
     // Draw all objects on map
+    MapLayer *layer = map_get_current_layer(core->map);
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            void *target_struct = core->map->objects[y][x].object;
+            void *target_struct = layer->objects[y][x].object;
             if (!target_struct) continue;
             
             if (DRAWABLE(target_struct)) {
@@ -139,7 +144,7 @@ void core_global_move(Core *core, Coords move) {
             RESTORE_POSITION(core->cursor->subject, &core->cursor->coords);
         }
         else {
-            core->cursor->coords = target.default_coords;
+            core->cursor->coords = GET_DEFAULT_COORDS(target.object);
         }
     }
 }
@@ -149,13 +154,15 @@ void core_global_move(Core *core, Coords move) {
  * Called during shutdown to prevent memory leaks
  */
 void core_free(Core *core) {
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            MapObject object = core->map->objects[y][x];
-            if (!object.object) continue;
+    for (int z = 0; z < MAP_LAYERS; z++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
+                if (!object.object) continue;
 
-            if (DYNAMIC(object.object)) {
-                FREE(object.object);
+                if (DYNAMIC(object.object)) {
+                    FREE(object.object);
+                }
             }
         }
     }
@@ -166,17 +173,15 @@ void core_free(Core *core) {
  * Calls update for each object
  */
 void core_update(Core *core) {
+    MapLayer *layer = map_get_current_layer(core->map);
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            MapObject object = core->map->objects[y][x];
+            MapObject object = layer->objects[y][x];
             if (!object.object) continue;
 
             if (UPDATEABLE(object.object)) {
                 UPDATE(object.object);
             }
-            //     ObjectInterfaces *interfaces = (ObjectInterfaces *)object.object;
-            //     interfaces->updateable->update(object.object, interfaces->updateable->context);
-            // }
         }
     }
 }
@@ -187,15 +192,34 @@ void core_update(Core *core) {
  * Exits program if validation fails
  */
 void core_validate_interfaces(Core *core) {
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            MapObject object = core->map->objects[y][x];
-            if (!object.object) continue;
-            
-            ObjectInterfaces *interfaces = (ObjectInterfaces*)object.object;
-            if (!validate_object_interfaces(interfaces)) {
-                exit(1);
+    for (int z = 0; z < MAP_LAYERS; z++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
+                if (!object.object) continue;
+                
+                ObjectInterfaces *interfaces = (ObjectInterfaces*)object.object;
+                if (!validate_object_interfaces(interfaces)) {
+                    exit(1);
+                }
             }
         }
+    }
+}
+
+/*
+ * Change layer of the map
+ * Updates cursor position to the default position of the new layer
+ */
+void core_change_layer(Core *core, int layer) {
+    Map *map = core->map;
+    map_move_layer(map, layer);
+    MapObject object = map_get_object(map, map->global_coords);
+    core->cursor->coords = GET_DEFAULT_COORDS(object.object);
+    core->cursor->subject = object.object;
+
+    MapLayer *layer_ = map_get_current_layer(core->map);
+    if (layer_->prepare_screen) {
+        layer_->prepare_screen(core->screen);
     }
 }

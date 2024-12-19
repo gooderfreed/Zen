@@ -16,77 +16,75 @@
 
 #include "../inc/solitare.h"
 
-static void set_noncanonical_mode(void) {
-    struct termios term;
-    tcgetattr(STDIN_FILENO, &term);
-
-    term.c_lflag &= (tcflag_t)~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+static void prepare_menu_screen(Screen *screen) {
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
 }
 
-static void restore_terminal_settings(void) {
-    struct termios term;
-    tcgetattr(STDIN_FILENO, &term);
-
-    term.c_lflag |= ICANON | ECHO;
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+static void prepare_game_screen(Screen *screen) {
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_GREEN, COLOR_RESET);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_BLUE, fat_border);
+    add_separator(screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
 }
-
 
 int main(void) {
-    setlocale(LC_ALL, "");
-    hide_cursor();
-    clear();
     srand((unsigned int)time(NULL));
+    Screen    screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
 
-    Container cursor_cards = container_init();
-    
+    Container cursor_container = container_init();
+
     Deck  deck  = generate_deck();
-    Field field = init_field(&deck); // TODO: change deck get_card method
+    Field field = init_field(&deck);
     Stock stock = init_stock();
+    Menu  menu  = init_menu();
+
+    Map map = {
+        .layers = {
+            [0] = {
+                .prepare_screen = prepare_menu_screen,
+                .default_layer_coords = MENU_DEFAULT_COORDS,
+                .objects = {
+                    [0][0] = {.object = &menu}
+                }
+            },
+            [1] = {
+                .prepare_screen = prepare_game_screen,
+                .default_layer_coords = GAME_DEFAULT_COORDS,
+                .objects = {
+                    [0][0] = {.object = &deck},
+                    [0][1] = {.object = &field},
+                    [0][2] = {.object = &stock}
+                }
+            },
+            [2] = {0},
+        },
+        .global_coords = (Coords){.x = 0, .y = 0, .z = 0}
+    };
+
+    MapObject object = map_get_current_object(&map);
+    Cursor    cursor = init_cursor(object.object, GET_DEFAULT_COORDS(object.object), &cursor_container);
+    Core      core   = init_core(&map, &cursor, &screen);
 
     StockContext stock_context = {
         .deck = &deck,
         .field = &field,
-        .cursor_container = &cursor_cards
-    };
-    stock.interfaces.updateable->context = &stock_context;
-
-    Screen screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
-    
-    set_button_context(BUTTON_HANDLER(&deck), 0, &cursor_cards);
-
-    Map map = {
-        .objects = {
-            {
-                {&deck, DECK_DEFAULT_COORDS}, {&field, FIELD_DEFAULT_COORDS}, {&stock, STOCK_DEFAULT_COORDS}
-            }
-        },
-        .global_coords = (Coords){.x = 1, .y = 0}
+        .cursor_container = &cursor_container
     };
 
-    MapObject object = map_get_current_object(&map);
-    Cursor    cursor = init_cursor(object.object, object.default_coords, &cursor_cards);
-    Core      core   = init_core(&map, &cursor, &screen);
+    SET_UPDATE_CONTEXT(&stock,   &stock_context);
+    SET_BUTTON_CONTEXT(&deck, 0, &cursor_container);
+    SET_BUTTON_CONTEXT(&menu, 0, &core);
+    SET_BUTTON_CONTEXT(&menu, 3, &core);
 
-    add_borders(&screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_BLUE, fat_border);
-    add_separator(&screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
 
     core_update_screen(&core);
-
     set_noncanonical_mode();
     bool need_screen_update;
     while (true) {
         wint_t ch = getwchar();
-        // wprintf(L"key: %i       \n", ch);
         need_screen_update = true;
         switch (ch) {
-            case L'q': case L'й': case KEY_ESC:
-                clear();
-                show_cursor();
-                core_free(&core);
-                restore_terminal_settings();
-                return 0;
+            case L'q': case L'й': case KEY_ESC: core_change_layer(&core, 0);      break;
             case L'a': case L'ф': core_local_move(&core, CURSOR_LEFT);            break;
             case L'd': case L'в': core_local_move(&core, CURSOR_RIGHT);           break;
             case L'w': case L'ц': core_local_move(&core, CURSOR_UP);              break;
