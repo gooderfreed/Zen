@@ -12,5 +12,5 @@
 #include "screen.h"
 #include "cursor.h"
 #include "map.h"
-
+#include "card.h"
 #endif
