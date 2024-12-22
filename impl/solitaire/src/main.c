@@ -40,14 +40,14 @@ int main(void) {
 
     Map map = {
         .layers = {
-            [0] = {
+            [0] = (MapLayer) {
                 .prepare_screen = prepare_menu_screen,
                 .default_layer_coords = MENU_DEFAULT_COORDS,
                 .objects = {
                     [0][0] = {.object = &menu}
                 }
             },
-            [1] = {
+            [1] = (MapLayer) {
                 .prepare_screen = prepare_game_screen,
                 .default_layer_coords = GAME_DEFAULT_COORDS,
                 .objects = {
@@ -56,9 +56,9 @@ int main(void) {
                     [0][2] = {.object = &stock}
                 }
             },
-            [2] = {0},
+            [2] = (MapLayer) {0},
         },
-        .global_coords = (Coords){.x = 0, .y = 0, .z = 0}
+        .global_coords = (Coords) {.x = 0, .y = 0, .z = 0}
     };
 
     MapObject object = map_get_current_object(&map);

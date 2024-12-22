@@ -62,7 +62,7 @@ static void place_cursor_in_deck(const void *deck_pointer, const Coords cursor_c
     (void)deck_pointer;
     
     target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
-    target_coords->x = cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1;
+    target_coords->x = (short)(cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1);
 }
 
 /*

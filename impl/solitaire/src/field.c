@@ -74,8 +74,8 @@ static void place_cursor_in_field(const void *field_pointer, const Coords cursor
     int part = BORDER_OFFSET_Y + 1 + cursor_coords.y * 2 + BORDER_OFFSET_Y;
     bool is_last_card = FIELD_HEIGHT == cursor_coords.y || !field->field[cursor_coords.y + 1][cursor_coords.x];
 
-    target_coords->y += part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1);
-    target_coords->x += BORDER_OFFSET_X - 1;
+    target_coords->y += (short)(part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1));
+    target_coords->x += (short)(BORDER_OFFSET_X - 1);
 }
 
 /*
@@ -87,7 +87,7 @@ static void move_in_field(const void *field_pointer, Coords *coords, const Coord
     short new_y = coords->y + delta.y;
     const Field *field = (const Field *)field_pointer;
 
-    coords->x = (new_x + FIELD_WIDTH) % FIELD_WIDTH;
+    coords->x = (short)((new_x + FIELD_WIDTH) % FIELD_WIDTH);
     if (new_y >= 0 && new_y < FIELD_HEIGHT && field->field[new_y][coords->x] && !field->field[new_y][coords->x]->hidden) coords->y = new_y;
     if (delta.y == 0) coords->y = (short)get_last_card_y(field, coords->x);
 }
