@@ -131,7 +131,7 @@ while (true) {
 ```
 
 ## License
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
