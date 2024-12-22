@@ -1,20 +1,4 @@
 /*
- * Copyright 2024 Cheban Sergiy
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-*/
-
-/*
  * Core engine implementation
  * Contains main game loop logic and object management
  */
@@ -46,7 +30,7 @@ Core init_core(Map *map, Cursor *cursor, Screen *screen) {
  */
 void core_local_move(Core *core, Coords move) {
     Cursor *cursor = core->cursor;
-    if (!INTERACTABLE(cursor->subject)) return;
+    if (!IS_INTERACTABLE(cursor->subject)) return;
 
     Coords coords = {.x = cursor->coords.x, .y = cursor->coords.y};
     MOVE(cursor->subject, &coords, move);
@@ -112,7 +96,7 @@ void core_update_screen(Core *core) {
             void *target_struct = layer->objects[y][x].object;
             if (!target_struct) continue;
             
-            if (DRAWABLE(target_struct)) {
+            if (IS_DRAWABLE(target_struct)) {
                 DRAW(target_struct, core->screen, core->cursor);
             }
         }
@@ -129,7 +113,7 @@ void core_update_screen(Core *core) {
  */
 void core_global_move(Core *core, Coords move) {
     // Save current position if object supports it
-    if (POSITIONABLE(core->cursor->subject)) {
+    if (IS_POSITIONABLE(core->cursor->subject)) {
         SAVE_POSITION(core->cursor->subject, core->cursor->coords);
     }
 
@@ -140,7 +124,7 @@ void core_global_move(Core *core, Coords move) {
     // Update cursor for new object
     if (target.object) {
         core->cursor->subject = target.object;
-        if (POSITIONABLE(core->cursor->subject)) {
+        if (IS_POSITIONABLE(core->cursor->subject)) {
             RESTORE_POSITION(core->cursor->subject, &core->cursor->coords);
         }
         else {
@@ -160,7 +144,7 @@ void core_free(Core *core) {
                 MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
                 if (!object.object) continue;
 
-                if (DYNAMIC(object.object)) {
+                if (IS_DYNAMIC(object.object)) {
                     FREE(object.object);
                 }
             }
@@ -179,7 +163,7 @@ void core_update(Core *core) {
             MapObject object = layer->objects[y][x];
             if (!object.object) continue;
 
-            if (UPDATEABLE(object.object)) {
+            if (IS_UPDATEABLE(object.object)) {
                 UPDATE(object.object);
             }
         }

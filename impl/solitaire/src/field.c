@@ -1,20 +1,4 @@
 /*
- * Copyright 2024 Cheban Sergiy
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-*/
-
-/*
  * Field implementation
  * Handles field object management and card placement
  */
@@ -220,7 +204,7 @@ static bool is_same_card_in_field(const void *field_pointer, const Coords cursor
  */
 static void save_current_pos_in_field(void *field_pointer, Coords current_coords) {
     Field *field = (Field *)field_pointer;
-    GET_RESTORE_COORDS(field) = current_coords;
+    SET_RESTORE_COORDS(field, current_coords);
 }
 
 /*

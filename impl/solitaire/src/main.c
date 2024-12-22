@@ -1,19 +1,3 @@
-/*
- * Copyright 2024 Cheban Sergiy
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
-*/
-
 #include "../inc/solitare.h"
 
 static void prepare_menu_screen(Screen *screen) {
@@ -29,15 +13,17 @@ static void prepare_game_screen(Screen *screen) {
 
 int main(void) {
     srand((unsigned int)time(NULL));
-    Screen    screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
-
+    
+    Screen screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
     Container cursor_container = container_init();
 
+    // init objects
     Deck  deck  = generate_deck();
     Field field = init_field(&deck);
     Stock stock = init_stock();
     Menu  menu  = init_menu();
 
+    // create map
     Map map = {
         .layers = {
             [0] = (MapLayer) {
@@ -61,10 +47,12 @@ int main(void) {
         .global_coords = (Coords) {.x = 0, .y = 0, .z = 0}
     };
 
+    // init core
     MapObject object = map_get_current_object(&map);
     Cursor    cursor = init_cursor(object.object, GET_DEFAULT_COORDS(object.object), &cursor_container);
     Core      core   = init_core(&map, &cursor, &screen);
 
+    // set game context
     StockContext stock_context = {
         .deck = &deck,
         .field = &field,
@@ -76,7 +64,7 @@ int main(void) {
     SET_BUTTON_CONTEXT(&menu, 0, &core);
     SET_BUTTON_CONTEXT(&menu, 3, &core);
 
-
+    // main loop
     core_update_screen(&core);
     set_noncanonical_mode();
     bool need_screen_update;
