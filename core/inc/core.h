@@ -42,6 +42,8 @@
 
 // primitive types
 typedef struct Screen Screen;
+typedef struct CursorConfig CursorConfig;
+typedef __uint8_t CursorType;
 typedef struct Cursor Cursor;
 typedef struct Card Card;
 
@@ -127,6 +129,8 @@ typedef struct {
     void (*place_cursor)(const void *self, const Coords, Coords *);
     void (*move)(const void *self, Coords *, const Coords);
     Coords (*get_default_coords)(const void *self);
+    void (*custom_draw)(const void *self, const Cursor *, Screen *, const Coords);
+    CursorConfig (*get_cursor_config)(const void *self, const Coords);
 } Interactable;
 
 /*
@@ -139,7 +143,7 @@ typedef struct {
 
     void (*select_cards)(void       *self, const Coords, Container *);
     void (*place_cards) (void       *self, const Coords, Container *);
-    void (*get_cards)   (void       *self,               Container *);
+    void (*get_cards)   (void       *self,         const Container *);
 
     bool (*can_place)   (const void *self, const Coords, const Container *);
     bool (*is_same_card)(const void *self, const Coords, const Card *);
@@ -317,6 +321,12 @@ typedef struct ObjectInterfaces {
 #define GET_DEFAULT_COORDS(object) \
     (INTERACT_HANDLER(object)->get_default_coords(object))
 
+#define GET_CURSOR_CONFIG(object, coords) \
+    (INTERACT_HANDLER(object)->get_cursor_config(object, coords))
+
+#define CUSTOM_DRAW(object, cursor, screen, coords) \
+    (INTERACT_HANDLER(object)->custom_draw(object, cursor, screen, coords))
+
 // Position Handler macros
 #define POSITION_HANDLER(object) \
     GET_INTERFACE(object, position_handler)
@@ -433,6 +443,7 @@ void add_separator(Screen *screen, int y, int x, Color background, Color foregro
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
 void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
 void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background);
+void screen_draw_cursor(Screen *screen, Coords coords, CursorType type);
 void set_noncanonical_mode(void);
 void restore_terminal_settings(void);
 #endif
@@ -469,6 +480,38 @@ struct Cursor {
     Container *cards;        // Currently selected cards
     void *subject;          // Object under cursor
 };
+
+/*
+ * Cursor style definitions
+ * Predefined cursor styles for different purposes
+ */
+enum CursorType {
+    CURSOR_SLIM,
+
+    CURSOR_LEFT_SLIM,
+    CURSOR_RIGHT_SLIM,
+    CURSOR_UP_SLIM,
+    CURSOR_DOWN_SLIM,
+
+    CURSOR_WIDE,
+
+    CURSOR_LEFT_WIDE,
+    CURSOR_RIGHT_WIDE,
+    CURSOR_UP_WIDE,
+    CURSOR_DOWN_WIDE,
+
+    CURSOR_SELECT,
+    CURSOR_CUSTOM
+};
+
+/*
+ * Cursor configuration structure
+ * Contains cursor type and custom symbol
+ */
+typedef struct CursorConfig {
+    CursorType type;
+    wchar_t *custom;
+} CursorConfig;
 
 // Map related definitions
 // ---------------------

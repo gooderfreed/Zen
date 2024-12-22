@@ -97,7 +97,6 @@ int main(void) {
 
         if (need_screen_update) {
             core_update_screen(&core);
-            need_screen_update = false;
         }
     }
 }

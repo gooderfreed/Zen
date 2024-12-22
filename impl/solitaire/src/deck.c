@@ -75,6 +75,16 @@ static Coords get_default_coords(const void *deck_pointer) {
 }
 
 /*
+ * Get cursor config
+ * Gets the cursor config of the deck
+ */
+static CursorConfig get_cursor_config_in_deck(const void *deck_pointer, const Coords cursor_coords) {
+    (void)deck_pointer;
+    (void)cursor_coords;
+    return (CursorConfig) {.type = CURSOR_UP_WIDE};
+}
+
+/*
  * Handle next card button click
  * Advances to next card in deck and clears cursor container
  */
@@ -113,7 +123,7 @@ static void select_card_in_deck(void *deck_pointer, const Coords cursor_coords, 
  * Get card from deck
  * Removes selected card from deck and advances to next card
  */
-static void get_card_in_deck(void *deck_pointer, Container *container) {
+static void get_card_in_deck(void *deck_pointer, const Container *container) {
     Deck *deck = (Deck *)deck_pointer;
     (void)container;
 
@@ -177,7 +187,8 @@ Deck generate_deck(void) {
     static const Interactable interactable = {
         .place_cursor        = place_cursor_in_deck,
         .move                = move_in_deck,
-        .get_default_coords  = get_default_coords
+        .get_default_coords  = get_default_coords,
+        .get_cursor_config   = get_cursor_config_in_deck
     };
 
     static const CardHandler card_handler = {
@@ -226,7 +237,7 @@ Deck generate_deck(void) {
  * Cycles through deck until finding next available card
  */
 void next_card(Deck *deck) {
-    Card *start = deck->pointer;
+    const Card *start = deck->pointer;
     if (!start) return;
 
     do {

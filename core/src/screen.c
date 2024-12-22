@@ -87,7 +87,7 @@ const char *get_background(Color color) {
  * Creates screen structure with cleared buffers
  */
 Screen init_screen(Color background, Color foreground, wchar_t symbol) {
-    Screen screen;
+    Screen screen = {0};
 
     setlocale(LC_ALL, "");
     hide_cursor();
@@ -214,5 +214,44 @@ void restore_terminal_settings(void) {
 
     term.c_lflag |= ICANON | ECHO;
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+static const wchar_t* get_cursor_string(CursorType type) {
+    static const wchar_t* cursor_strings[] = {
+        [CURSOR_LEFT_SLIM]  = L"<",
+        [CURSOR_RIGHT_SLIM] = L">",
+        [CURSOR_UP_SLIM]    = L"⋀",
+        [CURSOR_DOWN_SLIM]  = L"⋁",
+        
+        [CURSOR_LEFT_WIDE]  = L"W⟋⟍",
+        [CURSOR_RIGHT_WIDE] = L"W⟍⟋",
+        [CURSOR_UP_WIDE]    = L"H╱╲",
+        [CURSOR_DOWN_WIDE]  = L"H╲╱",
+        
+        [CURSOR_SLIM]       = L"●",
+        [CURSOR_WIDE]       = L"◖◗",
+    };
+    
+    return cursor_strings[type];
+}
+
+/*
+ * Draw cursor on screen
+ * Draws the cursor at the specified coordinates
+ */
+void screen_draw_cursor(Screen *screen, Coords coords, CursorType type) {
+    const wchar_t *cursor_string = get_cursor_string(type);
+    if (cursor_string) {
+        if (type <= CURSOR_WIDE) {
+            screen->data[coords.y][coords.x] = cursor_string[0];
+        } else {
+            screen->data[coords.y][coords.x] = cursor_string[1];
+            if (cursor_string[0] == L'H') {
+                screen->data[coords.y][coords.x + 1] = cursor_string[2];
+            } else {
+                screen->data[coords.y + 1][coords.x] = cursor_string[2];
+            }
+        }
+    }
 }
 #endif

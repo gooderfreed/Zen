@@ -60,8 +60,7 @@ static void move_in_menu(const void *menu_pointer, Coords *coords, const Coords 
     (void)menu_pointer;
     if (delta.x != 0) return;
     short new_y = coords->y + delta.y;
-    if (new_y < 0 || new_y > 3) return;
-    coords->y = new_y;
+    coords->y = (new_y + 4) % 4;
 }
 
 /*
@@ -71,6 +70,16 @@ static void move_in_menu(const void *menu_pointer, Coords *coords, const Coords 
 static Coords get_default_coords(const void *menu_pointer) {
     (void)menu_pointer;
     return (Coords) {.x = 0, .y = 0};
+}
+
+/*
+ * Get cursor config
+ * Gets the cursor config of the menu
+ */
+static CursorConfig get_cursor_config_in_menu(const void *menu_pointer, const Coords cursor_coords) {
+    (void)menu_pointer;
+    (void)cursor_coords;
+    return (CursorConfig) {.type = CURSOR_RIGHT_SLIM};
 }
 
 /*
@@ -129,7 +138,8 @@ Menu init_menu(void) {
     static const Interactable interactable = {
         .place_cursor        = place_cursor_in_menu,
         .move                = move_in_menu,
-        .get_default_coords  = get_default_coords
+        .get_default_coords  = get_default_coords,
+        .get_cursor_config   = get_cursor_config_in_menu
     };
 
     static Button start_button = {

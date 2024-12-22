@@ -62,7 +62,7 @@ bool is_button(void *object, Coords coords) {
     if (!HAVE_BUTTONS(object)) return false;
     ButtonHandler *button_handler = BUTTON_HANDLER(object);
     for (int i = 0; i < button_handler->buttons_count; i++) {
-        Button *button = button_handler->buttons[i];
+        const Button *button = button_handler->buttons[i];
         if (button->coords.x == coords.x && button->coords.y == coords.y) {
             return true;
         }

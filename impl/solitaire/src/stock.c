@@ -91,6 +91,16 @@ static Coords get_default_coords(const void *stock_pointer) {
 }
 
 /*
+ * Get cursor config
+ * Gets the cursor config of the stock
+ */
+static CursorConfig get_cursor_config_in_stock(const void *stock_pointer, const Coords cursor_coords) {
+    (void)stock_pointer;
+    (void)cursor_coords;
+    return (CursorConfig) {.type = CURSOR_UP_WIDE};
+}
+
+/*
  * Check if a card can be placed in the stock
  * Ensures the card is of the correct suit and follows the foundation pile rules
  */
@@ -99,7 +109,7 @@ static bool can_place_in_stock(const void *stock_pointer, const Coords cursor_co
     const Stock *stock = (const Stock *)stock_pointer;
     if (container->size != 1) return false;
 
-    Card *card = container_get_element(container, 0);
+    const Card *card = container_get_element(container, 0);
     if (card->suit != (Suit)cursor_coords.x) return false;
 
     return can_place_in_stock_pile(stock, card);
@@ -142,7 +152,7 @@ static void save_current_pos_in_stock(void *stock_pointer, Coords current_coords
  * Check if a card can be placed in the stock
  * Ensures that stock is balanced
  */
-static bool is_stock_balanced(Stock *stock, Card *card) {
+static bool is_stock_balanced(const Stock *stock, const Card *card) {
     int min_value = King;
     int max_value = Ace;
     for (int suit = Ace; suit < CARD_SUITS; suit++) {
@@ -235,7 +245,8 @@ Stock init_stock(void) {
     static const Interactable interactable = {
         .place_cursor        = place_cursor_in_stock,
         .move                = move_in_stock,
-        .get_default_coords  = get_default_coords
+        .get_default_coords  = get_default_coords,
+        .get_cursor_config   = get_cursor_config_in_stock
     };
 
     static const CardHandler card_handler = {

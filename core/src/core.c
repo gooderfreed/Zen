@@ -198,7 +198,7 @@ void core_validate_interfaces(Core *core) {
                 MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
                 if (!object.object) continue;
                 
-                ObjectInterfaces *interfaces = (ObjectInterfaces*)object.object;
+                const ObjectInterfaces *interfaces = (const ObjectInterfaces*)object.object;
                 if (!validate_object_interfaces(interfaces)) {
                     exit(1);
                 }

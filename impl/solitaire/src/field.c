@@ -43,7 +43,7 @@ static void print_field(const void *field_pointer, Screen *screen, const Cursor 
             int additional_offset = (is_hovered_row && x == hovered_x && hovered_card->subject == field_pointer);
             int x_0 = x * CARD_WIDTH + BORDER_OFFSET_X;
 
-            Card *current_card = field->field[y][x];
+            const Card *current_card = field->field[y][x];
 
             if (y == 0 && !current_card) {
                 add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
@@ -85,7 +85,7 @@ static void place_cursor_in_field(const void *field_pointer, const Coords cursor
 static void move_in_field(const void *field_pointer, Coords *coords, const Coords delta) {
     short new_x = coords->x + delta.x;
     short new_y = coords->y + delta.y;
-    Field *field = (Field *)field_pointer;
+    const Field *field = (const Field *)field_pointer;
 
     coords->x = (new_x + FIELD_WIDTH) % FIELD_WIDTH;
     if (new_y >= 0 && new_y < FIELD_HEIGHT && field->field[new_y][coords->x] && !field->field[new_y][coords->x]->hidden) coords->y = new_y;
@@ -97,15 +97,25 @@ static void move_in_field(const void *field_pointer, Coords *coords, const Coord
  * Gets the default coords of the field
  */
 static Coords get_default_coords(const void *field_pointer) {
-    Field *field = (Field *)field_pointer;
+    const Field *field = (const Field *)field_pointer;
     return (Coords) {.x = 3, .y = (short)get_last_card_y(field, 3)};
+}
+
+/*
+ * Get cursor config
+ * Gets the cursor config of the field
+ */
+static CursorConfig get_cursor_config_in_field(const void *field_pointer, const Coords cursor_coords) {
+    (void)field_pointer;
+    (void)cursor_coords;
+    return (CursorConfig) {.type = CURSOR_UP_WIDE};
 }
 
 /*
  * Get cards from field
  * Removes selected cards from field and marks them as not selected
  */
-static void get_cards_in_field(void *field_pointer, Container *container) {
+static void get_cards_in_field(void *field_pointer, const Container *container) {
     Field *field = (Field *)field_pointer;
 
     for (int i = 0; i < container->size; i++) {
@@ -132,14 +142,14 @@ static void select_cards_in_field(void *field_pointer, Coords cursor_coords, Con
     }
 
     // Select cards in field
-    for (int i = cursor_coords.y; field->field[i][cursor_coords.x] && i < FIELD_HEIGHT; ++i) {
+    for (int i = cursor_coords.y; i < FIELD_HEIGHT && field->field[i][cursor_coords.x]; ++i) {
         Card *current_card = field->field[i][cursor_coords.x];
-        Card *next_card = (i + 1 < FIELD_HEIGHT) ? field->field[i + 1][cursor_coords.x] : NULL;
+        const Card *next_card_in_row = (i + 1 < FIELD_HEIGHT) ? field->field[i + 1][cursor_coords.x] : NULL;
 
         // If move is valid, select card
-        if (!next_card ||
-            (current_card->numeral - next_card->numeral == 1 && 
-            current_card->suit - next_card->suit % 2 != 0)) {
+        if (!next_card_in_row ||
+            (current_card->numeral - next_card_in_row->numeral == 1 && 
+            current_card->suit - next_card_in_row->suit % 2 != 0)) {
             current_card->selected = true;
             container_add_element(container, current_card);
         }
@@ -165,8 +175,8 @@ static bool can_place_in_field(const void *field_pointer, const Coords cursor_co
     if (field->field[cursor_coords.y + 1][cursor_coords.x] != NULL) return false;
     if (field->field[cursor_coords.y][cursor_coords.x] != NULL && field->field[cursor_coords.y][cursor_coords.x]->selected) return false;
 
-    Card *card = (Card *)container_get_element(container, 0);
-    Card *target_card = field->field[cursor_coords.y][cursor_coords.x];
+    const Card *card = (Card *)container_get_element(container, 0);
+    const Card *target_card = field->field[cursor_coords.y][cursor_coords.x];
     if (target_card == NULL) {
         if (card->numeral != King) return false;
     }
@@ -237,7 +247,8 @@ Field init_field(Deck *deck) {
     static const Interactable interactable = {
         .place_cursor        = place_cursor_in_field,
         .move                = move_in_field,
-        .get_default_coords  = get_default_coords
+        .get_default_coords  = get_default_coords,
+        .get_cursor_config   = get_cursor_config_in_field
     };
 
     static const CardHandler card_handler = {

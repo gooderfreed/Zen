@@ -66,6 +66,11 @@ static bool validate_interactable(const void *interface, const char *name) {
         return false;
     }
 
+    if (!interactable->get_cursor_config) {
+        wprintf(L"Error in '%s': Interactable interface is missing 'get_cursor_config' function\n", name);
+        return false;
+    }
+
     return true;
 }
 

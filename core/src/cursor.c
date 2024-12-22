@@ -49,12 +49,18 @@ void print_cursor(Cursor *cursor, Screen *screen) {
     // If subject is interactable, let it place the cursor
     if (INTERACTABLE(cursor->subject)) {
         PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
+
+        CursorConfig config = GET_CURSOR_CONFIG(cursor->subject, cursor->coords);
+
+        // If subject has custom cursor, let it draw it
+        if (config.type == CURSOR_CUSTOM) {
+            CUSTOM_DRAW(cursor->subject, cursor, screen, base_coords);
+            return;
+        }
+
+        // Otherwise, draw default cursor
+        screen_draw_cursor(screen, base_coords, config.type);
     }
     
-    // Draw cursor symbol at calculated position
-    if (base_coords.y < SCREEN_HEIGHT && base_coords.x < SCREEN_WIDTH) {
-        screen->data[base_coords.y][base_coords.x] = '/';
-        screen->data[base_coords.y][base_coords.x + 1] = '\\';
-    }
 }
 
