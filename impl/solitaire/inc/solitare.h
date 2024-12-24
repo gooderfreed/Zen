@@ -100,6 +100,7 @@ typedef struct Field {
  */
 typedef struct Menu {
     ObjectInterfaces interfaces;              // Core engine interfaces
+    bool start_game : 1;
 } Menu;
 
 /*

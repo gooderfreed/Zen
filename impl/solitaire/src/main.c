@@ -99,7 +99,8 @@ int main(void) {
     SET_UPDATE_CONTEXT(&stock,   &stock_context);
     SET_BUTTON_CONTEXT(&deck, 0, &cursor_container);
     SET_BUTTON_CONTEXT(&menu, 0, &core);
-    SET_BUTTON_CONTEXT(&menu, 3, &core);
+    SET_BUTTON_CONTEXT(&menu, 1, &core);
+    SET_BUTTON_CONTEXT(&menu, 4, &core);
 
 
     char buffer[50];

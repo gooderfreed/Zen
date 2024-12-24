@@ -5,8 +5,8 @@
  * Draws the menu on the screen
  */
 static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *cursor) {
-    (void)menu_pointer;
     (void)cursor;
+    Menu *menu = (Menu *)menu_pointer;
 
     int text_offset = 1;
     int text_y = 18;
@@ -19,10 +19,16 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
     insert_text(screen, text_y + 2, text_offset, "o.`Y8b Yb   dP 88  .o 88   88    dP__Yb  88 88\"Yb  88\"\" ",  text_color, background_color);
     insert_text(screen, text_y + 3, text_offset, "8bodP'  YbodP  88ood8 88   88   dP\"\"\"\"Yb 88 88  Yb 88888", text_color, background_color);
 
-    insert_text(screen, text_y + 8,  SCREEN_WIDTH/2 - 6, "  Start",    text_color, background_color);
-    insert_text(screen, text_y + 9,  SCREEN_WIDTH/2 - 6, "  Options",  text_color, background_color);
-    insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, "  Controls", text_color, background_color);
-    insert_text(screen, text_y + 11, SCREEN_WIDTH/2 - 6, "  Exit",     text_color, background_color);
+    if (menu->start_game) {
+        insert_text(screen, text_y + 8,  SCREEN_WIDTH/2 - 6, " Start",    text_color, background_color);
+    }
+    else {
+        insert_text(screen, text_y + 7,  SCREEN_WIDTH/2 - 6, " Continue",    text_color, background_color);
+        insert_text(screen, text_y + 8,  SCREEN_WIDTH/2 - 6, " New Game",    text_color, background_color);
+    }
+    insert_text(screen, text_y + 9,  SCREEN_WIDTH/2 - 6, " Options",  text_color, background_color);
+    insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, " Controls", text_color, background_color);
+    insert_text(screen, text_y + 11, SCREEN_WIDTH/2 - 6, " Exit",     text_color, background_color);
 }
 
 /*
@@ -32,7 +38,7 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
 static void place_cursor_in_menu(const void *menu_pointer, const Coords cursor_coords, Coords *target_coords) {
     (void)menu_pointer;
     (void)cursor_coords;
-    target_coords->y = 26 + cursor_coords.y;
+    target_coords->y = 25 + cursor_coords.y;
     target_coords->x = SCREEN_WIDTH/2 - 6;
 }
 
@@ -41,10 +47,14 @@ static void place_cursor_in_menu(const void *menu_pointer, const Coords cursor_c
  * Moves the cursor in the menu
  */
 static void move_in_menu(const void *menu_pointer, Coords *coords, const Coords delta) {
-    (void)menu_pointer;
+    Menu *menu = (Menu *)menu_pointer;
+
     if (delta.x != 0) return;
     short new_y = coords->y + delta.y;
-    coords->y = (new_y + 4) % 4;
+    if (new_y < 0) new_y = BUTTON_HANDLER_SIZE - 1;
+    coords->y = (new_y + BUTTON_HANDLER_SIZE) % BUTTON_HANDLER_SIZE;
+    coords->y = coords->y == 0 ? (short)menu->start_game: coords->y;
+    // if (menu->start_game && coords->y == 0) coords->y = 1;
 }
 
 /*
@@ -52,8 +62,8 @@ static void move_in_menu(const void *menu_pointer, Coords *coords, const Coords 
  * Gets the default coords of the menu
  */
 static Coords get_default_coords(const void *menu_pointer) {
-    (void)menu_pointer;
-    return (Coords) {.x = 0, .y = 0};
+    Menu *menu = (Menu *)menu_pointer;
+    return (Coords) {.x = 0, .y = menu->start_game ? 1 : 0};
 }
 
 /*
@@ -67,11 +77,22 @@ static CursorConfig get_cursor_config_in_menu(const void *menu_pointer, const Co
 }
 
 /*
+ * On continue click
+ * Handles the continue button click
+ */
+static void on_continue_click(void *menu_pointer, void *context) {
+    (void)menu_pointer;
+    Core *core = (Core *)context;
+    core_change_layer(core, 1);
+}
+
+/*
  * On start click
  * Handles the start button click
  */
-static void on_start_click(void *menu, void *context) {
-    (void)menu;
+static void on_start_click(void *menu_pointer, void *context) {
+    Menu *menu = (Menu *)menu_pointer;
+    menu->start_game = false;
     Core *core = (Core *)context;
     core_change_layer(core, 1);
 }
@@ -80,8 +101,8 @@ static void on_start_click(void *menu, void *context) {
  * On exit click
  * Handles the exit button click
  */
-static void on_exit_click(void *menu, void *context) {
-    (void)menu;
+static void on_exit_click(void *menu_pointer, void *context) {
+    (void)menu_pointer;
     Core *core = (Core *)context;
     clear();
     show_cursor();
@@ -94,8 +115,8 @@ static void on_exit_click(void *menu, void *context) {
  * On options click
  * Handles the options button click
  */
-static void on_options_click(void *menu, void *context) {
-    (void)menu;
+static void on_options_click(void *menu_pointer, void *context) {
+    (void)menu_pointer;
     (void)context;
 }
 
@@ -103,8 +124,8 @@ static void on_options_click(void *menu, void *context) {
  * On controls click
  * Handles the controls button click
  */
-static void on_controls_click(void *menu, void *context) {
-    (void)menu;
+static void on_controls_click(void *menu_pointer, void *context) {
+    (void)menu_pointer;
     (void)context;
 }
 
@@ -113,7 +134,9 @@ static void on_controls_click(void *menu, void *context) {
  * Initializes the menu
  */
 Menu init_menu(void) {
-    Menu menu = {0};
+    Menu menu = {
+        .start_game = true
+    };
 
     static const Drawable drawable = {
         .print = print_menu
@@ -126,33 +149,39 @@ Menu init_menu(void) {
         .get_cursor_config   = get_cursor_config_in_menu
     };
 
-    static Button start_button = {
+    static Button continue_button = {
         .coords = {.x = 0, .y = 0},
+        .on_click = on_continue_click
+    };
+
+    static Button start_button = {
+        .coords = {.x = 0, .y = 1},
         .on_click = on_start_click
     };
 
     static Button options_button = {
-        .coords = {.x = 0, .y = 1},
+        .coords = {.x = 0, .y = 2},
         .on_click = on_options_click
     };
 
     static Button controls_button = {
-        .coords = {.x = 0, .y = 2},
+        .coords = {.x = 0, .y = 3},
         .on_click = on_controls_click
     };
 
     static Button exit_button = {
-        .coords = {.x = 0, .y = 3},
+        .coords = {.x = 0, .y = 4},
         .on_click = on_exit_click
     };
 
     static ButtonHandler button_handler = {
-        .buttons_count = 4,
+        .buttons_count = 5,
         .buttons = {
-            [0] = &start_button,
-            [1] = &options_button,
-            [2] = &controls_button,
-            [3] = &exit_button
+            [0] = &continue_button,
+            [1] = &start_button,
+            [2] = &options_button,
+            [3] = &controls_button,
+            [4] = &exit_button
         }
     };
 
