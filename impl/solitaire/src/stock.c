@@ -191,26 +191,25 @@ static void update_stock(void *stock_pointer, void *context) {
     
     Deck *deck = (Deck *)stock_context->deck;
     Field *field = (Field *)stock_context->field;
+    Container *cursor_container = stock_context->cursor_container;
 
-    bool can_place = true;
-    while (can_place) {
-        can_place = false;
-        // Place cards from deck to stock
-        if (try_place(stock, deck->pointer, stock_context->cursor_container)) {
-            next_card(deck);
-            can_place = true;
-        }
-        // Place cards from field to stock
-        for (int x = 0; x < FIELD_WIDTH; x++) {
-            int y = get_last_card_y(field, x);
-            Card *target = field->field[y][x];
-            if (try_place(stock, target, stock_context->cursor_container)) {
-                field->field[y][x] = NULL;
-                if (y - 1 >= 0 && field->field[y - 1][x]) {
-                    field->field[y - 1][x]->hidden = false;
-                }
-                can_place = true;
+    // Place cards from deck to stock
+    if (try_place(stock, deck->pointer, cursor_container)) {
+        next_card(deck);
+    }
+    
+    // Place cards from field to stock
+    for (int x = 0; x < FIELD_WIDTH; x++) {
+        if (!field->field[0][x]) continue;
+
+        int y = get_last_card_y(field, x);
+        Card *target = field->field[y][x];
+        if (try_place(stock, target, cursor_container)) {
+            field->field[y][x] = NULL;
+            if (y - 1 >= 0 && field->field[y - 1][x]) {
+                field->field[y - 1][x]->hidden = false;
             }
+            break;
         }
     }
 }
