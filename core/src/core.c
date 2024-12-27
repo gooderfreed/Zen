@@ -24,6 +24,11 @@ Core init_core(Map *map, Cursor *cursor, Screen *screen) {
     return core;
 }
 
+void core_shutdown(Core *core) {
+    screen_shutdown(core->screen);
+    core_free(core);
+}
+
 /*
  * Handle cursor movement request in current object
  * Moves cursor if target object is interactable and allows movement
@@ -199,7 +204,11 @@ void core_change_layer(Core *core, int layer) {
     Map *map = core->map;
     map_move_layer(map, layer);
     MapObject object = map_get_object(map, map->global_coords);
-    core->cursor->coords = GET_DEFAULT_COORDS(object.object);
+
+    // Update cursor position to default position of new layer
+    if (IS_INTERACTABLE(object.object)) {
+        core->cursor->coords = GET_DEFAULT_COORDS(object.object);
+    }
     core->cursor->subject = object.object;
 
     MapLayer *layer_ = map_get_current_layer(core->map);

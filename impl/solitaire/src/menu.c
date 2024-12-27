@@ -37,7 +37,6 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
  */
 static void place_cursor_in_menu(const void *menu_pointer, const Coords cursor_coords, Coords *target_coords) {
     (void)menu_pointer;
-    (void)cursor_coords;
     target_coords->y = 25 + cursor_coords.y;
     target_coords->x = SCREEN_WIDTH/2 - 6;
 }
@@ -83,7 +82,7 @@ static CursorConfig get_cursor_config_in_menu(const void *menu_pointer, const Co
 static void on_continue_click(void *menu_pointer, void *context) {
     (void)menu_pointer;
     Core *core = (Core *)context;
-    core_change_layer(core, 1);
+    core_change_layer(core, GAME_ID);
 }
 
 /*
@@ -94,7 +93,7 @@ static void on_start_click(void *menu_pointer, void *context) {
     Menu *menu = (Menu *)menu_pointer;
     menu->start_game = false;
     Core *core = (Core *)context;
-    core_change_layer(core, 1);
+    core_change_layer(core, GAME_ID);
 }
 
 /*
@@ -104,10 +103,7 @@ static void on_start_click(void *menu_pointer, void *context) {
 static void on_exit_click(void *menu_pointer, void *context) {
     (void)menu_pointer;
     Core *core = (Core *)context;
-    clear();
-    show_cursor();
-    core_free(core);
-    restore_terminal_settings();
+    core_shutdown(core);
     exit(0);
 }
 

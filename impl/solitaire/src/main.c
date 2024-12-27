@@ -48,6 +48,17 @@ static void prepare_game_screen(Screen *screen) {
     add_separator(screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
 }
 
+/*
+ * Prepare win screen
+ */
+static void prepare_win_screen(Screen *screen) {
+    int y = (SCREEN_HEIGHT - WIN_SCREEN_HEIGHT) / 2;
+    int x = (SCREEN_WIDTH - WIN_SCREEN_WIDTH) / 2;
+
+    fill_area(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
+}
+
 int main(void) {
     srand((unsigned int)time(NULL));
     
@@ -58,19 +69,21 @@ int main(void) {
     Deck  deck  = generate_deck();
     Field field = init_field(&deck);
     Stock stock = init_stock();
+
     Menu  menu  = init_menu();
+    WinScreen win_screen = init_win_screen();
 
     // create map
     Map map = {
         .layers = {
-            [0] = (MapLayer) {
+            [MENU_ID] = (MapLayer) {
                 .prepare_screen = prepare_menu_screen,
                 .default_layer_coords = MENU_DEFAULT_COORDS,
                 .objects = {
                     [0][0] = {.object = &menu}
                 }
             },
-            [1] = (MapLayer) {
+            [GAME_ID] = (MapLayer) {
                 .prepare_screen = prepare_game_screen,
                 .default_layer_coords = GAME_DEFAULT_COORDS,
                 .objects = {
@@ -79,7 +92,13 @@ int main(void) {
                     [0][2] = {.object = &stock}
                 }
             },
-            [2] = (MapLayer) {0},
+            [WIN_ID] = (MapLayer) {
+                .prepare_screen = prepare_win_screen,
+                .default_layer_coords = WIN_DEFAULT_COORDS,
+                .objects = {
+                    [0][0] = {.object = &win_screen}
+                }
+            },
         },
         .global_coords = (Coords) {.x = 0, .y = 0, .z = 0}
     };
@@ -93,25 +112,34 @@ int main(void) {
     StockContext stock_context = {
         .deck = &deck,
         .field = &field,
-        .cursor_container = &cursor_container
+        .cursor_container = &cursor_container,
+        .core = &core
     };
 
+    // set context for game objects
     SET_UPDATE_CONTEXT(&stock,   &stock_context);
     SET_BUTTON_CONTEXT(&deck, 0, &cursor_container);
+
+    // set context for menu objects
     SET_BUTTON_CONTEXT(&menu, 0, &core);
     SET_BUTTON_CONTEXT(&menu, 1, &core);
     SET_BUTTON_CONTEXT(&menu, 4, &core);
+
+    // set context for win screen objects
+    SET_BUTTON_CONTEXT(&win_screen, 0, &core);
+    SET_BUTTON_CONTEXT(&win_screen, 1, &core);
+    SET_BUTTON_CONTEXT(&win_screen, 2, &core);
 
 
     char buffer[50];
     // main loop
     set_noncanonical_mode();
     while (true) {
-        core_update(&core);
-
         // update fps
         insert_text(&screen, 0, 0, calculate_fps(buffer), COLOR_BOLD, COLOR_BLACK);
         core_update_screen(&core);
+
+        core_update(&core);
 
         fd_set readfds;
         FD_ZERO(&readfds);
@@ -124,15 +152,21 @@ int main(void) {
         // check for input
         if (select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv) > 0) {
             wint_t ch = getwchar();
+
+            if (ch == KEY_ESC) {
+                core_shutdown(&core);
+                break;
+            }
+
             switch (ch) {
-                case L'q': case L'й': case KEY_ESC: core_change_layer(&core, 0);      break;
-                case L'a': case L'ф': core_local_move(&core, CURSOR_LEFT);            break;
-                case L'd': case L'в': core_local_move(&core, CURSOR_RIGHT);           break;
-                case L'w': case L'ц': core_local_move(&core, CURSOR_UP);              break;
-                case L's': case L'ы': case L'і': core_local_move(&core, CURSOR_DOWN); break;
-                case KEY_SPACE: case KEY_ENTER: core_action(&core);                   break;
-                case KEY_CTRL_A: core_global_move(&core, CURSOR_LEFT);                break;
-                case KEY_CTRL_D: core_global_move(&core, CURSOR_RIGHT);               break;
+                case L'q': case L'й':            core_change_layer(&core, MENU_ID);     break;
+                case L'a': case L'ф':            core_local_move(&core, CURSOR_LEFT);   break;
+                case L'd': case L'в':            core_local_move(&core, CURSOR_RIGHT);  break;
+                case L'w': case L'ц':            core_local_move(&core, CURSOR_UP);     break;
+                case L's': case L'ы': case L'і': core_local_move(&core, CURSOR_DOWN);   break;
+                case KEY_SPACE: case KEY_ENTER:  core_action(&core);                    break;
+                case KEY_CTRL_A:                 core_global_move(&core, CURSOR_LEFT);  break;
+                case KEY_CTRL_D:                 core_global_move(&core, CURSOR_RIGHT); break;
             }
         }
     }

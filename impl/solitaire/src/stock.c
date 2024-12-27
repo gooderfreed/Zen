@@ -137,10 +137,10 @@ static void save_current_pos_in_stock(void *stock_pointer, Coords current_coords
  * Ensures that stock is balanced
  */
 static bool is_stock_balanced(const Stock *stock, const Card *card) {
-    int min_value = King;
-    int max_value = Ace;
-    for (int suit = Ace; suit < CARD_SUITS; suit++) {
-        int value = 0;
+    Numeral min_value = King;
+    Numeral max_value = Ace;
+    for (Suit suit = Spades; suit < CARD_SUITS; suit++) {
+        Numeral value = 0;
         if (stock->top_cards[suit]) {
             value = stock->top_cards[suit]->numeral;
         }
@@ -182,6 +182,18 @@ static bool try_place(Stock *stock, Card *target, Container *cursor_container) {
 }
 
 /*
+ * Check if the game is won
+*/
+static bool is_win(const Stock *stock) {
+    for (int suit = 0; suit < CARD_SUITS; suit++) {
+        if (!stock->top_cards[suit] || stock->top_cards[suit]->numeral != King) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/*
  * Update stock
  * Places cards from deck and field into stock
  */
@@ -189,13 +201,21 @@ static void update_stock(void *stock_pointer, void *context) {
     Stock *stock = (Stock *)stock_pointer;
     StockContext *stock_context = (StockContext *)context;
     
-    Deck *deck = (Deck *)stock_context->deck;
+    Deck  *deck  = (Deck *)stock_context->deck;
     Field *field = (Field *)stock_context->field;
-    Container *cursor_container = stock_context->cursor_container;
+    Core  *core  = (Core *)stock_context->core;
+    Container *cursor_container = (Container *)stock_context->cursor_container;
+
+    // Check if the game is won
+    if (is_win(stock)) {
+        core_change_layer(core, WIN_ID);
+        return;
+    }
 
     // Place cards from deck to stock
     if (try_place(stock, deck->pointer, cursor_container)) {
         next_card(deck);
+        return;
     }
     
     // Place cards from field to stock
@@ -209,7 +229,7 @@ static void update_stock(void *stock_pointer, void *context) {
             if (y - 1 >= 0 && field->field[y - 1][x]) {
                 field->field[y - 1][x]->hidden = false;
             }
-            break;
+            return;
         }
     }
 }

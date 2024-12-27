@@ -78,6 +78,7 @@ const char *get_background(Color color);
     * Screen manipulation and drawing
     */
     Screen init_screen(Color background, Color foreground, wchar_t symbol);
+    void screen_shutdown(Screen *screen);
     void print_screen(const Screen *screen);
     void add_separator(Screen *screen, int y, int x, Color background, Color foreground, const wchar_t *borders);
     void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);

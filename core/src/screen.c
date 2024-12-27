@@ -90,6 +90,17 @@ Screen init_screen(Color background, Color foreground, wchar_t symbol) {
 }
 
 /*
+ * Shutdown screen
+ * Restores terminal settings and clears screen
+ */
+void screen_shutdown(Screen *screen) {
+    (void)screen;
+    clear();
+    show_cursor();
+    restore_terminal_settings();
+}
+
+/*
  * Add borders to specified area of screen
  * Creates a border using provided border characters
  */
@@ -200,6 +211,10 @@ void restore_terminal_settings(void) {
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
+/*
+ * Get cursor string
+ * Returns the cursor string for the specified cursor type
+ */
 static const wchar_t* get_cursor_string(CursorType type) {
     static const wchar_t* cursor_strings[] = {
         [CURSOR_LEFT_SLIM]  = L"<",

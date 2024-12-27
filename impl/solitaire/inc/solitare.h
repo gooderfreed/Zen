@@ -103,6 +103,20 @@ typedef struct Menu {
     bool start_game : 1;
 } Menu;
 
+typedef struct Game {
+    Deck  *deck;
+    Field *field;
+    Stock *stock;
+} Game;
+
+/*
+ * Win screen structure
+ * Represents the win screen of the game
+ */
+typedef struct WinScreen {
+    ObjectInterfaces interfaces;
+} WinScreen;
+
 /*
  * Stock context structure 
  * Contains pointers to deck and field for auto-update
@@ -111,6 +125,7 @@ typedef struct StockContext {
     Deck *deck;
     Field *field;
     Container *cursor_container;
+    Core *core;
 } StockContext;
 
 //field
@@ -135,5 +150,8 @@ void colorize_card(Screen *screen, const Card *card, int y, int x, int height, i
 
 //menu
 Menu init_menu(void);
+
+//winscreen
+WinScreen init_win_screen(void);
 
 #endif

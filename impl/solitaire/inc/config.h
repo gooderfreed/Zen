@@ -9,6 +9,15 @@
 
 #define MENU_DEFAULT_COORDS (Coords){.x = 0, .y = 0}
 #define GAME_DEFAULT_COORDS (Coords){.x = 1, .y = 0}
+#define WIN_DEFAULT_COORDS  (Coords){.x = 0, .y = 0}
+
+#define MENU_ID 0
+#define GAME_ID 1
+#define WIN_ID  2
+
+
+#define WIN_SCREEN_HEIGHT 20
+#define WIN_SCREEN_WIDTH 39
 
 #define CARD_NUMERALS 13
 
