@@ -5,28 +5,41 @@
 #include "../inc/core.h"
 
 /*
- * Initialize core engine with provided components
- * Validates all interfaces before returning
+ * Shutdown core engine
+ * Frees all dynamic objects and shuts down screen
  */
-Core init_core(Map *map, Cursor *cursor, Screen *screen) {
-    Core core = {
-        .screen = screen,
-        .map = map,
-        .cursor = cursor,
-    };
-
-    core_validate_interfaces(&core);
-    MapLayer *layer = map_get_current_layer(core.map);
-    if (layer->prepare_screen) {
-        layer->prepare_screen(core.screen);
-    }
-
-    return core;
-}
-
 void core_shutdown(Core *core) {
     screen_shutdown(core->screen);
     core_free(core);
+}
+
+/*
+ * Set new map to core engine
+ * Assigns new map and validates all interfaces
+ */
+void core_set_map(Core *core, Map *map) {
+    core->map = map;
+    core_validate_interfaces(core);
+    MapLayer *layer = map_get_current_layer(core->map);
+    if (layer->prepare_screen) {
+        layer->prepare_screen(core->screen);
+    }
+}
+
+/*
+ * Set new cursor to core engine
+ * Assigns new cursor and validates all interfaces
+ */
+void core_set_cursor(Core *core, Cursor *cursor) {
+    core->cursor = cursor;
+}
+
+/*
+ * Set new screen to core engine
+ * Assigns new screen and validates all interfaces
+ */
+void core_set_screen(Core *core, Screen *screen) {
+    core->screen = screen;
 }
 
 /*

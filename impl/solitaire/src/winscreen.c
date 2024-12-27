@@ -105,6 +105,17 @@ static void on_exit_click(void *win_screen_pointer, void *context) {
 }
 
 /*
+ * Prepare win screen
+ */
+static void prepare_win_screen(Screen *screen) {
+    int y = (SCREEN_HEIGHT - WIN_SCREEN_HEIGHT) / 2;
+    int x = (SCREEN_WIDTH - WIN_SCREEN_WIDTH) / 2;
+
+    fill_area(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
+}
+
+/*
  * Initialize win screen
  * Creates the win screen with required interfaces
  */
@@ -159,5 +170,23 @@ WinScreen init_win_screen(void) {
     };
 
     return win_screen;
+}
+
+/*
+ * Prepare win screen
+ * Prepares the win screen for drawing
+ */
+MapLayer win_layer_init(WinScreen *win_screen, Core *core) {
+    SET_BUTTON_CONTEXT(win_screen, 0, core);
+    SET_BUTTON_CONTEXT(win_screen, 1, core);
+    SET_BUTTON_CONTEXT(win_screen, 2, core);
+
+    return (MapLayer) {
+        .prepare_screen = prepare_win_screen,
+        .default_layer_coords = WIN_DEFAULT_COORDS,
+        .objects = {
+            [0][0] = {.object = win_screen}
+        }
+    };
 }
 

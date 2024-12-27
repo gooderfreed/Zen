@@ -31,74 +31,32 @@ static char* calculate_fps(char *buffer) {
     return buffer;
 }
 
-/*
- * Prepare menu screen
- */
-static void prepare_menu_screen(Screen *screen) {
-    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
-    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
-}
-
-/*
- * Prepare game screen
- */
-static void prepare_game_screen(Screen *screen) {
-    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_GREEN, COLOR_RESET);
-    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_BLUE, fat_border);
-    add_separator(screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
-}
-
-/*
- * Prepare win screen
- */
-static void prepare_win_screen(Screen *screen) {
-    int y = (SCREEN_HEIGHT - WIN_SCREEN_HEIGHT) / 2;
-    int x = (SCREEN_WIDTH - WIN_SCREEN_WIDTH) / 2;
-
-    fill_area(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
-    add_borders(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
-}
-
 int main(void) {
     srand((unsigned int)time(NULL));
     
     Screen screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
     Container cursor_container = container_init();
+    Core core = {0};
 
     // init objects
     Deck  deck  = generate_deck();
     Field field = init_field(&deck);
     Stock stock = init_stock();
 
+    MapLayer game_layer = game_layer_init(&deck, &field, &stock);
+    
     Menu  menu  = init_menu();
+    MapLayer menu_layer = menu_layer_init(&menu, &core);
+
     WinScreen win_screen = init_win_screen();
+    MapLayer win_layer = win_layer_init(&win_screen, &core);
 
     // create map
     Map map = {
         .layers = {
-            [MENU_ID] = (MapLayer) {
-                .prepare_screen = prepare_menu_screen,
-                .default_layer_coords = MENU_DEFAULT_COORDS,
-                .objects = {
-                    [0][0] = {.object = &menu}
-                }
-            },
-            [GAME_ID] = (MapLayer) {
-                .prepare_screen = prepare_game_screen,
-                .default_layer_coords = GAME_DEFAULT_COORDS,
-                .objects = {
-                    [0][0] = {.object = &deck},
-                    [0][1] = {.object = &field},
-                    [0][2] = {.object = &stock}
-                }
-            },
-            [WIN_ID] = (MapLayer) {
-                .prepare_screen = prepare_win_screen,
-                .default_layer_coords = WIN_DEFAULT_COORDS,
-                .objects = {
-                    [0][0] = {.object = &win_screen}
-                }
-            },
+            [MENU_ID] = menu_layer,
+            [GAME_ID] = game_layer,
+            [WIN_ID]  = win_layer,
         },
         .global_coords = (Coords) {.x = 0, .y = 0, .z = 0}
     };
@@ -106,30 +64,23 @@ int main(void) {
     // init core
     MapObject object = map_get_current_object(&map);
     Cursor    cursor = init_cursor(object.object, GET_DEFAULT_COORDS(object.object), &cursor_container);
-    Core      core   = init_core(&map, &cursor, &screen);
 
     // set game context
     StockContext stock_context = {
-        .deck = &deck,
+        .deck  = &deck,
         .field = &field,
+        .core  = &core,
         .cursor_container = &cursor_container,
-        .core = &core
     };
 
     // set context for game objects
     SET_UPDATE_CONTEXT(&stock,   &stock_context);
     SET_BUTTON_CONTEXT(&deck, 0, &cursor_container);
 
-    // set context for menu objects
-    SET_BUTTON_CONTEXT(&menu, 0, &core);
-    SET_BUTTON_CONTEXT(&menu, 1, &core);
-    SET_BUTTON_CONTEXT(&menu, 4, &core);
 
-    // set context for win screen objects
-    SET_BUTTON_CONTEXT(&win_screen, 0, &core);
-    SET_BUTTON_CONTEXT(&win_screen, 1, &core);
-    SET_BUTTON_CONTEXT(&win_screen, 2, &core);
-
+    core_set_cursor(&core, &cursor);
+    core_set_screen(&core, &screen);
+    core_set_map(&core, &map);
 
     char buffer[50];
     // main loop

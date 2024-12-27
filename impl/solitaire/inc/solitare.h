@@ -150,8 +150,13 @@ void colorize_card(Screen *screen, const Card *card, int y, int x, int height, i
 
 //menu
 Menu init_menu(void);
+MapLayer menu_layer_init(Menu *menu, Core *core);
 
 //winscreen
 WinScreen init_win_screen(void);
+MapLayer win_layer_init(WinScreen *win_screen, Core *core);
+
+//game
+MapLayer game_layer_init(Deck *deck, Field *field, Stock *stock);
 
 #endif

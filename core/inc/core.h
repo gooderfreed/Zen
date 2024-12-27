@@ -51,7 +51,9 @@ typedef struct {
  * Core functions
  * Main engine functionality
  */
-Core init_core(Map *map, Cursor *cursor, Screen *screen);
+void core_set_map(Core *core, Map *map);
+void core_set_cursor(Core *core, Cursor *cursor);
+void core_set_screen(Core *core, Screen *screen);
 void core_shutdown(Core *core);
 void core_local_move(Core *core, Coords move);
 void core_action(Core *core);

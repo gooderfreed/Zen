@@ -126,6 +126,14 @@ static void on_controls_click(void *menu_pointer, void *context) {
 }
 
 /*
+ * Prepare menu screen
+ */
+static void prepare_menu_screen(Screen *screen) {
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
+}
+
+/*
  * Init menu
  * Initializes the menu
  */
@@ -194,4 +202,22 @@ Menu init_menu(void) {
     };
     
     return menu;
+}
+
+/*
+ * Menu layer
+ * Creates the menu layer
+ */
+MapLayer menu_layer_init(Menu *menu, Core *core) {
+    SET_BUTTON_CONTEXT(menu, 0, core);
+    SET_BUTTON_CONTEXT(menu, 1, core);
+    SET_BUTTON_CONTEXT(menu, 4, core);
+
+    return (MapLayer) {
+        .prepare_screen = prepare_menu_screen,
+        .default_layer_coords = MENU_DEFAULT_COORDS,
+        .objects = {
+            [0][0] = {.object = menu}
+        }
+    };
 }
