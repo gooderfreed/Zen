@@ -116,6 +116,18 @@ static void prepare_win_screen(Screen *screen) {
 }
 
 /*
+ * Win loop
+ * Handles the win screen loop
+ */
+static void win_loop(Core *core, wint_t key) {
+    switch (key) {
+        case L'w': case L'ц':            core_local_move(core, CURSOR_UP);   break;
+        case L's': case L'ы': case L'і': core_local_move(core, CURSOR_DOWN); break;
+        case KEY_SPACE: case KEY_ENTER:  core_action(core);                  break;
+    }
+}
+
+/*
  * Initialize win screen
  * Creates the win screen with required interfaces
  */
@@ -187,6 +199,7 @@ MapLayer win_layer_init(Core *core) {
     return (MapLayer) {
         .prepare_screen = prepare_win_screen,
         .default_layer_coords = WIN_DEFAULT_COORDS,
+        .layer_loop = win_loop,
         .objects = {
             [0][0] = {.object = &win_screen}
         }

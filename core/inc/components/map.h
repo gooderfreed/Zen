@@ -39,6 +39,7 @@ typedef struct MapLayer {
     #endif
     Coords default_layer_coords;
     void (*prepare_screen)(Screen *screen);
+    void (*layer_loop)(Core *core, wint_t key);
 } MapLayer;
 
 /*

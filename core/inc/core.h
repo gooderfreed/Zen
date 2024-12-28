@@ -40,7 +40,7 @@
  * Core structure
  * Main game engine structure containing all necessary components
  */
-typedef struct {
+typedef struct Core {
     Cursor *cursor;  // Game cursor
     Screen *screen;  // Game screen
     Map *map;        // Game map
@@ -52,6 +52,7 @@ typedef struct {
  * Main engine functionality
  */
 void core_set_map(Core *core, Map *map);
+void core_manage_loop(Core *core, wint_t key);
 void core_set_cursor(Core *core, Cursor *cursor);
 void core_set_screen(Core *core, Screen *screen);
 void core_shutdown(Core *core);

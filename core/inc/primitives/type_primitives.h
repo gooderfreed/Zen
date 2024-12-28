@@ -23,4 +23,6 @@ typedef struct Card Card;
 
 typedef struct Container Container;
 
+typedef struct Core Core;
+
 #endif

@@ -229,3 +229,12 @@ void core_change_layer(Core *core, int layer) {
         layer_->prepare_screen(core->screen);
     }
 }
+
+/*
+ * Main game loop
+ * Handles game loop and input processing
+ */
+void core_manage_loop(Core *core, wint_t key) {
+    MapLayer *layer = map_get_current_layer(core->map);
+    layer->layer_loop(core, key);
+}

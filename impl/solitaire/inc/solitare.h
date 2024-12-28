@@ -1,6 +1,8 @@
 #ifndef SOLITARE_H
 #define SOLITARE_H
 
+#define _POSIX_C_SOURCE 199309L
+
 #include "config.h"
 #define CARD_STRUCT
 #include "../../../core/inc/core.h"
