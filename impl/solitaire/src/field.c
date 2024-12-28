@@ -266,6 +266,7 @@ Field init_field(Deck *deck) {
         .position_handler = &position_handler
     };
 
+    draw_card(deck); // из-за какого-то бага указатель на карту сбрасывается, если не вызвать draw_card
     for (short row = 0; row < FIELD_WIDTH; row++) {
         for (short col = 0; col < FIELD_HEIGHT; col++) {
             if (col > row) field.field[col][row] = NULL;

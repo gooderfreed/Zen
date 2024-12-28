@@ -198,6 +198,7 @@ static bool is_win(const Stock *stock) {
  * Places cards from deck and field into stock
  */
 static void update_stock(void *stock_pointer, void *context) {
+    if (!context) return;
     Stock *stock = (Stock *)stock_pointer;
     StockContext *stock_context = (StockContext *)context;
     

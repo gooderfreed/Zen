@@ -38,18 +38,9 @@ int main(void) {
     Container cursor_container = container_init();
     Core core = {0};
 
-    // init objects
-    Deck  deck  = generate_deck();
-    Field field = init_field(&deck);
-    Stock stock = init_stock();
-
-    MapLayer game_layer = game_layer_init(&deck, &field, &stock);
-    
-    Menu  menu  = init_menu();
-    MapLayer menu_layer = menu_layer_init(&menu, &core);
-
-    WinScreen win_screen = init_win_screen();
-    MapLayer win_layer = win_layer_init(&win_screen, &core);
+    MapLayer game_layer = game_layer_init(&core, &cursor_container);
+    MapLayer menu_layer = menu_layer_init(&core);
+    MapLayer win_layer = win_layer_init(&core);
 
     // create map
     Map map = {
@@ -64,18 +55,6 @@ int main(void) {
     // init core
     MapObject object = map_get_current_object(&map);
     Cursor    cursor = init_cursor(object.object, GET_DEFAULT_COORDS(object.object), &cursor_container);
-
-    // set game context
-    StockContext stock_context = {
-        .deck  = &deck,
-        .field = &field,
-        .core  = &core,
-        .cursor_container = &cursor_container,
-    };
-
-    // set context for game objects
-    SET_UPDATE_CONTEXT(&stock,   &stock_context);
-    SET_BUTTON_CONTEXT(&deck, 0, &cursor_container);
 
 
     core_set_cursor(&core, &cursor);

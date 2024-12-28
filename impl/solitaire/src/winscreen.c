@@ -119,7 +119,7 @@ static void prepare_win_screen(Screen *screen) {
  * Initialize win screen
  * Creates the win screen with required interfaces
  */
-WinScreen init_win_screen(void) {
+static WinScreen init_win_screen(void) {
     WinScreen win_screen = {0};
 
     static const Drawable drawable = {
@@ -176,16 +176,19 @@ WinScreen init_win_screen(void) {
  * Prepare win screen
  * Prepares the win screen for drawing
  */
-MapLayer win_layer_init(WinScreen *win_screen, Core *core) {
-    SET_BUTTON_CONTEXT(win_screen, 0, core);
-    SET_BUTTON_CONTEXT(win_screen, 1, core);
-    SET_BUTTON_CONTEXT(win_screen, 2, core);
+MapLayer win_layer_init(Core *core) {
+    static WinScreen win_screen = {0};
+    win_screen = init_win_screen();
+
+    SET_BUTTON_CONTEXT(&win_screen, 0, core);
+    SET_BUTTON_CONTEXT(&win_screen, 1, core);
+    SET_BUTTON_CONTEXT(&win_screen, 2, core);
 
     return (MapLayer) {
         .prepare_screen = prepare_win_screen,
         .default_layer_coords = WIN_DEFAULT_COORDS,
         .objects = {
-            [0][0] = {.object = win_screen}
+            [0][0] = {.object = &win_screen}
         }
     };
 }

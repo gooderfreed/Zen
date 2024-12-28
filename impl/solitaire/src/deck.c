@@ -162,7 +162,7 @@ Deck generate_deck(void) {
             deck.deck[i++] = card;
         }
     }
-    deck.pointer = &deck.deck[0];
+    deck.pointer = &deck.deck[0]; // я хуй знает. я тут указатель ставлю, но сука он сбрасывается в хуй пойми что.
 
     static const Drawable drawable = {
         .print = print_deck

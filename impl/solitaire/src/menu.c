@@ -137,7 +137,7 @@ static void prepare_menu_screen(Screen *screen) {
  * Init menu
  * Initializes the menu
  */
-Menu init_menu(void) {
+static Menu init_menu(void) {
     Menu menu = {
         .start_game = true
     };
@@ -208,16 +208,19 @@ Menu init_menu(void) {
  * Menu layer
  * Creates the menu layer
  */
-MapLayer menu_layer_init(Menu *menu, Core *core) {
-    SET_BUTTON_CONTEXT(menu, 0, core);
-    SET_BUTTON_CONTEXT(menu, 1, core);
-    SET_BUTTON_CONTEXT(menu, 4, core);
+MapLayer menu_layer_init(Core *core) {
+    static Menu menu = {0};
+    menu = init_menu();
+
+    SET_BUTTON_CONTEXT(&menu, 0, core);
+    SET_BUTTON_CONTEXT(&menu, 1, core);
+    SET_BUTTON_CONTEXT(&menu, 4, core);
 
     return (MapLayer) {
         .prepare_screen = prepare_menu_screen,
         .default_layer_coords = MENU_DEFAULT_COORDS,
         .objects = {
-            [0][0] = {.object = menu}
+            [0][0] = {.object = &menu}
         }
     };
 }

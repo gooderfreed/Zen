@@ -149,14 +149,12 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
 
 //menu
-Menu init_menu(void);
-MapLayer menu_layer_init(Menu *menu, Core *core);
+MapLayer menu_layer_init(Core *core);
 
 //winscreen
-WinScreen init_win_screen(void);
-MapLayer win_layer_init(WinScreen *win_screen, Core *core);
+MapLayer win_layer_init(Core *core);
 
 //game
-MapLayer game_layer_init(Deck *deck, Field *field, Stock *stock);
+MapLayer game_layer_init(Core *core, Container *container);
 
 #endif
