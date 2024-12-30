@@ -81,9 +81,9 @@ typedef struct Deck {
  * Represents the stock of cards in Solitaire
  */
 typedef struct Stock {
-    ObjectInterfaces interfaces;                     // Core engine interfaces
-    Card *stock[CARD_SUITS][CARD_NUMERALS];          // Foundation piles for each suit
-    Card *top_cards[CARD_SUITS];
+    ObjectInterfaces interfaces;               // Core engine interfaces
+    Card *stock[CARD_SUITS][CARD_NUMERALS];    // Foundation piles for each suit
+    Card *top_cards[CARD_SUITS];               // Top card pointers for each suit
 } Stock;
 
 
@@ -101,22 +101,16 @@ typedef struct Field {
  * Represents the menu of the game
  */
 typedef struct Menu {
-    ObjectInterfaces interfaces;              // Core engine interfaces
-    bool start_game : 1;
+    ObjectInterfaces interfaces;     // Core engine interfaces
+    bool start_game : 1;             // Start game flag
 } Menu;
-
-typedef struct Game {
-    Deck  *deck;
-    Field *field;
-    Stock *stock;
-} Game;
 
 /*
  * Win screen structure
  * Represents the win screen of the game
  */
 typedef struct WinScreen {
-    ObjectInterfaces interfaces;
+    ObjectInterfaces interfaces;    // Core engine interfaces
 } WinScreen;
 
 /*
@@ -124,10 +118,10 @@ typedef struct WinScreen {
  * Contains pointers to deck and field for auto-update
  */
 typedef struct StockContext {
-    Deck *deck;
-    Field *field;
-    Container *cursor_container;
-    Core *core;
+    Deck *deck;                   // Deck pointer
+    Field *field;                 // Field pointer
+    Container *cursor_container;  // Cursor container
+    Core *core;                   // Core pointer
 } StockContext;
 
 //field

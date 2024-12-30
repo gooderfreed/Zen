@@ -73,9 +73,9 @@ const char *get_background(Color color) {
 Screen init_screen(Color background, Color foreground, wchar_t symbol) {
     Screen screen = {0};
 
+    set_noncanonical_mode();
     setlocale(LC_ALL, "");
     hide_cursor();
-    // show_cursor();
     clear();
 
     for (int i = 0; i < SCREEN_HEIGHT; i++) {
