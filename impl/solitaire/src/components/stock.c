@@ -2,7 +2,7 @@
  * Stock implementation
  * Handles stock object management and foundation pile drawing
  */
-#include "../inc/solitare.h"
+#include "../inc/solitaire.h"
 
 /*
  * Draw stock piles on screen
@@ -255,7 +255,8 @@ void stock_reset(Stock *stock) {
 Stock init_stock(void) {
     Stock stock = {0};
 
-    static const Drawable drawable = {
+    static Drawable drawable = {
+        .is_active = true,
         .print = print_stock
     };
 

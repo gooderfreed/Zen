@@ -1,4 +1,4 @@
-#include "../inc/solitare.h"
+#include "../inc/solitaire.h"
 #include <fcntl.h>
 #include <sys/select.h>
 

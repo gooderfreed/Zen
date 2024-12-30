@@ -1,4 +1,4 @@
-#include "../../inc/solitare.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Arrays of card display elements

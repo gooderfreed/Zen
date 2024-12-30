@@ -105,6 +105,10 @@ typedef struct Menu {
     bool start_game : 1;             // Start game flag
 } Menu;
 
+typedef struct Controls {
+    ObjectInterfaces interfaces;     // Core engine interfaces
+} Controls;
+
 /*
  * Win screen structure
  * Represents the win screen of the game
@@ -135,8 +139,11 @@ typedef struct StockContext {
     Core *core;                   // Core pointer
 } StockContext;
 
-typedef struct NewGame
-{
+/*
+ * New game structure
+ * Contains pointers to core and game for menu interaction
+ */
+typedef struct NewGame {
     Game *game;
     Core *core;
 } NewGame;
@@ -169,6 +176,8 @@ void colorize_card(Screen *screen, const Card *card, int y, int x, int height, i
 
 //menu
 MapLayer menu_layer_init(Core *core, Game *game);
+void prepare_menu_screen(Screen *screen);
+Controls init_controls(void);
 
 //winscreen
 MapLayer win_layer_init(Core *core, Game *game);

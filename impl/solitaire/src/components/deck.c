@@ -2,7 +2,7 @@
  * Deck implementation
  * Handles deck object management and card drawing
  */
-#include "../inc/solitare.h"
+#include "../inc/solitaire.h"
 
 /*
  * Draw deck on screen
@@ -178,9 +178,10 @@ Deck generate_deck(void) {
             deck.deck[i++] = card;
         }
     }
-    deck.pointer = &deck.deck[0]; // я хуй знает. я тут указатель ставлю, но сука он сбрасывается в хуй пойми что.
+    deck.pointer = &deck.deck[0];
 
-    static const Drawable drawable = {
+    static Drawable drawable = {
+        .is_active = true,
         .print = print_deck
     };
 

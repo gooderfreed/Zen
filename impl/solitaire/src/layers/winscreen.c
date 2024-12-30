@@ -1,5 +1,5 @@
 
-#include "../inc/solitare.h"
+#include "../inc/solitaire.h"
 
 /*
  * Print win screen
@@ -136,7 +136,8 @@ static void win_loop(Core *core, wint_t key) {
 static WinScreen init_win_screen(void) {
     WinScreen win_screen = {0};
 
-    static const Drawable drawable = {
+    static Drawable drawable = {
+        .is_active = true,
         .print = print_win_screen
     };
 

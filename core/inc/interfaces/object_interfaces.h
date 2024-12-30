@@ -21,9 +21,9 @@ typedef struct ObjectInterfaces {
     } capabilities;
 
     const CardHandler     *card_handler;
-    const Drawable        *drawable;
     const Interactable    *interactable;
     const Dynamic         *dynamic;
+    Drawable              *drawable;
     ButtonHandler         *button_handler;
     PositionHandler       *position_handler;
     Updateable            *updateable;

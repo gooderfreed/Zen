@@ -114,7 +114,7 @@ void core_update_screen(Core *core) {
             void *target_struct = layer->objects[y][x].object;
             if (!target_struct) continue;
             
-            if (IS_DRAWABLE(target_struct)) {
+            if (IS_ACTIVE_DRAWABLE(target_struct)) {
                 DRAW(target_struct, core->screen, core->cursor);
             }
         }

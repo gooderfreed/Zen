@@ -1,4 +1,12 @@
-#include "../inc/solitare.h"
+#include "../inc/solitaire.h"
+
+/*
+ * Prepare menu screen
+ */
+void prepare_menu_screen(Screen *screen) {
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
+}
 
 /*
  * Print menu
@@ -20,15 +28,14 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
     insert_text(screen, text_y + 3, text_offset, "8bodP'  YbodP  88ood8 88   88   dP\"\"\"\"Yb 88 88  Yb 88888", text_color, background_color);
 
     if (menu->start_game) {
-        insert_text(screen, text_y + 8,  SCREEN_WIDTH/2 - 6, " Start",    text_color, background_color);
+        insert_text(screen, text_y + 8, SCREEN_WIDTH/2 - 6, " Start", text_color, background_color);
     }
     else {
-        insert_text(screen, text_y + 7,  SCREEN_WIDTH/2 - 6, " Continue",    text_color, background_color);
-        insert_text(screen, text_y + 8,  SCREEN_WIDTH/2 - 6, " New Game",    text_color, background_color);
+        insert_text(screen, text_y + 7, SCREEN_WIDTH/2 - 6, " Continue", text_color, background_color);
+        insert_text(screen, text_y + 8, SCREEN_WIDTH/2 - 6, " New Game", text_color, background_color);
     }
-    insert_text(screen, text_y + 9,  SCREEN_WIDTH/2 - 6, " Options",  text_color, background_color);
-    insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, " Controls", text_color, background_color);
-    insert_text(screen, text_y + 11, SCREEN_WIDTH/2 - 6, " Exit",     text_color, background_color);
+    insert_text(screen, text_y + 9,  SCREEN_WIDTH/2 - 6, " Controls", text_color, background_color);
+    insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, " Exit",     text_color, background_color);
 }
 
 /*
@@ -50,10 +57,10 @@ static void move_in_menu(const void *menu_pointer, Coords *coords, const Coords 
 
     if (delta.x != 0) return;
     short new_y = coords->y + delta.y;
+    if (new_y == 0 && menu->start_game) new_y = -1;
     if (new_y < 0) new_y = BUTTON_HANDLER_SIZE - 1;
     coords->y = (new_y + BUTTON_HANDLER_SIZE) % BUTTON_HANDLER_SIZE;
     coords->y = coords->y == 0 ? (short)menu->start_game: coords->y;
-    // if (menu->start_game && coords->y == 0) coords->y = 1;
 }
 
 /*
@@ -62,6 +69,7 @@ static void move_in_menu(const void *menu_pointer, Coords *coords, const Coords 
  */
 static Coords get_default_coords(const void *menu_pointer) {
     Menu *menu = (Menu *)menu_pointer;
+    SET_DRAWABLE_ACTIVE(menu, true);
     return (Coords) {.x = 0, .y = menu->start_game ? 1 : 0};
 }
 
@@ -105,17 +113,9 @@ static void on_start_click(void *menu_pointer, void *context) {
 static void on_exit_click(void *menu_pointer, void *context) {
     (void)menu_pointer;
     Core *core = (Core *)context;
+
     core_shutdown(core);
     exit(0);
-}
-
-/*
- * On options click
- * Handles the options button click
- */
-static void on_options_click(void *menu_pointer, void *context) {
-    (void)menu_pointer;
-    (void)context;
 }
 
 /*
@@ -123,16 +123,11 @@ static void on_options_click(void *menu_pointer, void *context) {
  * Handles the controls button click
  */
 static void on_controls_click(void *menu_pointer, void *context) {
-    (void)menu_pointer;
-    (void)context;
-}
-
-/*
- * Prepare menu screen
- */
-static void prepare_menu_screen(Screen *screen) {
-    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
-    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
+    Menu *menu = (Menu *)menu_pointer;
+    Core *core = (Core *)context;
+    SET_DRAWABLE_ACTIVE(menu, false);
+    prepare_menu_screen(core->screen);
+    core_global_move(core, CURSOR_RIGHT);
 }
 
 /*
@@ -156,7 +151,8 @@ static Menu init_menu(void) {
         .start_game = true
     };
 
-    static const Drawable drawable = {
+    static Drawable drawable = {
+        .is_active = true,
         .print = print_menu
     };
 
@@ -177,29 +173,23 @@ static Menu init_menu(void) {
         .on_click = on_start_click
     };
 
-    static Button options_button = {
-        .coords = {.x = 0, .y = 2},
-        .on_click = on_options_click
-    };
-
     static Button controls_button = {
-        .coords = {.x = 0, .y = 3},
+        .coords = {.x = 0, .y = 2},
         .on_click = on_controls_click
     };
 
     static Button exit_button = {
-        .coords = {.x = 0, .y = 4},
+        .coords = {.x = 0, .y = 3},
         .on_click = on_exit_click
     };
 
     static ButtonHandler button_handler = {
-        .buttons_count = 5,
+        .buttons_count = 4,
         .buttons = {
             [0] = &continue_button,
             [1] = &start_button,
-            [2] = &options_button,
-            [3] = &controls_button,
-            [4] = &exit_button
+            [2] = &controls_button,
+            [3] = &exit_button
         }
     };
 
@@ -226,6 +216,9 @@ MapLayer menu_layer_init(Core *core, Game *game) {
     static Menu menu = {0};
     menu = init_menu();
 
+    static Controls controls;
+    controls = init_controls();
+
     static NewGame new_game;
     new_game = (NewGame) {
         .game = game,
@@ -234,14 +227,18 @@ MapLayer menu_layer_init(Core *core, Game *game) {
 
     SET_BUTTON_CONTEXT(&menu, 0, core);
     SET_BUTTON_CONTEXT(&menu, 1, &new_game);
-    SET_BUTTON_CONTEXT(&menu, 4, core);
+    SET_BUTTON_CONTEXT(&menu, 2, core);
+    SET_BUTTON_CONTEXT(&menu, 3, core);
+
+    SET_BUTTON_CONTEXT(&controls, 0, core);
 
     return (MapLayer) {
         .prepare_screen = prepare_menu_screen,
         .default_layer_coords = MENU_DEFAULT_COORDS,
         .layer_loop = menu_loop,
         .objects = {
-            [0][0] = {.object = &menu}
+            [0][0] = {.object = &menu},
+            [0][1] = {.object = &controls}
         }
     };
 }

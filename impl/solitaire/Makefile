@@ -41,19 +41,19 @@ $(OBJ_FILES): | $(OBJ_DIR)
 
 # Compile solitaire files with context
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitare.h
+	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitaire.h
 
 # Compile layers files with context
 $(OBJ_DIR)/%.o: $(SRC_DIR)/layers/%.c $(INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitare.h
+	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitaire.h
 
 # Compile components files with context
 $(OBJ_DIR)/%.o: $(SRC_DIR)/components/%.c $(INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitare.h
+	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitaire.h
 
 # Then compile core files with context
 $(OBJ_DIR)/%.o: $(CORE_SRC_DIR)/%.c $(CORE_INC_FILES)
-	@$(CC) $(CFLAGS) -c $< -o $@ -I $(CORE_INC_DIR) -include $(INC_DIR)/solitare.h
+	@$(CC) $(CFLAGS) -c $< -o $@ -I $(CORE_INC_DIR) -include $(INC_DIR)/solitaire.h
 
 $(OBJ_DIR):
 	@$(MKDIR) $@

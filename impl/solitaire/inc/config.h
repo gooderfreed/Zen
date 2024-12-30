@@ -5,7 +5,7 @@
 #define MAP_HEIGHT 1
 #define MAP_WIDTH 3
 
-#define BUTTON_HANDLER_SIZE 5
+#define BUTTON_HANDLER_SIZE 4
 
 #define MENU_DEFAULT_COORDS (Coords){.x = 0, .y = 0}
 #define GAME_DEFAULT_COORDS (Coords){.x = 1, .y = 0}

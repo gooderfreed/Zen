@@ -8,11 +8,12 @@
  * Implementations must provide print method
  */
 typedef struct Drawable {
+    bool is_active;
     void (*print)(const void *, Screen *, const Cursor *);
 } Drawable;
 
 // Drawable macros
-static inline const Drawable *DRAW_HANDLER(const void *object) {
+static inline Drawable *DRAW_HANDLER(const void *object) {
     return GET_INTERFACES(object)->drawable;
 }
 
@@ -22,6 +23,14 @@ static inline bool IS_DRAWABLE(const void *object) {
 
 static inline void DRAW(const void *object, Screen *screen, Cursor *cursor) {
     DRAW_HANDLER(object)->print(object, screen, cursor);
+}
+
+static inline bool IS_ACTIVE_DRAWABLE(const void *object) {
+    return IS_DRAWABLE(object) && DRAW_HANDLER(object)->is_active;
+}
+
+static inline void SET_DRAWABLE_ACTIVE(void *object, bool active) {
+    DRAW_HANDLER(object)->is_active = active;
 }
 
 #endif

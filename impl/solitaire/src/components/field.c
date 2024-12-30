@@ -2,7 +2,7 @@
  * Field implementation
  * Handles field object management and card placement
  */
-#include "../inc/solitare.h"
+#include "../inc/solitaire.h"
 
 /*
  * Print field content to screen
@@ -259,7 +259,8 @@ void prepare_field(Field *field, Deck *deck) {
 Field init_field(void) {
     Field field = {0};
 
-    static const Drawable drawable = {
+    static Drawable drawable = {
+        .is_active = true,
         .print = print_field
     };
 
