@@ -114,6 +114,17 @@ typedef struct WinScreen {
 } WinScreen;
 
 /*
+ * Game structure
+ * Contains all game components
+ */
+typedef struct Game
+{
+    Deck *deck;
+    Field *field;
+    Stock *stock;
+} Game;
+
+/*
  * Stock context structure 
  * Contains pointers to deck and field for auto-update
  */
@@ -124,17 +135,29 @@ typedef struct StockContext {
     Core *core;                   // Core pointer
 } StockContext;
 
+typedef struct NewGame
+{
+    Game *game;
+    Core *core;
+} NewGame;
+
+
+
 //field
-Field init_field(Deck *deck);
+Field init_field(void);
 int get_last_card_y(const Field *field, int x);
+void prepare_field(Field *field, Deck *deck);
+
 //stock
 Stock init_stock(void);
+void stock_reset(Stock *stock);
 
 //deck
 Deck generate_deck(void);
 void next_card(Deck *deck);
 Card *draw_card(Deck *deck);
 bool have_hidden_cards(const Deck *deck);
+void deck_reset(Deck *deck);
 
 //card
 extern const wchar_t fat_border[8];
@@ -145,12 +168,13 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
 
 //menu
-MapLayer menu_layer_init(Core *core);
+MapLayer menu_layer_init(Core *core, Game *game);
 
 //winscreen
-MapLayer win_layer_init(Core *core);
+MapLayer win_layer_init(Core *core, Game *game);
 
 //game
 MapLayer game_layer_init(Core *core, Container *container);
+void game_reset(Game *game);
 
 #endif

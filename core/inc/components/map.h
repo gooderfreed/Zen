@@ -31,15 +31,16 @@ typedef struct MapObject {
  */
 typedef struct MapLayer {
     #ifdef MAP_DYNAMIC
-        int height;
-        int width;
-        MapObject **objects;
+        int height;                                // Layer height
+        int width;                                 // Layer width
+        MapObject **objects;                       // Objects on the layer
     #else
-        MapObject objects[MAP_HEIGHT][MAP_WIDTH];
+        MapObject objects[MAP_HEIGHT][MAP_WIDTH];  // Objects on the layer
     #endif
-    Coords default_layer_coords;
-    void (*prepare_screen)(Screen *screen);
-    void (*layer_loop)(Core *core, wint_t key);
+    Coords default_layer_coords;                   // Default layer coordinates
+    void *layer_main_object;                       // Main object for the current layer
+    void (*prepare_screen)(Screen *screen);        // Function to prepare screen for the layer
+    void (*layer_loop)(Core *core, wint_t key);    // Function to handle layer loop
 } MapLayer;
 
 /*
@@ -48,12 +49,12 @@ typedef struct MapLayer {
  */
 typedef struct Map {
     #ifdef MAP_DYNAMIC
-        int layers_count;
-        MapLayer *layers;
+        int layers_count;            // Number of map layers
+        MapLayer *layers;            // Map layers
     #else
-        MapLayer layers[MAP_LAYERS];
+        MapLayer layers[MAP_LAYERS]; // Map layers
     #endif
-    Coords global_coords;                      // Global map position
+    Coords global_coords;            // Global map position
 } Map;
 
 /*

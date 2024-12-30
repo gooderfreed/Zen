@@ -143,6 +143,22 @@ static void deck_shuffle(Deck *deck) {
 }
 
 /*
+ * Reset deck to initial state
+ * Resets all cards in the deck to default state
+ */
+void deck_reset(Deck *deck) {
+    for (int i = 0; i < DECK_SIZE; i++) {
+        deck->deck[i].object = Deck_enum;
+        deck->deck[i].selected = false;
+        deck->deck[i].hidden = false;
+        deck->deck[i].coords = (Coords) {.x = 1, .y = 0};
+    }
+    deck->pointer = &deck->deck[0];
+    deck_shuffle(deck);
+}
+
+
+/*
  * Generate a deck of cards
  * Initializes deck structure and fills it with cards
  */

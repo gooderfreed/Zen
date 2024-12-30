@@ -92,8 +92,10 @@ static void on_continue_click(void *menu_pointer, void *context) {
 static void on_start_click(void *menu_pointer, void *context) {
     Menu *menu = (Menu *)menu_pointer;
     menu->start_game = false;
-    Core *core = (Core *)context;
-    core_change_layer(core, GAME_ID);
+
+    NewGame *new_game = (NewGame *)context;
+    game_reset(new_game->game);
+    core_change_layer(new_game->core, GAME_ID);
 }
 
 /*
@@ -220,12 +222,18 @@ static Menu init_menu(void) {
  * Menu layer
  * Creates the menu layer
  */
-MapLayer menu_layer_init(Core *core) {
+MapLayer menu_layer_init(Core *core, Game *game) {
     static Menu menu = {0};
     menu = init_menu();
 
+    static NewGame new_game;
+    new_game = (NewGame) {
+        .game = game,
+        .core = core
+    };
+
     SET_BUTTON_CONTEXT(&menu, 0, core);
-    SET_BUTTON_CONTEXT(&menu, 1, core);
+    SET_BUTTON_CONTEXT(&menu, 1, &new_game);
     SET_BUTTON_CONTEXT(&menu, 4, core);
 
     return (MapLayer) {

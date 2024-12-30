@@ -80,7 +80,9 @@ static CursorConfig get_cursor_config_in_menu(const void *win_screen_pointer, co
  */
 static void on_new_game_click(void *win_screen_pointer, void *context) {
     (void)win_screen_pointer;
-    (void)context;
+    NewGame *new_game = (NewGame *)context;
+    game_reset(new_game->game);
+    core_change_layer(new_game->core, GAME_ID);
 }
 
 /*
@@ -188,11 +190,17 @@ static WinScreen init_win_screen(void) {
  * Prepare win screen
  * Prepares the win screen for drawing
  */
-MapLayer win_layer_init(Core *core) {
+MapLayer win_layer_init(Core *core, Game *game) {
     static WinScreen win_screen = {0};
     win_screen = init_win_screen();
 
-    SET_BUTTON_CONTEXT(&win_screen, 0, core);
+    static NewGame new_game;
+    new_game = (NewGame) {
+        .game = game,
+        .core = core
+    };
+
+    SET_BUTTON_CONTEXT(&win_screen, 0, &new_game);
     SET_BUTTON_CONTEXT(&win_screen, 1, core);
     SET_BUTTON_CONTEXT(&win_screen, 2, core);
 

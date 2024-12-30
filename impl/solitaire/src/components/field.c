@@ -218,10 +218,45 @@ static void restore_pos_in_field(void *field_pointer, Coords *current_coords) {
 }
 
 /*
+ * Clear field
+ * Removes all cards from field
+ */
+static void clear_field(Field *field) {
+    for (short row = 0; row < FIELD_WIDTH; row++) {
+        for (short col = 0; col < FIELD_HEIGHT; col++) {
+            if (field->field[col][row]) {
+                field->field[col][row] = NULL;
+            }
+        }
+    }
+}
+
+/*
+ * Prepare field
+ * Initializes field with cards from deck
+ */
+void prepare_field(Field *field, Deck *deck) {
+    clear_field(field);
+    for (short row = 0; row < FIELD_WIDTH; row++) {
+        for (short col = 0; col < FIELD_HEIGHT; col++) {
+            if (col > row) field->field[col][row] = NULL;
+            else {
+                Card *card = draw_card(deck);
+                card->coords.x = row;
+                card->coords.y = col;
+                card->object = Field_enum;
+                card->hidden = col == row ? false : true;
+                field->field[col][row] = card;
+            }
+        }
+    }
+}
+
+/*
  * Initialize field with cards from deck
  * Sets up field structure and interfaces
  */
-Field init_field(Deck *deck) {
+Field init_field(void) {
     Field field = {0};
 
     static const Drawable drawable = {
@@ -265,21 +300,6 @@ Field init_field(Deck *deck) {
         .card_handler = &card_handler,
         .position_handler = &position_handler
     };
-
-    draw_card(deck); // из-за какого-то бага указатель на карту сбрасывается, если не вызвать draw_card
-    for (short row = 0; row < FIELD_WIDTH; row++) {
-        for (short col = 0; col < FIELD_HEIGHT; col++) {
-            if (col > row) field.field[col][row] = NULL;
-            else {
-                Card *card = draw_card(deck);
-                card->coords.x = row;
-                card->coords.y = col;
-                card->object = Field_enum;
-                card->hidden = col == row ? false : true;
-                field.field[col][row] = card;
-            }
-        }
-    }
 
     field.interfaces.position_handler->restore_coords = (Coords) {.x = 0, .y = 0};
 

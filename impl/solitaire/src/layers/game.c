@@ -10,7 +10,7 @@ static Game game_init(void) {
     static Stock stock;
 
     deck = generate_deck();
-    field = init_field(&deck);
+    field = init_field();
     stock = init_stock();
 
     Game game = {
@@ -49,6 +49,16 @@ static void game_loop(Core *core, wint_t key) {
 }
 
 /*
+ * Reset game
+ * Resets the game state
+ */
+void game_reset(Game *game) {
+    deck_reset(game->deck);
+    prepare_field(game->field, game->deck);
+    stock_reset(game->stock);
+}
+
+/*
  * Initialize game layer
  * Creates game layer with required interfaces
  */
@@ -70,6 +80,7 @@ MapLayer game_layer_init(Core *core, Container *container) {
         .prepare_screen = prepare_game_screen,
         .default_layer_coords = GAME_DEFAULT_COORDS,
         .layer_loop = game_loop,
+        .layer_main_object = &game,
         .objects = {
             [0][0] = {.object = game.deck},
             [0][1] = {.object = game.field},

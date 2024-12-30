@@ -236,6 +236,19 @@ static void update_stock(void *stock_pointer, void *context) {
 }
 
 /*
+ * Reset stock
+ * Clears stock piles and top card pointers
+ */
+void stock_reset(Stock *stock) {
+    for (int suit = 0; suit < CARD_SUITS; suit++) {
+        stock->top_cards[suit] = NULL;
+        for (int numeral = 0; numeral < CARD_NUMERALS; numeral++) {
+            stock->stock[suit][numeral] = NULL;
+        }
+    }
+}
+
+/*
  * Initialize empty stock structure
  * Creates stock with empty foundation piles and required interfaces
  */

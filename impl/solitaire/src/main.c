@@ -17,8 +17,9 @@ static void init_game(Core *core) {
     cursor_container = container_init();
     
     game_layer = game_layer_init(core, &cursor_container);
-    menu_layer = menu_layer_init(core);
-    win_layer = win_layer_init(core);
+    Game *game  = (Game *)game_layer.layer_main_object;
+    menu_layer = menu_layer_init(core, game);
+    win_layer  = win_layer_init(core, game);
 
     // create map
     map = (Map) {
@@ -68,7 +69,7 @@ static void game_loop(Core *core) {
             core_manage_loop(core, ch);
         }
 
-        struct timespec ts = {0, 1000000000 / 120};
+        struct timespec ts = {0, 1000000000 / 120};  // 120 fps | why 120fps for console? Because
         nanosleep(&ts, NULL);
     }
 }
