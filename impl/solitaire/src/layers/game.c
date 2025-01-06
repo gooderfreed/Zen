@@ -62,15 +62,13 @@ void game_reset(Game *game) {
  * Initialize game layer
  * Creates game layer with required interfaces
  */
-MapLayer game_layer_init(Core *core, Container *container) {
-    (void)core;
+MapLayer game_layer_init(Container *container) {
     static Game game;
     game = game_init();
 
     static StockContext stock_context;
     stock_context.deck  = game.deck;
     stock_context.field = game.field;
-    stock_context.core  = core;
     stock_context.cursor_container = container;
 
     SET_UPDATE_CONTEXT(game.stock,   &stock_context);

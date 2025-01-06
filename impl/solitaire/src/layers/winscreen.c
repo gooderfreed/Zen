@@ -79,10 +79,9 @@ static CursorConfig get_cursor_config_in_menu(const void *win_screen_pointer, co
  * Handles the new game button click
  */
 static void on_new_game_click(void *win_screen_pointer, void *context) {
-    (void)win_screen_pointer;
-    NewGame *new_game = (NewGame *)context;
-    game_reset(new_game->game);
-    core_change_layer(new_game->core, GAME_ID);
+    Game *game = (Game *)context;
+    game_reset(game);
+    CORE_CHANGE_LAYER(win_screen_pointer, GAME_ID);
 }
 
 /*
@@ -90,9 +89,8 @@ static void on_new_game_click(void *win_screen_pointer, void *context) {
  * Handles the menu button click
  */
 static void on_menu_click(void *win_screen_pointer, void *context) {
-    (void)win_screen_pointer;
-    Core *core = (Core *)context;
-    core_change_layer(core, MENU_ID);
+    (void)context;
+    CORE_CHANGE_LAYER(win_screen_pointer, MENU_ID);
 }
 
 /*
@@ -100,9 +98,8 @@ static void on_menu_click(void *win_screen_pointer, void *context) {
  * Handles the exit button click
  */
 static void on_exit_click(void *win_screen_pointer, void *context) {
-    (void)win_screen_pointer;
-    Core *core = (Core *)context;
-    core_shutdown(core);
+    (void)context;
+    CORE_SHUTDOWN(win_screen_pointer);
     exit(0);
 }
 
@@ -177,10 +174,11 @@ static WinScreen init_win_screen(void) {
         .capabilities = {
             .is_drawable     = true,
             .is_interactable = true,
-            .have_buttons    = true
+            .have_buttons    = true,
+            .requires_core   = true
         },
-        .drawable = &drawable,
-        .interactable = &interactable,
+        .drawable       = &drawable,
+        .interactable   = &interactable,
         .button_handler = &button_handler
     };
 
@@ -191,19 +189,11 @@ static WinScreen init_win_screen(void) {
  * Prepare win screen
  * Prepares the win screen for drawing
  */
-MapLayer win_layer_init(Core *core, Game *game) {
+MapLayer win_layer_init(Game *game) {
     static WinScreen win_screen = {0};
     win_screen = init_win_screen();
 
-    static NewGame new_game;
-    new_game = (NewGame) {
-        .game = game,
-        .core = core
-    };
-
-    SET_BUTTON_CONTEXT(&win_screen, 0, &new_game);
-    SET_BUTTON_CONTEXT(&win_screen, 1, core);
-    SET_BUTTON_CONTEXT(&win_screen, 2, core);
+    SET_BUTTON_CONTEXT(&win_screen, 0, game);
 
     return (MapLayer) {
         .prepare_screen = prepare_win_screen,

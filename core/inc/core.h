@@ -65,4 +65,6 @@ void core_validate_interfaces(Core *core);
 void core_free(Core *core);
 void core_change_layer(Core *core, int layer);
 
+Screen *core_get_screen(Core *core);
+
 #endif

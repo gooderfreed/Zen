@@ -16,10 +16,10 @@ static void init_game(Core *core) {
     screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
     cursor_container = container_init();
     
-    game_layer = game_layer_init(core, &cursor_container);
+    game_layer = game_layer_init(&cursor_container);
     Game *game  = (Game *)game_layer.layer_main_object;
-    menu_layer = menu_layer_init(core, game);
-    win_layer  = win_layer_init(core, game);
+    menu_layer = menu_layer_init(game);
+    win_layer  = win_layer_init(game);
 
     // create map
     map = (Map) {

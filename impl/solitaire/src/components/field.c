@@ -294,11 +294,12 @@ Field init_field(void) {
             .can_hold_cards  = true,
             .is_drawable     = true,
             .is_interactable = true,
-            .is_positionable = true
+            .is_positionable = true,
+            .requires_core   = true
         },
-        .drawable =     &drawable,
-        .interactable = &interactable,
-        .card_handler = &card_handler,
+        .drawable         = &drawable,
+        .interactable     = &interactable,
+        .card_handler     = &card_handler,
         .position_handler = &position_handler
     };
 

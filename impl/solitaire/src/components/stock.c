@@ -204,12 +204,13 @@ static void update_stock(void *stock_pointer, void *context) {
     
     Deck  *deck  = (Deck *)stock_context->deck;
     Field *field = (Field *)stock_context->field;
-    Core  *core  = (Core *)stock_context->core;
+    // Core  *core  = (Core *)stock_context->core;
     Container *cursor_container = (Container *)stock_context->cursor_container;
 
     // Check if the game is won
     if (is_win(stock)) {
-        core_change_layer(core, WIN_ID);
+        // core_change_layer(core, WIN_ID);
+        CORE_CHANGE_LAYER(stock, WIN_ID);
         return;
     }
 
@@ -292,7 +293,8 @@ Stock init_stock(void) {
             .is_interactable = true,
             .can_hold_cards  = true,
             .is_positionable = true,
-            .requires_update = true
+            .requires_update = true,
+            .requires_core   = true
         },
         .drawable         = &drawable,
         .interactable     = &interactable,

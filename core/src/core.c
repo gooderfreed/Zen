@@ -19,6 +19,32 @@ void core_shutdown(Core *core) {
  */
 void core_set_map(Core *core, Map *map) {
     core->map = map;
+
+    static CoreDependent core_dependent;
+    core_dependent = (CoreDependent) {
+        .core = core,
+        .change_layer = core_change_layer,
+        .action = core_action,
+        .global_move = core_global_move,
+        .local_move = core_local_move,
+        .get_screen = core_get_screen,
+        .shutdown = core_shutdown
+    };
+
+    for (int z = 0; z < MAP_LAYERS; z++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                MapObject object = map_get_object(map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
+                if (!object.object) continue;
+
+                if (IS_CORE_DEPENDENT(object.object)) {
+                    ObjectInterfaces *interfaces = GET_INTERFACES(object.object);
+                    interfaces->core_dependent = &core_dependent;
+                }
+            }
+        }
+    }
+
     core_validate_interfaces(core);
     MapLayer *layer = map_get_current_layer(core->map);
     if (layer->prepare_screen) {
@@ -40,6 +66,14 @@ void core_set_cursor(Core *core, Cursor *cursor) {
  */
 void core_set_screen(Core *core, Screen *screen) {
     core->screen = screen;
+}
+
+/*
+ * Get screen from core engine
+ * Returns screen from core engine
+ */
+Screen *core_get_screen(Core *core) {
+    return core->screen;
 }
 
 /*

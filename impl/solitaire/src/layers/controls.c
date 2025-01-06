@@ -72,11 +72,12 @@ static CursorConfig get_cursor_config_in_controls(const void *controls_pointer, 
  * Handles the back button click
  */
 static void on_back_click(void *controls_pointer, void *context) {
+    (void)context;
+
     Controls *controls = (Controls *)controls_pointer;
-    Core *core = (Core *)context;
     SET_DRAWABLE_ACTIVE(controls, false);
-    prepare_menu_screen(core->screen);
-    core_global_move(core, CURSOR_LEFT);
+    prepare_menu_screen(CORE_GET_SCREEN(controls_pointer));
+    CORE_GLOBAL_MOVE(controls_pointer, CURSOR_LEFT);
 }
 
 
@@ -117,6 +118,7 @@ Controls init_controls(void) {
             .is_drawable     = true,
             .have_buttons    = true,
             .is_interactable = true,
+            .requires_core   = true
         },
         .drawable       = &drawable,
         .interactable   = &interactable,

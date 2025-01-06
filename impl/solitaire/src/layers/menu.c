@@ -88,9 +88,8 @@ static CursorConfig get_cursor_config_in_menu(const void *menu_pointer, const Co
  * Handles the continue button click
  */
 static void on_continue_click(void *menu_pointer, void *context) {
-    (void)menu_pointer;
-    Core *core = (Core *)context;
-    core_change_layer(core, GAME_ID);
+    (void)context;
+    CORE_CHANGE_LAYER(menu_pointer, GAME_ID);
 }
 
 /*
@@ -101,9 +100,9 @@ static void on_start_click(void *menu_pointer, void *context) {
     Menu *menu = (Menu *)menu_pointer;
     menu->start_game = false;
 
-    NewGame *new_game = (NewGame *)context;
-    game_reset(new_game->game);
-    core_change_layer(new_game->core, GAME_ID);
+    Game *game = (Game *)context;
+    game_reset(game);
+    CORE_CHANGE_LAYER(menu_pointer, GAME_ID);
 }
 
 /*
@@ -111,10 +110,8 @@ static void on_start_click(void *menu_pointer, void *context) {
  * Handles the exit button click
  */
 static void on_exit_click(void *menu_pointer, void *context) {
-    (void)menu_pointer;
-    Core *core = (Core *)context;
-
-    core_shutdown(core);
+    (void)context;
+    CORE_SHUTDOWN(menu_pointer);
     exit(0);
 }
 
@@ -123,11 +120,12 @@ static void on_exit_click(void *menu_pointer, void *context) {
  * Handles the controls button click
  */
 static void on_controls_click(void *menu_pointer, void *context) {
+    (void)context;
+    
     Menu *menu = (Menu *)menu_pointer;
-    Core *core = (Core *)context;
     SET_DRAWABLE_ACTIVE(menu, false);
-    prepare_menu_screen(core->screen);
-    core_global_move(core, CURSOR_RIGHT);
+    prepare_menu_screen(CORE_GET_SCREEN(menu_pointer));
+    CORE_GLOBAL_MOVE(menu_pointer, CURSOR_RIGHT);
 }
 
 /*
@@ -199,6 +197,7 @@ static Menu init_menu(void) {
             .is_drawable     = true,
             .have_buttons    = true,
             .is_interactable = true,
+            .requires_core   = true
         },
         .drawable       = &drawable,
         .interactable   = &interactable,
@@ -212,25 +211,14 @@ static Menu init_menu(void) {
  * Menu layer
  * Creates the menu layer
  */
-MapLayer menu_layer_init(Core *core, Game *game) {
+MapLayer menu_layer_init(Game *game) {
     static Menu menu = {0};
     menu = init_menu();
 
     static Controls controls;
     controls = init_controls();
 
-    static NewGame new_game;
-    new_game = (NewGame) {
-        .game = game,
-        .core = core
-    };
-
-    SET_BUTTON_CONTEXT(&menu, 0, core);
-    SET_BUTTON_CONTEXT(&menu, 1, &new_game);
-    SET_BUTTON_CONTEXT(&menu, 2, core);
-    SET_BUTTON_CONTEXT(&menu, 3, core);
-
-    SET_BUTTON_CONTEXT(&controls, 0, core);
+    SET_BUTTON_CONTEXT(&menu, 1, game);
 
     return (MapLayer) {
         .prepare_screen = prepare_menu_screen,

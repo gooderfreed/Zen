@@ -136,18 +136,7 @@ typedef struct StockContext {
     Deck *deck;                   // Deck pointer
     Field *field;                 // Field pointer
     Container *cursor_container;  // Cursor container
-    Core *core;                   // Core pointer
 } StockContext;
-
-/*
- * New game structure
- * Contains pointers to core and game for menu interaction
- */
-typedef struct NewGame {
-    Game *game;
-    Core *core;
-} NewGame;
-
 
 
 //field
@@ -175,15 +164,15 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
 
 //menu
-MapLayer menu_layer_init(Core *core, Game *game);
+MapLayer menu_layer_init(Game *game);
 void prepare_menu_screen(Screen *screen);
 Controls init_controls(void);
 
 //winscreen
-MapLayer win_layer_init(Core *core, Game *game);
+MapLayer win_layer_init(Game *game);
 
 //game
-MapLayer game_layer_init(Core *core, Container *container);
+MapLayer game_layer_init(Container *container);
 void game_reset(Game *game);
 
 #endif

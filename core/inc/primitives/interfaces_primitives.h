@@ -15,5 +15,6 @@ typedef struct ButtonHandler ButtonHandler;
 typedef struct PositionHandler PositionHandler;
 typedef struct Updateable Updateable;
 typedef struct CardHandler CardHandler;
+typedef struct CoreDependent CoreDependent;
 
 #endif

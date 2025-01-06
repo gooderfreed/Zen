@@ -14,4 +14,6 @@
 #include "position_handler.h"
 #include "button_handler.h"
 #include "card_handler.h"
+#include "core_dependent.h"
+
 #endif

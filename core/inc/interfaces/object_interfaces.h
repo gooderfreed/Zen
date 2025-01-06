@@ -18,11 +18,13 @@ typedef struct ObjectInterfaces {
         bool is_dynamic      : 1;
         bool is_positionable : 1;
         bool requires_update : 1;
+        bool requires_core   : 1;
     } capabilities;
 
     const CardHandler     *card_handler;
     const Interactable    *interactable;
     const Dynamic         *dynamic;
+    const CoreDependent   *core_dependent;
     Drawable              *drawable;
     ButtonHandler         *button_handler;
     PositionHandler       *position_handler;
