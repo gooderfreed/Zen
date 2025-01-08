@@ -23,6 +23,16 @@ static Game game_init(void) {
 }
 
 /*
+ * Reset game
+ * Resets the game state
+ */
+void game_reset(Game *game) {
+    deck_reset(game->deck);
+    prepare_field(game->field, game->deck);
+    stock_reset(game->stock);
+}
+
+/*
  * Prepare game screen
  */
 static void prepare_game_screen(Screen *screen) {
@@ -46,16 +56,6 @@ static void game_loop(Core *core, wint_t key) {
         case KEY_CTRL_A:                 core_global_move(core, CURSOR_LEFT);  break;
         case KEY_CTRL_D:                 core_global_move(core, CURSOR_RIGHT); break;
     }
-}
-
-/*
- * Reset game
- * Resets the game state
- */
-void game_reset(Game *game) {
-    deck_reset(game->deck);
-    prepare_field(game->field, game->deck);
-    stock_reset(game->stock);
 }
 
 /*

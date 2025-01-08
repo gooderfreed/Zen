@@ -164,11 +164,13 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
 
 //menu
+Menu init_menu(void);
 MapLayer menu_layer_init(Game *game);
 void prepare_menu_screen(Screen *screen);
 Controls init_controls(void);
 
 //winscreen
+WinScreen init_win_screen(void);
 MapLayer win_layer_init(Game *game);
 
 //game

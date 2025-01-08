@@ -7,7 +7,7 @@ INC_DIR = inc
 CORE_DIR = ../../core
 
 # Source files
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/components/*.c) $(wildcard $(SRC_DIR)/layers/*.c)
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/components/*.c) $(wildcard $(SRC_DIR)/layers/*.c) $(wildcard $(SRC_DIR)/ui/*.c)
 OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(notdir $(SRC_FILES:%.c=%.o)))
 
 # Core library sources
@@ -45,6 +45,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_FILES)
 
 # Compile layers files with context
 $(OBJ_DIR)/%.o: $(SRC_DIR)/layers/%.c $(INC_FILES)
+	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitaire.h
+
+# Compile ui files with context
+$(OBJ_DIR)/%.o: $(SRC_DIR)/ui/%.c $(INC_FILES)
 	@$(CC) $(CFLAGS) -c $< -o $@ -I $(INC_DIR) -I $(CORE_INC_DIR) -include $(INC_DIR)/solitaire.h
 
 # Compile components files with context
