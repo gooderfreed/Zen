@@ -43,9 +43,9 @@ MapLayer *menu_layer_init(Arena *arena, Game *game) {
         .width = MENU_LAYER_WIDTH,
     };
 
-    menu_layer->objects = (MapObject **)arena_alloc(arena, menu_layer->height * sizeof(MapObject *));
+    menu_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(menu_layer->height) * sizeof(MapObject *));
     for (int i = 0; i < menu_layer->height; i++) {
-        menu_layer->objects[i] = (MapObject *)arena_alloc(arena, menu_layer->width * sizeof(MapObject));
+        menu_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(menu_layer->width) * sizeof(MapObject));
     }
     
     menu_layer->objects[0][0].object = &menu;

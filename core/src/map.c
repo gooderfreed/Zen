@@ -15,7 +15,7 @@ Map *init_map(Arena *arena, int layers, Coords global_coords) {
     *map = (Map) {
         .layers_count = layers,
         .global_coords = global_coords,
-        .layers = (MapLayer **)arena_alloc(arena, layers * sizeof(MapLayer *))
+        .layers = (MapLayer **)arena_alloc(arena, (size_t)(layers) * sizeof(MapLayer *))
     };
 
     return map;

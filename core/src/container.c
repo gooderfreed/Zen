@@ -17,7 +17,7 @@ Container *container_init(Arena *arena, int length) {
         .size = 0,
         .length = length,
         .source = NULL,
-        .container = (void **)arena_alloc(arena, length * sizeof(void *))
+        .container = (void **)arena_alloc(arena, (size_t)(length) * sizeof(void *))
     };
 
     return container;

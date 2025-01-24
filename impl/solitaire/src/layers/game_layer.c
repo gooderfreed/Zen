@@ -88,9 +88,9 @@ MapLayer *game_layer_init(Arena *arena, Container *container) {
         .width = GAME_LAYER_WIDTH,
     };
 
-    game_layer->objects = (MapObject **)arena_alloc(arena, game_layer->height * sizeof(MapObject *));
+    game_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(game_layer->height) * sizeof(MapObject *));
     for (int i = 0; i < game_layer->height; i++) {
-        game_layer->objects[i] = (MapObject *)arena_alloc(arena, game_layer->width * sizeof(MapObject));
+        game_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(game_layer->width) * sizeof(MapObject));
     }
 
     game_layer->objects[0][0].object = game->deck;

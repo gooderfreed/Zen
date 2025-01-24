@@ -22,8 +22,8 @@ static void print_stock(const void *stock_pointer, Screen *screen, const Cursor 
         }
         else {
             add_borders(screen, BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
-            screen->data[BORDER_OFFSET_Y + CARD_HEIGHT / 2][x + CARD_WIDTH / 2 - 1] = suit_to_text((Suit)suit);
-            screen->foreground[BORDER_OFFSET_Y + CARD_HEIGHT / 2][x + CARD_WIDTH / 2 - 1] = (suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
+            screen->pixels[BORDER_OFFSET_Y + CARD_HEIGHT / 2][x + CARD_WIDTH / 2 - 1].symbol = suit_to_text((Suit)suit);
+            screen->pixels[BORDER_OFFSET_Y + CARD_HEIGHT / 2][x + CARD_WIDTH / 2 - 1].foreground = (suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
         }
     }
 }

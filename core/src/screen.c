@@ -74,19 +74,16 @@ Screen *init_screen(Arena *arena, int width, int height, Color background, Color
     Screen *screen = (Screen *)arena_alloc(arena, sizeof(Screen));
     screen->width = width;
     screen->height = height;
-
-    screen->background = (Color **)   arena_alloc(arena, (size_t)(height) * sizeof(Color *));
-    screen->foreground = (Color **)   arena_alloc(arena, (size_t)(height) * sizeof(Color *));
-    screen->data       = (wchar_t **) arena_alloc(arena, (size_t)(height) * sizeof(wchar_t *));
+    screen->pixels = (Pixel **)arena_alloc(arena, (size_t)(height) * sizeof(Pixel *));
 
     for (int i = 0; i < height; i++) {
-        screen->background[i] = (Color *)   arena_alloc(arena, width * sizeof(Color));
-        screen->foreground[i] = (Color *)   arena_alloc(arena, width * sizeof(Color));
-        screen->data[i]       = (wchar_t *) arena_alloc(arena, width * sizeof(wchar_t));
+        screen->pixels[i] = (Pixel *)arena_alloc(arena, (size_t)(width) * sizeof(Pixel));
         for (int j = 0; j < screen->width; j++) {
-            screen->background[i][j] = background;
-            screen->data[i][j] = symbol;
-            screen->foreground[i][j] = foreground;
+            screen->pixels[i][j] = (Pixel) {
+                .background = background,
+                .foreground = foreground,
+                .symbol = symbol
+            };
         }
     }
 
@@ -114,29 +111,22 @@ void screen_shutdown(Screen *screen) {
  * Creates a border using provided border characters
  */
 void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders) {
+    Pixel horizontal_pixel = (Pixel) {background, foreground, borders[0]};
     for (int i = 0; i < width; ++i) {
-        screen->background[y][x + i] = background;
-        screen->data[y][x + i] = borders[0];
-        screen->foreground[y][x + i] = foreground;
-
-        screen->background[y + height - 1][x + i] = background;
-        screen->data[y + height - 1][x + i] = borders[0];
-        screen->foreground[y + height - 1][x + i] = foreground;
+        screen->pixels[y][x + i] = horizontal_pixel;
+        screen->pixels[y + height - 1][x + i] = horizontal_pixel;
     }
+
+    Pixel vertical_pixel = (Pixel) {background, foreground, borders[1]};
     for (int i = 0; i < height; ++i) {
-        screen->background[y + i][x] = background;
-        screen->data[y + i][x] = borders[1];
-        screen->foreground[y + i][x] = foreground;
-        
-        screen->background[y + i][x + width - 1] = background;
-        screen->data[y + i][x + width - 1] = borders[1];
-        screen->foreground[y + i][x + width - 1] = foreground;
+        screen->pixels[y + i][x] = vertical_pixel;
+        screen->pixels[y + i][x + width - 1] = vertical_pixel;
     }
 
-    screen->data[y][x] = borders[2];
-    screen->data[y][x + width - 1] = borders[3];
-    screen->data[y + height - 1][x] = borders[4];
-    screen->data[y + height - 1][x + width - 1] = borders[5];
+    screen->pixels[y][x].symbol = borders[2];
+    screen->pixels[y][x + width - 1].symbol = borders[3];
+    screen->pixels[y + height - 1][x].symbol = borders[4];
+    screen->pixels[y + height - 1][x + width - 1].symbol = borders[5];
 }
 
 /*
@@ -144,13 +134,12 @@ void add_borders(Screen *screen, int y, int x, int height, int width, Color back
  * Used for visual separation of screen areas
  */
 void add_separator(Screen *screen, int y, int x, Color background, Color foreground , const wchar_t *borders) {
+    Pixel pixel = (Pixel) {background, foreground, borders[0]};
     for (int i = 0; i < screen->width; ++i) {
-        screen->background[y][x + i] = background;
-        screen->data[y][x + i] = borders[0];
-        screen->foreground[y][x + i] = foreground;
+        screen->pixels[y][x + i] = pixel;
     }
-    screen->data[y][x] = borders[6];
-    screen->data[y][screen->width - 1] = borders[7];
+    screen->pixels[y][x].symbol = borders[6];
+    screen->pixels[y][screen->width - 1].symbol = borders[7];
 }
 
 /*
@@ -161,7 +150,7 @@ void print_screen(const Screen *screen) {
     gotoxy(0, 0);
     for (int y = 0; y < screen->height; ++y) {
         for (int x = 0; x < screen->width; ++x) {
-            wprintf(L"%s%sm%lc\033[0m", get_background(screen->background[y][x]), get_foreground(screen->foreground[y][x]), screen->data[y][x]);
+            wprintf(L"%s%sm%lc\033[0m", get_background(screen->pixels[y][x].background), get_foreground(screen->pixels[y][x].foreground), screen->pixels[y][x].symbol);
         }
         wprintf(L"\n");
     }
@@ -172,11 +161,10 @@ void print_screen(const Screen *screen) {
  * Fills the area with specified symbol, background and foreground formatting
  */
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground) {
+    Pixel pixel = (Pixel) {background, foreground, symbol};
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
-            screen->background[i][j] = background;
-            screen->data[i][j] = symbol;
-            screen->foreground[i][j] = foreground;
+            screen->pixels[i][j] = pixel;
         }
     }
 }
@@ -189,10 +177,10 @@ void insert_text(Screen *screen, int y, int x, const char *text, Color foregroun
     int text_length;
     for (text_length = 0; text[text_length] != '\0'; text_length++);
     
+    Pixel pixel = (Pixel) {background, foreground, ' '};
     for (int i = 0; i < text_length; i++) {
-        screen->data[y][x + i] = text[i];
-        screen->foreground[y][x + i] = foreground;
-        screen->background[y][x + i] = background;
+        screen->pixels[y][x + i] = pixel;
+        screen->pixels[y][x + i].symbol = text[i];
     }
 }
 
@@ -251,13 +239,13 @@ void screen_draw_cursor(Screen *screen, Coords coords, CursorType type) {
     const wchar_t *cursor_string = get_cursor_string(type);
     if (cursor_string) {
         if (type <= CURSOR_WIDE) {
-            screen->data[coords.y][coords.x] = cursor_string[0];
+            screen->pixels[coords.y][coords.x].symbol = cursor_string[0];
         } else {
-            screen->data[coords.y][coords.x] = cursor_string[1];
+            screen->pixels[coords.y][coords.x].symbol = cursor_string[1];
             if (cursor_string[0] == L'H') {
-                screen->data[coords.y][coords.x + 1] = cursor_string[2];
+                screen->pixels[coords.y][coords.x + 1].symbol = cursor_string[2];
             } else {
-                screen->data[coords.y + 1][coords.x] = cursor_string[2];
+                screen->pixels[coords.y + 1][coords.x].symbol = cursor_string[2];
             }
         }
     }

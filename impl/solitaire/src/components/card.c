@@ -55,8 +55,8 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
         fill_area(screen, y_0, x_0, size_y, size_x, L'░', COLOR_RESET, COLOR_RESET);
         add_borders(screen, y_0, x_0, size_y, size_x, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
         if (y != CARD_HEIGHT + 2 * BORDER_OFFSET_Y + 1 && y != BORDER_OFFSET_Y) {
-            screen->data[y_0][x_0] = card_border[6];
-            screen->data[y_0][x_0 + CARD_WIDTH - 1] = card_border[7];
+            screen->pixels[y_0][x_0].symbol = card_border[6];
+            screen->pixels[y_0][x_0 + CARD_WIDTH - 1].symbol = card_border[7];
         }
         return;
     }
@@ -66,29 +66,29 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
     add_borders(screen, y_0, x_0, size_y, size_x, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
 
     if (y != CARD_HEIGHT + 2 * BORDER_OFFSET_Y + 1 && y != BORDER_OFFSET_Y) {
-        screen->data[y_0][x_0] = card_border[6];
-        screen->data[y_0][x_0 + CARD_WIDTH - 1] = card_border[7];
+        screen->pixels[y_0][x_0].symbol = card_border[6];
+        screen->pixels[y_0][x_0 + CARD_WIDTH - 1].symbol = card_border[7];
     }
 
     if (card->selected) {
-        screen->data[y_0][x_0 + 3] = L'◖';
-        screen->data[y_0][x_0 + 4] = L'◗';
+        screen->pixels[y_0][x_0 + 3].symbol = L'◖';
+        screen->pixels[y_0][x_0 + 4].symbol = L'◗';
     }
 
     wchar_t suit = suit_to_text(card->suit);
-    screen->data[y_0 + 1][x_0 + 1] = suit;
-    screen->data[y_0 + CARD_HEIGHT / 2][x_0 + CARD_WIDTH / 2 - 1] = suit;
-    screen->data[y_0 + CARD_HEIGHT - 2][x_0 + CARD_WIDTH - 3] = suit;
+    screen->pixels[y_0 + 1][x_0 + 1].symbol = suit;
+    screen->pixels[y_0 + CARD_HEIGHT / 2][x_0 + CARD_WIDTH / 2 - 1].symbol = suit;
+    screen->pixels[y_0 + CARD_HEIGHT - 2][x_0 + CARD_WIDTH - 3].symbol = suit;
 
     const char *numeral = numeral_to_text(card->numeral);
-    screen->data[y_0 + 1][x_0 + CARD_WIDTH - 3] = numeral[0];
-    screen->data[y_0 + 1][x_0 + CARD_WIDTH - 2] = numeral[1];
+    screen->pixels[y_0 + 1][x_0 + CARD_WIDTH - 3].symbol = numeral[0];
+    screen->pixels[y_0 + 1][x_0 + CARD_WIDTH - 2].symbol = numeral[1];
     if (numeral[0] == ' ') {
-        screen->data[y_0 + CARD_HEIGHT - 2][x_0 + 1] = numeral[1];
+        screen->pixels[y_0 + CARD_HEIGHT - 2][x_0 + 1].symbol = numeral[1];
     }
     else {
-        screen->data[y_0 + CARD_HEIGHT - 2][x_0 + 1] = numeral[0];
-        screen->data[y_0 + CARD_HEIGHT - 2][x_0 + 2] = numeral[1];
+        screen->pixels[y_0 + CARD_HEIGHT - 2][x_0 + 1].symbol = numeral[0];
+        screen->pixels[y_0 + CARD_HEIGHT - 2][x_0 + 2].symbol = numeral[1];
     }
 }
 
@@ -101,22 +101,21 @@ void colorize_card(Screen *screen, const Card *card, int y, int x, int height, i
         return;
     }
 
+    Pixel pixel = (Pixel) { COLOR_WHITE, COLOR_RESET, ' ' };
     for (int i = y; i < y + height; i++) {
         for (int j = x; j < x + width; j++) {
             if (i < SCREEN_HEIGHT && j < SCREEN_WIDTH) {
-                screen->background[i][j] = COLOR_WHITE;
-                screen->data[i][j] = ' ';
-                screen->foreground[i][j] = COLOR_RESET;
+                screen->pixels[i][j] = pixel;
             }
         }
     }
 
-    screen->foreground[y][x] = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
-    screen->foreground[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1] = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
-    screen->foreground[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1] = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
+    screen->pixels[y][x].foreground = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
+    screen->pixels[y + CARD_HEIGHT / 2 - 1][x + CARD_WIDTH / 2 - 1 - 1].foreground  = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
+    screen->pixels[y + CARD_HEIGHT - 2 - 1][x + CARD_WIDTH - 3 - 1].foreground  = (card->suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
 
-    screen->foreground[y][x + width - 2] = COLOR_BLACK;
-    screen->foreground[y][x + width - 1] = COLOR_BLACK;
-    screen->foreground[y + height - 1][x] = COLOR_BLACK;
-    if (card->numeral % 10 == 0) screen->foreground[y + height - 1][x + 1] = COLOR_BLACK;
+    screen->pixels[y][x + width - 2].foreground = COLOR_BLACK;
+    screen->pixels[y][x + width - 1].foreground = COLOR_BLACK;
+    screen->pixels[y + height - 1][x].foreground = COLOR_BLACK;
+    if (card->numeral % 10 == 0) screen->pixels[y + height - 1][x + 1].foreground = COLOR_BLACK;
 }

@@ -44,9 +44,9 @@ MapLayer *win_layer_init(Arena *arena, Game *game) {
         .width = WIN_LAYER_WIDTH,
     };
 
-    win_layer->objects = (MapObject **)arena_alloc(arena, win_layer->height * sizeof(MapObject *));
+    win_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(win_layer->height) * sizeof(MapObject *));
     for (int i = 0; i < win_layer->height; i++) {
-        win_layer->objects[i] = (MapObject *)arena_alloc(arena, win_layer->width * sizeof(MapObject));
+        win_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(win_layer->width) * sizeof(MapObject));
     }
     
     win_layer->objects[0][0].object = &win_screen;

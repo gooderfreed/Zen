@@ -7,6 +7,7 @@
  * Do not include this file in your object
  */
 typedef unsigned char Color;
+typedef struct Pixel Pixel;
 typedef struct Screen Screen;
 
 typedef struct Block Block;
