@@ -35,17 +35,6 @@ const char *get_foreground(Color color);
 const char *get_background(Color color);
 
 /*
- * Screen dimensions
- * Can be overridden by implementation
- */
-#ifndef SCREEN_HEIGHT
-    #define SCREEN_HEIGHT 1
-#endif
-#ifndef SCREEN_WIDTH
-    #define SCREEN_WIDTH 1
-#endif
-
-/*
  * Terminal control macros
  * Basic terminal manipulation commands
  */
@@ -59,34 +48,28 @@ const char *get_background(Color color);
  * Represents the game screen with background, foreground and actual data layers
  */
 #ifndef CUSTOM_SCREEN
-    struct Screen {
-        #ifdef SCREEN_DYNAMIC
-            int height;
-            int width;
-            Color **background;
-            wchar_t **data;
-            Color **foreground;
-        #else
-            Color background[SCREEN_HEIGHT][SCREEN_WIDTH];  // Background colors/effects
-            wchar_t data[SCREEN_HEIGHT][SCREEN_WIDTH];      // Actual characters
-            Color foreground[SCREEN_HEIGHT][SCREEN_WIDTH];  // Foreground colors/effects
-        #endif
-    };
+struct Screen {
+    int height;           // height of the screen
+    int width;            // width of the screen
+    Color **background;   // Background colors/effects
+    wchar_t **data;       // Actual characters 
+    Color **foreground;   // Foreground colors/effects
+};
 
-    /*
-    * Screen functions
-    * Screen manipulation and drawing
-    */
-    Screen init_screen(Color background, Color foreground, wchar_t symbol);
-    void screen_shutdown(Screen *screen);
-    void print_screen(const Screen *screen);
-    void add_separator(Screen *screen, int y, int x, Color background, Color foreground, const wchar_t *borders);
-    void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
-    void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
-    void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background);
-    void screen_draw_cursor(Screen *screen, Coords coords, CursorType type);
-    void set_noncanonical_mode(void);
-    void restore_terminal_settings(void);
+/*
+* Screen functions
+* Screen manipulation and drawing
+*/
+Screen *init_screen(Arena *arena, int width, int height, Color background, Color foreground, wchar_t symbol);
+void screen_shutdown(Screen *screen);
+void print_screen(const Screen *screen);
+void add_separator(Screen *screen, int y, int x, Color background, Color foreground, const wchar_t *borders);
+void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
+void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
+void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background);
+void screen_draw_cursor(Screen *screen, Coords coords, CursorType type);
+void set_noncanonical_mode(void);
+void restore_terminal_settings(void);
 #endif
 
 

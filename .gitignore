@@ -53,6 +53,7 @@ dkms.conf
 
 # IDE
 .vscode/
+.timetracker
 
 # Projects executable
 impl/*/solitaire

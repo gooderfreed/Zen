@@ -9,6 +9,9 @@
 typedef unsigned char Color;
 typedef struct Screen Screen;
 
+typedef struct Block Block;
+typedef struct Arena Arena;
+
 typedef struct Map Map;
 typedef struct MapLayer MapLayer;
 typedef struct MapObject MapObject;

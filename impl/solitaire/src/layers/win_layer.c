@@ -28,19 +28,29 @@ static void win_loop(Core *core, wint_t key) {
  * Prepare win screen
  * Prepares the win screen for drawing
  */
-MapLayer win_layer_init(Game *game) {
+MapLayer *win_layer_init(Arena *arena, Game *game) {
     static WinScreen win_screen = {0};
     win_screen = init_win_screen();
 
     SET_BUTTON_CONTEXT(&win_screen, 0, game);
 
-    return (MapLayer) {
+    MapLayer *win_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
+
+    *win_layer = (MapLayer) {
         .prepare_screen = prepare_win_screen,
-        .default_layer_coords = WIN_DEFAULT_COORDS,
         .layer_loop = win_loop,
-        .objects = {
-            [0][0] = {.object = &win_screen}
-        }
+        .default_layer_coords = WIN_DEFAULT_COORDS,
+        .height = WIN_LAYER_HEIGHT,
+        .width = WIN_LAYER_WIDTH,
     };
+
+    win_layer->objects = (MapObject **)arena_alloc(arena, win_layer->height * sizeof(MapObject *));
+    for (int i = 0; i < win_layer->height; i++) {
+        win_layer->objects[i] = (MapObject *)arena_alloc(arena, win_layer->width * sizeof(MapObject));
+    }
+    
+    win_layer->objects[0][0].object = &win_screen;
+
+    return win_layer;
 }
 

@@ -2,7 +2,6 @@
  * Core engine header - defines interfaces and base structures for card games
  * This is the main interface file that all implementations must include
  */
-
 #ifndef CORE_H
 #define CORE_H
 
@@ -11,16 +10,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <locale.h>
-
-/*
- * Dynamic memory configuration
- * Define DYNAMIC to enable all dynamic memory features
- */
-#ifdef DYNAMIC
-    #define CONTAINER_DYNAMIC
-    #define SCREEN_DYNAMIC
-    #define MAP_DYNAMIC
-#endif
+#include <stdlib.h>
 
 #include "interfaces/interfaces.h"
 #include "components/components.h"
@@ -41,9 +31,10 @@
  * Main game engine structure containing all necessary components
  */
 typedef struct Core {
-    Cursor *cursor;  // Game cursor
-    Screen *screen;  // Game screen
-    Map *map;        // Game map
+    Cursor *cursor;  // cursor
+    Screen *screen;  // screen
+    Arena  *arena;   // arena allocator
+    Map    *map;     // map
 } Core;
 
 
@@ -51,6 +42,7 @@ typedef struct Core {
  * Core functions
  * Main engine functionality
  */
+Core *core_init(Arena *arena);
 void core_set_map(Core *core, Map *map);
 void core_manage_loop(Core *core, wint_t key);
 void core_set_cursor(Core *core, Cursor *cursor);

@@ -9,8 +9,11 @@
  * Initialize cursor with starting object and position
  * Returns cursor structure ready for use
  */
-Cursor init_cursor(void *start_object, Coords start_coords, Container *cursor_cards) {
-    Cursor cursor = {
+Cursor *init_cursor(Arena *arena, void *start_object, Coords start_coords, Container *cursor_cards) {
+    Cursor *cursor = (Cursor *)arena_alloc(arena, sizeof(Cursor));
+    wprintf(L"cursor in: %p\n", cursor);
+
+    *cursor = (Cursor) {
         .coords = start_coords,
         .cards = cursor_cards,
         .subject = start_object,

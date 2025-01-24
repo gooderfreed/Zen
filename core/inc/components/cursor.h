@@ -19,7 +19,7 @@
  */
 struct Cursor {
     Coords coords;          // Current cursor position
-    Container *cards;        // Currently selected cards
+    Container *cards;       // Currently selected cards
     void *subject;          // Object under cursor
 };
 
@@ -59,7 +59,7 @@ typedef struct CursorConfig {
  * Cursor functions
  * Cursor manipulation and rendering
  */
-Cursor init_cursor(void *start_object, Coords start_coords, Container *cursor_cards);
+Cursor *init_cursor(Arena *arena, void *start_object, Coords start_coords, Container *cursor_cards);
 void print_cursor(Cursor *cursor, Screen *screen);
 void set_cursor(Cursor *cursor, Coords coords, void *target_subject);
 

@@ -5,12 +5,14 @@
 #include "../inc/core.h"
 
 /*
- * Shutdown core engine
- * Frees all dynamic objects and shuts down screen
+ * Initialize core structure
+ * Allocates memory for the core structure and binds it to the given arena
  */
-void core_shutdown(Core *core) {
-    screen_shutdown(core->screen);
-    core_free(core);
+Core *core_init(Arena *arena) {
+    Core *core = (Core *)arena_alloc(arena, sizeof(Core));
+    core->arena = arena;
+
+    return core;
 }
 
 /*
@@ -31,9 +33,10 @@ void core_set_map(Core *core, Map *map) {
         .shutdown = core_shutdown
     };
 
-    for (int z = 0; z < MAP_LAYERS; z++) {
-        for (int y = 0; y < MAP_HEIGHT; y++) {
-            for (int x = 0; x < MAP_WIDTH; x++) {
+    for (int z = 0; z < map->layers_count; z++) {
+        MapLayer *layer = map_get_layer(map, z);
+        for (int y = 0; y < layer->height; y++) {
+            for (int x = 0; x < layer->width; x++) {
                 MapObject object = map_get_object(map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
                 if (!object.object) continue;
 
@@ -74,6 +77,17 @@ void core_set_screen(Core *core, Screen *screen) {
  */
 Screen *core_get_screen(Core *core) {
     return core->screen;
+}
+
+/*
+ * Shutdown core engine
+ * Frees all dynamic objects and shuts down screen
+ */
+void core_shutdown(Core *core) {
+    screen_shutdown(core->screen);
+    core_free(core);
+    print_arena(core->arena);
+    arena_free(core->arena);
 }
 
 /*
@@ -143,8 +157,8 @@ void core_action(Core *core) {
 void core_update_screen(Core *core) {
     // Draw all objects on map
     MapLayer *layer = map_get_current_layer(core->map);
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
+    for (int y = 0; y < layer->height; y++) {
+        for (int x = 0; x < layer->width; x++) {
             void *target_struct = layer->objects[y][x].object;
             if (!target_struct) continue;
             
@@ -190,9 +204,10 @@ void core_global_move(Core *core, Coords move) {
  * Called during shutdown to prevent memory leaks
  */
 void core_free(Core *core) {
-    for (int z = 0; z < MAP_LAYERS; z++) {
-        for (int y = 0; y < MAP_HEIGHT; y++) {
-            for (int x = 0; x < MAP_WIDTH; x++) {
+    for (int z = 0; z < core->map->layers_count; z++) {
+        MapLayer *layer = map_get_layer(core->map, z);
+        for (int y = 0; y < layer->height; y++) {
+            for (int x = 0; x < layer->width; x++) {
                 MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
                 if (!object.object) continue;
 
@@ -210,8 +225,8 @@ void core_free(Core *core) {
  */
 void core_update(Core *core) {
     MapLayer *layer = map_get_current_layer(core->map);
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
+    for (int y = 0; y < layer->height; y++) {
+        for (int x = 0; x < layer->width; x++) {
             MapObject object = layer->objects[y][x];
             if (!object.object) continue;
 
@@ -228,9 +243,10 @@ void core_update(Core *core) {
  * Exits program if validation fails
  */
 void core_validate_interfaces(Core *core) {
-    for (int z = 0; z < MAP_LAYERS; z++) {
-        for (int y = 0; y < MAP_HEIGHT; y++) {
-            for (int x = 0; x < MAP_WIDTH; x++) {
+    for (int z = 0; z < core->map->layers_count; z++) {
+        MapLayer *layer = map_get_layer(core->map, z);
+        for (int y = 0; y < layer->height; y++) {
+            for (int x = 0; x < layer->width; x++) {
                 MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
                 if (!object.object) continue;
                 

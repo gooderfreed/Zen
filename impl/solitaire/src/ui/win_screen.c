@@ -50,7 +50,6 @@ static void move_in_menu(const void *win_screen_pointer, Coords *coords, const C
 
     if (delta.x != 0) return;
     short new_y = coords->y + delta.y;
-    // if (new_y < 0) new_y = 2;
     coords->y = (new_y + 3) % 3;
 }
 

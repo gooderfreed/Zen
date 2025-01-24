@@ -19,11 +19,13 @@ CORE_INC_FILES = $(wildcard $(CORE_INC_DIR)/*.h)
 
 # Compiler settings
 CC = clang
-CFLAGS = -std=c11 -Oz $(addprefix -f, visibility=hidden no-math-errno omit-frame-pointer fast-math merge-all-constants function-sections data-sections lto short-enums no-common stack-protector-strong) \
-            $(addprefix -W, all extra error pedantic conversion null-dereference \
-            cast-align unreachable-code strict-prototypes bad-function-cast \
-            strict-aliasing shadow double-promotion missing-prototypes \
-            missing-declarations pointer-arith format=2) \
+# CFLAGS = -std=c11 -Oz $(addprefix -f, visibility=hidden no-math-errno omit-frame-pointer fast-math merge-all-constants function-sections data-sections lto short-enums no-common stack-protector-strong) \
+#             $(addprefix -W, all extra error pedantic conversion null-dereference \
+#             cast-align unreachable-code strict-prototypes bad-function-cast \
+#             strict-aliasing shadow double-promotion missing-prototypes \
+#             missing-declarations pointer-arith format=2) \
+#             -I$(INC_DIR) -I$(CORE_INC_DIR)
+CFLAGS = -std=c11 -O0 -g3 -ggdb \
             -I$(INC_DIR) -I$(CORE_INC_DIR)
 
 AR = ar
@@ -35,7 +37,7 @@ all: $(NAMEBIN) clean
 
 $(NAMEBIN): $(OBJ_FILES) $(CORE_OBJ_FILES)
 	@$(CC) $(CFLAGS) $^ -o $@
-	@strip $@
+#   @strip $@
 
 $(OBJ_FILES): | $(OBJ_DIR)
 

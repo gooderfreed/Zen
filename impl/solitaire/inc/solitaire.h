@@ -16,9 +16,6 @@
  * Extends core engine with specific card game logic
  */
 
-// Game specific types
-// ------------------
-
 /*
  * Card suits enumeration
  * Classic playing card suits
@@ -165,16 +162,16 @@ void colorize_card(Screen *screen, const Card *card, int y, int x, int height, i
 
 //menu
 Menu init_menu(void);
-MapLayer menu_layer_init(Game *game);
+MapLayer *menu_layer_init(Arena *arena, Game *game);
 void prepare_menu_screen(Screen *screen);
 Controls init_controls(void);
 
 //winscreen
 WinScreen init_win_screen(void);
-MapLayer win_layer_init(Game *game);
+MapLayer *win_layer_init(Arena *arena, Game *game);
 
 //game
-MapLayer game_layer_init(Container *container);
+MapLayer *game_layer_init(Arena *arena, Container *container);
 void game_reset(Game *game);
 
 #endif

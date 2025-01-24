@@ -7,36 +7,28 @@
  * Initializes the game with all necessary components
  */
 static void init_game(Core *core) {
-    static Screen screen;
-    static Container cursor_container;
-    static MapLayer game_layer, menu_layer, win_layer;
-    static Map map;
-    static Cursor cursor;
-
-    screen = init_screen(COLOR_GREEN, COLOR_RESET, ' ');
-    cursor_container = container_init();
-    
-    game_layer = game_layer_init(&cursor_container);
-    Game *game  = (Game *)game_layer.layer_main_object;
-    menu_layer = menu_layer_init(game);
-    win_layer  = win_layer_init(game);
+    Arena *arena = core->arena;
+    // width  58
+    // height 53
+    Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_RESET, ' ');
+    Container *cursor_container = container_init(arena, CONTAINER_SIZE);
+    MapLayer *game_layer = game_layer_init(arena, cursor_container);
+    Game *game  = (Game *)game_layer->layer_main_object;
+    MapLayer *menu_layer = menu_layer_init(arena, game);
+    MapLayer *win_layer  = win_layer_init(arena, game);
 
     // create map
-    map = (Map) {
-        .layers = {
-            [MENU_ID] = menu_layer,
-            [GAME_ID] = game_layer,
-            [WIN_ID]  = win_layer,
-        },
-        .global_coords = (Coords) {.x = 0, .y = 0, .z = 0}
-    };
+    Map *map = init_map(arena, GAME_LAYERS, (Coords) {.x = 0, .y = 0, .z = 0});
+    map_set_layer(map, menu_layer, MENU_ID);
+    map_set_layer(map, game_layer, GAME_ID);
+    map_set_layer(map, win_layer,  WIN_ID);
 
-    MapObject object = map_get_current_object(&map);
-    cursor = init_cursor(object.object, GET_DEFAULT_COORDS(object.object), &cursor_container);
+    MapObject object = map_get_current_object(map);
+    Cursor *cursor = init_cursor(arena, object.object, GET_DEFAULT_COORDS(object.object), cursor_container);
 
-    core_set_cursor(core, &cursor);
-    core_set_screen(core, &screen);
-    core_set_map(core, &map);
+    core_set_cursor(core, cursor);
+    core_set_screen(core, screen);
+    core_set_map(core, map);
 }
 
 /*
@@ -76,8 +68,12 @@ static void game_loop(Core *core) {
 
 int main(void) {
     srand((unsigned int)time(NULL));
-    Core core = {0};
+
+    size_t size = 1024 * 1024;
+    Arena *arena = arena_new_dynamic(size);
+
+    Core *core = core_init(arena);
     
-    init_game(&core);
-    game_loop(&core);
+    init_game(core);
+    game_loop(core);
 }

@@ -7,10 +7,13 @@
  * Include this file in your object to use components
  */
 #include "../primitives/primitives.h"
+
+#include "arena_alloc.h"
 #include "coords.h"
 #include "container.h"
 #include "screen.h"
 #include "cursor.h"
 #include "map.h"
 #include "card.h"
+
 #endif

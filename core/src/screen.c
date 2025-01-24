@@ -70,21 +70,30 @@ const char *get_background(Color color) {
  * Initialize empty screen
  * Creates screen structure with cleared buffers
  */
-Screen init_screen(Color background, Color foreground, wchar_t symbol) {
-    Screen screen = {0};
+Screen *init_screen(Arena *arena, int width, int height, Color background, Color foreground, wchar_t symbol) {
+    Screen *screen = (Screen *)arena_alloc(arena, sizeof(Screen));
+    screen->width = width;
+    screen->height = height;
+
+    screen->background = (Color **)   arena_alloc(arena, (size_t)(height) * sizeof(Color *));
+    screen->foreground = (Color **)   arena_alloc(arena, (size_t)(height) * sizeof(Color *));
+    screen->data       = (wchar_t **) arena_alloc(arena, (size_t)(height) * sizeof(wchar_t *));
+
+    for (int i = 0; i < height; i++) {
+        screen->background[i] = (Color *)   arena_alloc(arena, width * sizeof(Color));
+        screen->foreground[i] = (Color *)   arena_alloc(arena, width * sizeof(Color));
+        screen->data[i]       = (wchar_t *) arena_alloc(arena, width * sizeof(wchar_t));
+        for (int j = 0; j < screen->width; j++) {
+            screen->background[i][j] = background;
+            screen->data[i][j] = symbol;
+            screen->foreground[i][j] = foreground;
+        }
+    }
 
     set_noncanonical_mode();
     setlocale(LC_ALL, "");
     hide_cursor();
     clear();
-
-    for (int i = 0; i < SCREEN_HEIGHT; i++) {
-        for (int j = 0; j < SCREEN_WIDTH; j++) {
-            screen.background[i][j] = background;
-            screen.data[i][j] = symbol;
-            screen.foreground[i][j] = foreground;
-        }
-    }
 
     return screen;
 }
@@ -135,13 +144,13 @@ void add_borders(Screen *screen, int y, int x, int height, int width, Color back
  * Used for visual separation of screen areas
  */
 void add_separator(Screen *screen, int y, int x, Color background, Color foreground , const wchar_t *borders) {
-    for (int i = 0; i < SCREEN_WIDTH; ++i) {
+    for (int i = 0; i < screen->width; ++i) {
         screen->background[y][x + i] = background;
         screen->data[y][x + i] = borders[0];
         screen->foreground[y][x + i] = foreground;
     }
     screen->data[y][x] = borders[6];
-    screen->data[y][SCREEN_WIDTH - 1] = borders[7];
+    screen->data[y][screen->width - 1] = borders[7];
 }
 
 /*
@@ -150,8 +159,8 @@ void add_separator(Screen *screen, int y, int x, Color background, Color foregro
  */
 void print_screen(const Screen *screen) {
     gotoxy(0, 0);
-    for (int y = 0; y < SCREEN_HEIGHT; ++y) {
-        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+    for (int y = 0; y < screen->height; ++y) {
+        for (int x = 0; x < screen->width; ++x) {
             wprintf(L"%s%sm%lc\033[0m", get_background(screen->background[y][x]), get_foreground(screen->foreground[y][x]), screen->data[y][x]);
         }
         wprintf(L"\n");

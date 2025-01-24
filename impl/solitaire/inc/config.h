@@ -1,29 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define MAP_LAYERS 3
-#define MAP_HEIGHT 1
-#define MAP_WIDTH 3
-
-#define BUTTON_HANDLER_SIZE 4
-
-#define MENU_DEFAULT_COORDS (Coords){.x = 0, .y = 0}
-#define GAME_DEFAULT_COORDS (Coords){.x = 1, .y = 0}
-#define WIN_DEFAULT_COORDS  (Coords){.x = 0, .y = 0}
-
-#define MENU_ID 0
-#define GAME_ID 1
-#define WIN_ID  2
-
-
-#define WIN_SCREEN_HEIGHT 20
-#define WIN_SCREEN_WIDTH 39
-
 #define CARD_NUMERALS 13
-
 #define CARD_SCALE_FACTOR 7
 #define CARD_COVERED_HEIGHT 2
-
 #define CARD_HEIGHT CARD_SCALE_FACTOR
 #define CARD_WIDTH (CARD_SCALE_FACTOR + 1)
 
@@ -44,6 +24,26 @@
 #define STOCK_AREA_WIDTH (4 * CARD_WIDTH)
 #define STOCK_CURSOR_BASE_X (STOCK_X_BASE + (CARD_WIDTH / 2 - 1))
 
+#define GAME_LAYERS 3
+
+#define MENU_LAYER_WIDTH  2
+#define MENU_LAYER_HEIGHT 1
+#define MENU_ID 0
+#define MENU_DEFAULT_COORDS (Coords){.x = 0, .y = 0}
+
+#define GAME_LAYER_WIDTH  3
+#define GAME_LAYER_HEIGHT 1
+#define GAME_ID 1
+#define GAME_DEFAULT_COORDS (Coords){.x = 1, .y = 0}
+
+#define WIN_LAYER_WIDTH  1
+#define WIN_LAYER_HEIGHT 1
+#define WIN_ID  2
+#define WIN_DEFAULT_COORDS  (Coords){.x = 0, .y = 0}
+#define WIN_SCREEN_HEIGHT 20
+#define WIN_SCREEN_WIDTH 39
+
+#define BUTTON_HANDLER_SIZE 4
 #define CONTAINER_SIZE CARD_NUMERALS
 
 #endif
