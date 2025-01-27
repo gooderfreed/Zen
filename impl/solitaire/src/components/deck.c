@@ -2,7 +2,7 @@
  * Deck implementation
  * Handles deck object management and card drawing
  */
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Draw deck on screen

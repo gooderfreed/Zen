@@ -2,7 +2,7 @@
  * Field implementation
  * Handles field object management and card placement
  */
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Print field content to screen
@@ -92,7 +92,7 @@ static Coords get_default_coords(const void *field_pointer) {
 static CursorConfig get_cursor_config_in_field(const void *field_pointer, const Coords cursor_coords) {
     (void)field_pointer;
     (void)cursor_coords;
-    return (CursorConfig) {.type = CURSOR_UP_WIDE};
+    return (CursorConfig) {.type = CURSOR_UP_WIDE, .background = COLOR_NONE, .foreground = COLOR_BOLD};
 }
 
 /*

@@ -89,8 +89,8 @@ typedef struct Stock {
  * Represents the tableau of cards in Solitaire
  */
 typedef struct Field {
-    ObjectInterfaces interfaces;                   // Core engine interfaces
-    Card *field[FIELD_HEIGHT][FIELD_WIDTH];        // Tableau columns for card placement
+    ObjectInterfaces interfaces;                // Core engine interfaces
+    Card *field[FIELD_HEIGHT][FIELD_WIDTH];     // Tableau columns for card placement
 } Field;
 
 /*
@@ -102,6 +102,10 @@ typedef struct Menu {
     bool start_game : 1;             // Start game flag
 } Menu;
 
+/*
+ * Controls structure
+ * Represents the controls screen of the game
+ */
 typedef struct Controls {
     ObjectInterfaces interfaces;     // Core engine interfaces
 } Controls;
@@ -118,8 +122,7 @@ typedef struct WinScreen {
  * Game structure
  * Contains all game components
  */
-typedef struct Game
-{
+typedef struct Game {
     Deck *deck;
     Field *field;
     Stock *stock;

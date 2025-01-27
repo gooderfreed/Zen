@@ -11,7 +11,6 @@
  */
 Cursor *init_cursor(Arena *arena, void *start_object, Coords start_coords, Container *cursor_cards) {
     Cursor *cursor = (Cursor *)arena_alloc(arena, sizeof(Cursor));
-    wprintf(L"cursor in: %p\n", cursor);
 
     *cursor = (Cursor) {
         .coords = start_coords,
@@ -38,6 +37,9 @@ void print_cursor(Cursor *cursor, Screen *screen) {
         PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
 
         CursorConfig config = GET_CURSOR_CONFIG(cursor->subject, cursor->coords);
+        // if (config.type != CURSOR_CUSTOM) {
+        //     if (config.foreground == COLOR_UNDEFINED) config.foreground = COLOR_NONE;
+        // }
 
         // If subject has custom cursor, let it draw it
         if (config.type == CURSOR_CUSTOM) {
@@ -46,7 +48,7 @@ void print_cursor(Cursor *cursor, Screen *screen) {
         }
 
         // Otherwise, draw default cursor
-        screen_draw_cursor(screen, base_coords, config.type);
+        screen_draw_cursor(screen, base_coords, config);
     }
     
 }

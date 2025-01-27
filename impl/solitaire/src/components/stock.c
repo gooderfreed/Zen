@@ -2,7 +2,7 @@
  * Stock implementation
  * Handles stock object management and foundation pile drawing
  */
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Draw stock piles on screen

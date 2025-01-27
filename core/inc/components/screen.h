@@ -8,6 +8,7 @@
  * Basic color definitions for foreground and background
  */
 enum Color {
+    COLOR_NONE,
     COLOR_RESET,
 
     COLOR_BOLD,
@@ -72,7 +73,7 @@ void add_separator(Screen *screen, int y, int x, Color background, Color foregro
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
 void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
 void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background);
-void screen_draw_cursor(Screen *screen, Coords coords, CursorType type);
+void screen_draw_cursor(Screen *screen, Coords coords, CursorConfig config);
 void set_noncanonical_mode(void);
 void restore_terminal_settings(void);
 #endif

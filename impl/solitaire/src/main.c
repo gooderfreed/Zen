@@ -8,8 +8,6 @@
  */
 static void init_game(Core *core) {
     Arena *arena = core->arena;
-    // width  58
-    // height 53
     Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_RESET, ' ');
     Container *cursor_container = container_init(arena, CONTAINER_SIZE);
     MapLayer *game_layer = game_layer_init(arena, cursor_container);
@@ -36,6 +34,8 @@ static void init_game(Core *core) {
  * Main game loop
  */
 static void game_loop(Core *core) {
+    // char buffer[50];
+
     while (true) {
         core_update_screen(core);
 
@@ -61,7 +61,7 @@ static void game_loop(Core *core) {
             core_manage_loop(core, ch);
         }
 
-        struct timespec ts = {0, 1000000000 / 120};  // 120 fps | why 120fps for console? Because
+        struct timespec ts = {0, 1000000000 / 120};  // 120 fps | why 120fps for console? Because I can
         nanosleep(&ts, NULL);
     }
 }

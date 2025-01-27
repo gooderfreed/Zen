@@ -10,27 +10,29 @@
  * Returns the ANSI escape sequence for the specified color
  */
 const char *get_foreground(Color color) {
+    if (color == COLOR_NONE) return "";
+
     static const char *foreground_colors[] = {
-        [COLOR_RESET] = "",
-        [COLOR_BOLD] = ";1",
+        [COLOR_RESET] = "m",
+        [COLOR_BOLD] = ";1m",
 
-        [COLOR_BLACK] = ";30",
-        [COLOR_RED] = ";31",
-        [COLOR_GREEN] = ";32",
-        [COLOR_YELLOW] = ";33",
-        [COLOR_BLUE] = ";34",
-        [COLOR_MAGENTA] = ";35",
-        [COLOR_CYAN] = ";36",
-        [COLOR_WHITE] = ";37",
+        [COLOR_BLACK] = ";30m",
+        [COLOR_RED] = ";31m",
+        [COLOR_GREEN] = ";32m",
+        [COLOR_YELLOW] = ";33m",
+        [COLOR_BLUE] = ";34m",
+        [COLOR_MAGENTA] = ";35m",
+        [COLOR_CYAN] = ";36m",
+        [COLOR_WHITE] = ";37m",
 
-        [COLOR_BRIGHT_BLACK] = ";90",
-        [COLOR_BRIGHT_RED] = ";91",
-        [COLOR_BRIGHT_GREEN] = ";92",
-        [COLOR_BRIGHT_YELLOW] = ";93",
-        [COLOR_BRIGHT_BLUE] = ";94",
-        [COLOR_BRIGHT_MAGENTA] = ";95",
-        [COLOR_BRIGHT_CYAN] = ";96",
-        [COLOR_BRIGHT_WHITE] = ";97",
+        [COLOR_BRIGHT_BLACK] = ";90m",
+        [COLOR_BRIGHT_RED] = ";91m",
+        [COLOR_BRIGHT_GREEN] = ";92m",
+        [COLOR_BRIGHT_YELLOW] = ";93m",
+        [COLOR_BRIGHT_BLUE] = ";94m",
+        [COLOR_BRIGHT_MAGENTA] = ";95m",
+        [COLOR_BRIGHT_CYAN] = ";96m",
+        [COLOR_BRIGHT_WHITE] = ";97m",
     };
     return foreground_colors[color];
 }
@@ -40,6 +42,8 @@ const char *get_foreground(Color color) {
  * Returns the ANSI escape sequence for the specified color
  */
 const char *get_background(Color color) {
+    if (color == COLOR_NONE) return "";
+
     static const char *background_colors[] = {
         [COLOR_RESET] = "\033[0",
         [COLOR_BOLD] = "\033[1",
@@ -147,13 +151,34 @@ void add_separator(Screen *screen, int y, int x, Color background, Color foregro
  * Outputs the entire screen buffer with formatting
  */
 void print_screen(const Screen *screen) {
-    gotoxy(0, 0);
+    wchar_t buffer[(12) * screen->width * screen->height];
+    int idx = 0;
+ 
+    idx += swprintf(buffer, 7, L"\033[0;0H");
+
+    Color last_bg = COLOR_RESET;
+    Color last_fg = COLOR_RESET;
+
     for (int y = 0; y < screen->height; ++y) {
         for (int x = 0; x < screen->width; ++x) {
-            wprintf(L"%s%sm%lc\033[0m", get_background(screen->pixels[y][x].background), get_foreground(screen->pixels[y][x].foreground), screen->pixels[y][x].symbol);
+            Pixel px = screen->pixels[y][x];
+
+            if (px.background != last_bg || px.foreground != last_fg) {
+                idx += swprintf(buffer + idx, 5, L"\033[0m");
+                idx += swprintf(buffer + idx, 11, L"%s%s", get_background(px.background), get_foreground(px.foreground));
+                buffer[idx++] = px.symbol;
+                last_bg = px.background;
+                last_fg = px.foreground;
+            }
+            else {
+                buffer[idx++] = px.symbol;
+            }
         }
-        wprintf(L"\n");
+        buffer[idx++] = L'\n';
     }
+
+    buffer[idx] = L'\0';
+    wprintf(L"%ls\033[0m", buffer);
 }
 
 /*
@@ -235,17 +260,25 @@ static const wchar_t* get_cursor_string(CursorType type) {
  * Draw cursor on screen
  * Draws the cursor at the specified coordinates
  */
-void screen_draw_cursor(Screen *screen, Coords coords, CursorType type) {
-    const wchar_t *cursor_string = get_cursor_string(type);
+void screen_draw_cursor(Screen *screen, Coords coords, CursorConfig config) {
+    const wchar_t *cursor_string = get_cursor_string(config.type);
     if (cursor_string) {
-        if (type <= CURSOR_WIDE) {
+
+        if (config.foreground != COLOR_NONE) screen->pixels[coords.y][coords.x].foreground = config.foreground;
+        if (config.background != COLOR_NONE) screen->pixels[coords.y][coords.x].background = config.background;
+
+        if (config.type <= CURSOR_WIDE) {
             screen->pixels[coords.y][coords.x].symbol = cursor_string[0];
         } else {
             screen->pixels[coords.y][coords.x].symbol = cursor_string[1];
             if (cursor_string[0] == L'H') {
                 screen->pixels[coords.y][coords.x + 1].symbol = cursor_string[2];
+                if (config.foreground != COLOR_NONE) screen->pixels[coords.y][coords.x + 1].foreground = config.foreground;
+                if (config.background != COLOR_NONE) screen->pixels[coords.y][coords.x + 1].background = config.background;
             } else {
                 screen->pixels[coords.y + 1][coords.x].symbol = cursor_string[2];
+                if (config.foreground != COLOR_NONE) screen->pixels[coords.y + 1][coords.x].foreground = config.foreground;
+                if (config.background != COLOR_NONE) screen->pixels[coords.y + 1][coords.x].background = config.background;
             }
         }
     }
