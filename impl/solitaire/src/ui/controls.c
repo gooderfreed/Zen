@@ -1,4 +1,4 @@
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Print controls
@@ -10,19 +10,21 @@ static void print_controls(const void *controls_pointer, Screen *screen, const C
 
     int text_y = 18;
     int text_x = 12;
+    Color text_color = COLOR_BOLD;
+    Color background_color = COLOR_NONE;
 
-    insert_text(screen, text_y + 0, text_x + 10, " Controls:",                          COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 1, text_x + 0, "  w            - move up",             COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 2, text_x + 0, "  a            - move left",           COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 3, text_x + 0, "  s            - move down",           COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 4, text_x + 0, "  d            - move right",          COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 5, text_x + 0, "  space\\enter  - action",             COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 6, text_x + 0, "  q            - menu",                COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 7, text_x + 0, "  esc          - exit",                COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 8, text_x + 0, "  ctrl+a       - move left globally",  COLOR_BOLD, COLOR_BLACK);
-    insert_text(screen, text_y + 9, text_x + 0, "  ctrl+d       - move right globally", COLOR_BOLD, COLOR_BLACK);
+    insert_text(screen, text_y + 0, text_x + 10, " Controls:",                          text_color, background_color);
+    insert_text(screen, text_y + 1, text_x + 0, "  w            - move up",             text_color, background_color);
+    insert_text(screen, text_y + 2, text_x + 0, "  a            - move left",           text_color, background_color);
+    insert_text(screen, text_y + 3, text_x + 0, "  s            - move down",           text_color, background_color);
+    insert_text(screen, text_y + 4, text_x + 0, "  d            - move right",          text_color, background_color);
+    insert_text(screen, text_y + 5, text_x + 0, "  space\\enter  - action",             text_color, background_color);
+    insert_text(screen, text_y + 6, text_x + 0, "  q            - menu",                text_color, background_color);
+    insert_text(screen, text_y + 7, text_x + 0, "  esc          - exit",                text_color, background_color);
+    insert_text(screen, text_y + 8, text_x + 0, "  ctrl+a       - move left globally",  text_color, background_color);
+    insert_text(screen, text_y + 9, text_x + 0, "  ctrl+d       - move right globally", text_color, background_color);
 
-    insert_text(screen, text_y + 11, text_x + 12, " Back", COLOR_BOLD, COLOR_BLACK);
+    insert_text(screen, text_y + 11, text_x + 12, " Back", text_color, background_color);
 }
 
 /*

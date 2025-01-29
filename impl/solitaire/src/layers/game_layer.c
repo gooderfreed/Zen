@@ -1,4 +1,4 @@
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Initialize game

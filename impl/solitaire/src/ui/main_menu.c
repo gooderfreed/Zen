@@ -1,4 +1,4 @@
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Print menu
@@ -12,7 +12,7 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
     int text_y = 18;
 
     Color text_color = COLOR_BOLD;
-    Color background_color = COLOR_BLACK;
+    Color background_color = COLOR_NONE;
 
     insert_text(screen, text_y + 0, text_offset, ".dP\"Y8  dP\"Yb  88     88 888888    db    88 88\"\"Yb 88888", text_color, background_color);
     insert_text(screen, text_y + 1, text_offset, "`Ybo.\" dP   Yb 88     88   88     dPYb   88 88__dP 88__ ",    text_color, background_color);

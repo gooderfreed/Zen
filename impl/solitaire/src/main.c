@@ -34,7 +34,6 @@ static void init_game(Core *core) {
  * Main game loop
  */
 static void game_loop(Core *core) {
-    // char buffer[50];
 
     while (true) {
         core_update_screen(core);

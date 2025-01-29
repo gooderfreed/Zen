@@ -62,6 +62,20 @@ struct Screen {
     Pixel **pixels;   // pixels
 };
 
+#define SET_PIXEL_FOREGROUND(pixel, color) \
+    if ((color) != COLOR_NONE) (pixel)->foreground = (color);
+
+#define SET_PIXEL_BACKGROUND(pixel, color) \
+    if ((color) != COLOR_NONE) (pixel)->background = (color);
+
+#define SET_PIXEL_COLOR(pixel, config) \
+    SET_PIXEL_FOREGROUND(pixel, (config).foreground) \
+    SET_PIXEL_BACKGROUND(pixel, (config).background)
+    
+#define SET_PIXEL(pixel_target, pixel_source) \
+    SET_PIXEL_COLOR(pixel_target, pixel_source) \
+    (pixel_target)->symbol = (pixel_source).symbol;
+
 /*
 * Screen functions
 * Screen manipulation and drawing

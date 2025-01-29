@@ -1,4 +1,4 @@
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Print win screen
@@ -12,7 +12,7 @@ static void print_win_screen(const void *win_screen_pointer, Screen *screen, con
     int text_x = (SCREEN_WIDTH  - WIN_SCREEN_WIDTH)  / 2 + 1;
 
     Color text_color = COLOR_BOLD;
-    Color background_color = COLOR_BLACK;
+    Color background_color = COLOR_NONE;
 
     insert_text(screen, text_y + 0, text_x + 8, "Yb  dP  dP\"Yb  88   88", text_color, background_color);
     insert_text(screen, text_y + 1, text_x + 8, " YbdP  dP   Yb 88   88", text_color, background_color);

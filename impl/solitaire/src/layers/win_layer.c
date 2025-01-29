@@ -1,5 +1,5 @@
 
-#include "../inc/solitaire.h"
+#include "../../inc/solitaire.h"
 
 /*
  * Prepare win screen
@@ -9,7 +9,7 @@ static void prepare_win_screen(Screen *screen) {
     int x = (SCREEN_WIDTH - WIN_SCREEN_WIDTH) / 2;
 
     fill_area(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
-    add_borders(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, COLOR_BLACK, COLOR_WHITE, fat_border);
+    add_borders(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 }
 
 /*
