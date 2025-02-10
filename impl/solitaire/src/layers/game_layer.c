@@ -50,14 +50,24 @@ static void prepare_game_screen(Screen *screen) {
 static void game_loop(Core *core, wint_t key) {
     switch (key) {
         case L'q': case L'й':            core_change_layer(core, MENU_ID);     break;
+        case KEY_CTRL_A:                 core_global_move(core, CURSOR_LEFT);  break;
+        case KEY_CTRL_D:                 core_global_move(core, CURSOR_RIGHT); break;
+    }
+}
+
+/*
+ * Game cursor loop
+ * Handles game cursor loop
+ */
+static bool cursor_loop(Core *core, wint_t key) {
+    switch (key) {
         case L'a': case L'ф':            core_local_move(core, CURSOR_LEFT);   break;
         case L'd': case L'в':            core_local_move(core, CURSOR_RIGHT);  break;
         case L'w': case L'ц':            core_local_move(core, CURSOR_UP);     break;
         case L's': case L'ы': case L'і': core_local_move(core, CURSOR_DOWN);   break;
         case KEY_SPACE: case KEY_ENTER:  core_action(core);                    break;
-        case KEY_CTRL_A:                 core_global_move(core, CURSOR_LEFT);  break;
-        case KEY_CTRL_D:                 core_global_move(core, CURSOR_RIGHT); break;
     }
+    return false;
 }
 
 /*
@@ -82,6 +92,7 @@ MapLayer *game_layer_init(Arena *arena, Container *container) {
     *game_layer = (MapLayer) {
         .prepare_screen = prepare_game_screen,
         .layer_loop = game_loop,
+        .layer_cursor_loop = cursor_loop,
         .default_layer_coords = GAME_DEFAULT_COORDS,
         .layer_main_object = game,
         .height = GAME_LAYER_HEIGHT,

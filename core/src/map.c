@@ -22,6 +22,26 @@ Map *init_map(Arena *arena, int layers, Coords global_coords) {
 }
 
 /*
+ * Create a map layer
+ * Allocates and initializes a map layer with given dimensions.
+ */
+MapLayer *create_map_layer(Arena *arena, int height, int width, Coords base_coords) {
+    MapLayer *map_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
+    *map_layer = (MapLayer) {
+        .height = height,
+        .width  = width,
+        .default_layer_coords = base_coords,
+    };
+
+    map_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(map_layer->height) * sizeof(MapObject *));
+    for (int i = 0; i < map_layer->height; i++) {
+        map_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(map_layer->width) * sizeof(MapObject));
+    }
+
+    return map_layer;
+}
+
+/*
  * Set a layer in the map
  * Assigns a MapLayer to the specified layer index in the map
  */
@@ -67,7 +87,7 @@ void map_move(Map *map, Coords move) {
     }
 
     MapObject object = map->layers[map->global_coords.z]->objects[new_coords.y][new_coords.x];
-    if (!(object.object && IS_INTERACTABLE(object.object))) return;
+    if (!(object.object && IS_CURSOR_INTERACTABLE(object.object))) return;
 
     map->global_coords = new_coords;
 }

@@ -10,7 +10,12 @@
  */
 Core *core_init(Arena *arena) {
     Core *core = (Core *)arena_alloc(arena, sizeof(Core));
-    core->arena = arena;
+    
+    core->arena        = arena;
+    core->input_type   = INPUT_TYPE_CURSOR;
+    core->time_manager = init_time_manager();
+    core->frame_timer  = init_frame_timer();
+    core->tick_counter = init_tick_counter();
 
     return core;
 }
@@ -39,6 +44,10 @@ void core_set_map(Core *core, Map *map) {
             for (int x = 0; x < layer->width; x++) {
                 MapObject object = map_get_object(map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
                 if (!object.object) continue;
+
+                if (IS_TICK_DEPENDENT(object.object)) {
+                    SET_TICK_COUNTER(object.object, &core->tick_counter);
+                }
 
                 if (IS_CORE_DEPENDENT(object.object)) {
                     ObjectInterfaces *interfaces = GET_INTERFACES(object.object);
@@ -96,10 +105,10 @@ void core_shutdown(Core *core) {
  */
 void core_local_move(Core *core, Coords move) {
     Cursor *cursor = core->cursor;
-    if (!IS_INTERACTABLE(cursor->subject)) return;
+    if (!IS_CURSOR_INTERACTABLE(cursor->subject)) return;
 
     Coords coords = {.x = cursor->coords.x, .y = cursor->coords.y};
-    MOVE(cursor->subject, &coords, move);
+    MOVE_CURSOR(cursor->subject, &coords, move);
 
     // Update cursor position only if movement was successful
     if (coords.x != cursor->coords.x || coords.y != cursor->coords.y) {
@@ -170,6 +179,7 @@ void core_update_screen(Core *core) {
 
     // Draw cursor and update screen
     print_cursor(core->cursor, core->screen);
+    draw_fps_stats(core->frame_timer.stats, core->screen);
     print_screen(core->screen);
 }
 
@@ -269,7 +279,7 @@ void core_change_layer(Core *core, int layer) {
     MapObject object = map_get_object(map, map->global_coords);
 
     // Update cursor position to default position of new layer
-    if (IS_INTERACTABLE(object.object)) {
+    if (IS_CURSOR_INTERACTABLE(object.object)) {
         core->cursor->coords = GET_DEFAULT_COORDS(object.object);
     }
     core->cursor->subject = object.object;
@@ -286,5 +296,101 @@ void core_change_layer(Core *core, int layer) {
  */
 void core_manage_loop(Core *core, wint_t key) {
     MapLayer *layer = map_get_current_layer(core->map);
-    layer->layer_loop(core, key);
+    MapObject obj = map_get_current_object(core->map);
+    bool handled = false;
+
+    switch (core->input_type) {
+    
+    case INPUT_TYPE_DIRECT: {
+        if (IS_INPUT_HANDLER(obj.object)) {
+            handled = HANDLE_INPUT(obj.object, core, key);
+        }
+        break;
+    }
+        
+    case INPUT_TYPE_CURSOR: {
+        if (IS_CURSOR_INTERACTABLE(obj.object)) {
+            handled = layer->layer_cursor_loop(core, key);
+        }
+        break;
+    }
+
+    default: break;
+    }
+    
+    if (!handled && layer->layer_loop) layer->layer_loop(core, key);
+}
+
+/*
+ * Set target FPS
+ * Configures the desired frames per second for the game loop.
+ */
+void core_set_target_fps(Core *core, int fps) {
+    set_target_fps(&core->frame_timer, fps);
+}
+
+/*
+ * Check if the game should close
+ * Updates time and processes game logic and rendering if needed.
+ */
+bool core_should_close(Core *core) {
+    update_time_manager(&core->time_manager);
+
+    // Update game logic if it's time for a new tick
+    if (should_update_ticks(&core->tick_counter, &core->time_manager)) {
+        core_update(core);
+    }
+
+    // Render frame if it's time
+    if (should_render_frame(&core->frame_timer, &core->time_manager)) {
+        core_update_screen(core);
+    }
+    return false;
+}
+
+/*
+ * Check for user input
+ * Returns true if there is input available from stdin.
+ */
+bool core_has_input(void) {
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(STDIN_FILENO, &readfds);
+
+    struct timeval tv = {0, 0}; // Non-blocking check
+    return select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv) > 0;
+}
+
+/*
+ * Enable FPS statistics
+ * Allocates and enables FPS tracking for performance monitoring.
+ */
+void core_enable_fps_stats(Core *core) {
+    if (core->frame_timer.stats) arena_free_block(core->arena, core->frame_timer.stats);
+    core->frame_timer.stats = create_fps_stats(core->arena);
+}
+
+/*
+ * Disable FPS statistics
+ * Frees and disables FPS tracking.
+ */
+void core_disable_fps_stats(Core *core) {
+    if (core->frame_timer.stats) arena_free_block(core->arena, core->frame_timer.stats);
+    core->frame_timer.stats = NULL;
+}
+
+/*
+ * Toggle FPS display
+ * Enables or disables drawing FPS on the screen.
+ */
+void core_show_fps(Core *core, bool state) {
+    if (core->frame_timer.stats) core->frame_timer.stats->draw_to_screen = state;
+}
+
+/*
+ * Set ticks per second
+ * Configures the number of logic updates per second.
+ */
+void core_set_ticks_per_second(Core *core, int ticks_per_second) {
+    set_ticks_per_second(&core->tick_counter, ticks_per_second);
 }

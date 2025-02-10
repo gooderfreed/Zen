@@ -134,9 +134,9 @@ Menu init_menu(void) {
         .print = print_menu
     };
 
-    static const Interactable interactable = {
+    static const CursorInteractable cursor_interactable = {
         .place_cursor        = place_cursor_in_menu,
-        .move                = move_in_menu,
+        .move_cursor         = move_in_menu,
         .get_default_coords  = get_default_coords,
         .get_cursor_config   = get_cursor_config_in_menu
     };
@@ -174,14 +174,14 @@ Menu init_menu(void) {
     menu.interfaces = (ObjectInterfaces) {
         .name = "Menu",
         .capabilities = {
-            .is_drawable     = true,
-            .have_buttons    = true,
-            .is_interactable = true,
-            .requires_core   = true
+            .is_drawable            = true,
+            .have_buttons           = true,
+            .is_cursor_interactable = true,
+            .requires_core          = true
         },
-        .drawable       = &drawable,
-        .interactable   = &interactable,
-        .button_handler = &button_handler
+        .drawable            = &drawable,
+        .cursor_interactable = &cursor_interactable,
+        .button_handler      = &button_handler
     };
     
     return menu;

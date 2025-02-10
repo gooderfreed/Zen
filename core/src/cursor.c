@@ -26,14 +26,14 @@ Cursor *init_cursor(Arena *arena, void *start_object, Coords start_coords, Conta
  * Handles cursor visualization based on current state and position
  */
 void print_cursor(Cursor *cursor, Screen *screen) {
-    // Get base coordinates for cursor
-    Coords base_coords = {
-        .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
-        .y = CARD_HEIGHT
-    };
-
     // If subject is interactable, let it place the cursor
-    if (IS_INTERACTABLE(cursor->subject)) {
+    if (cursor && IS_CURSOR_INTERACTABLE(cursor->subject)) {
+        // Get base coordinates for cursor
+        Coords base_coords = {
+            .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
+            .y = CARD_HEIGHT
+        };
+
         PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
 
         CursorConfig config = GET_CURSOR_CONFIG(cursor->subject, cursor->coords);

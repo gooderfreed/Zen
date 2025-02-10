@@ -16,12 +16,13 @@ static void prepare_win_screen(Screen *screen) {
  * Win loop
  * Handles the win screen loop
  */
-static void win_loop(Core *core, wint_t key) {
+static bool win_cursor_loop(Core *core, wint_t key) {
     switch (key) {
         case L'w': case L'ц':            core_local_move(core, CURSOR_UP);   break;
         case L's': case L'ы': case L'і': core_local_move(core, CURSOR_DOWN); break;
         case KEY_SPACE: case KEY_ENTER:  core_action(core);                  break;
     }
+    return false;
 }
 
 /*
@@ -38,7 +39,7 @@ MapLayer *win_layer_init(Arena *arena, Game *game) {
 
     *win_layer = (MapLayer) {
         .prepare_screen = prepare_win_screen,
-        .layer_loop = win_loop,
+        .layer_cursor_loop = win_cursor_loop,
         .default_layer_coords = WIN_DEFAULT_COORDS,
         .height = WIN_LAYER_HEIGHT,
         .width = WIN_LAYER_WIDTH,

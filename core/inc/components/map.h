@@ -16,13 +16,14 @@ typedef struct MapObject {
  * Represents a single layer on the map
  */
 typedef struct MapLayer {
-    int height;                                    // Layer height
-    int width;                                     // Layer width
-    MapObject **objects;                           // Objects on the layer
-    Coords default_layer_coords;                   // Default layer coordinates
-    void *layer_main_object;                       // Main object for the current layer
-    void (*prepare_screen)(Screen *screen);        // Function to prepare screen for the layer
-    void (*layer_loop)(Core *core, wint_t key);    // Function to handle layer loop
+    int height;                                         // Layer height
+    int width;                                          // Layer width
+    MapObject **objects;                                // Objects on the layer
+    Coords default_layer_coords;                        // Default layer coordinates
+    void *layer_main_object;                            // Main object for the current layer
+    void (*prepare_screen)(Screen *screen);             // Function to prepare screen for the layer
+    void (*layer_loop)(Core *core, wint_t key);         // Function to handle layer loop
+    bool (*layer_cursor_loop)(Core *core, wint_t key);  // Function to handle cursor movement
 } MapLayer;
 
 
@@ -44,6 +45,7 @@ Map *init_map(Arena *arena, int layers, Coords global_coords);
 void map_set_layer(Map *map, MapLayer *map_layer, int layer);
 void map_move(Map *map, Coords move);
 void map_move_layer(Map *map, int layer);
+MapLayer *create_map_layer(Arena *arena, int height, int width, Coords base_coords);
 MapLayer *map_get_layer(Map *map, int layer);
 MapLayer *map_get_current_layer(Map *map);
 MapObject map_get_current_object(Map *map);

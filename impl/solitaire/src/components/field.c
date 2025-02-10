@@ -264,9 +264,9 @@ Field init_field(void) {
         .print = print_field
     };
 
-    static const Interactable interactable = {
+    static const CursorInteractable cursor_interactable = {
         .place_cursor        = place_cursor_in_field,
-        .move                = move_in_field,
+        .move_cursor         = move_in_field,
         .get_default_coords  = get_default_coords,
         .get_cursor_config   = get_cursor_config_in_field
     };
@@ -291,16 +291,16 @@ Field init_field(void) {
     field.interfaces = (ObjectInterfaces) {
         .name           = "Field",
         .capabilities = {
-            .can_hold_cards  = true,
-            .is_drawable     = true,
-            .is_interactable = true,
-            .is_positionable = true,
-            .requires_core   = true
+            .can_hold_cards         = true,
+            .is_drawable            = true,
+            .is_positionable        = true,
+            .is_cursor_interactable = true,
+            .requires_core          = true
         },
-        .drawable         = &drawable,
-        .interactable     = &interactable,
-        .card_handler     = &card_handler,
-        .position_handler = &position_handler
+        .drawable            = &drawable,
+        .cursor_interactable = &cursor_interactable,
+        .card_handler        = &card_handler,
+        .position_handler    = &position_handler
     };
 
     field.interfaces.position_handler->restore_coords = (Coords) {.x = 0, .y = 0};

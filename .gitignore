@@ -57,3 +57,4 @@ dkms.conf
 
 # Projects executable
 impl/*/solitaire
+impl/*/snake

@@ -95,9 +95,9 @@ Controls init_controls(void) {
         .print = print_controls
     };
 
-    static const Interactable interactable = {
+    static const CursorInteractable cursor_interactable = {
         .place_cursor        = place_cursor_in_controls,
-        .move                = move_in_controls,
+        .move_cursor         = move_in_controls,
         .get_default_coords  = get_default_coords,
         .get_cursor_config   = get_cursor_config_in_controls
     };
@@ -117,14 +117,14 @@ Controls init_controls(void) {
     controls.interfaces = (ObjectInterfaces) {
         .name = "Controls",
         .capabilities = {
-            .is_drawable     = true,
-            .have_buttons    = true,
-            .is_interactable = true,
-            .requires_core   = true
+            .is_drawable            = true,
+            .have_buttons           = true,
+            .is_cursor_interactable = true,
+            .requires_core          = true
         },
-        .drawable       = &drawable,
-        .interactable   = &interactable,
-        .button_handler = &button_handler
+        .drawable            = &drawable,
+        .cursor_interactable = &cursor_interactable,
+        .button_handler      = &button_handler
     };
     
     return controls;

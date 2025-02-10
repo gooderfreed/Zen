@@ -87,6 +87,8 @@ Screen *init_screen(Arena *arena, int width, int height, Color background, Color
             screen->pixels[i][j] = pixel;
         }
     }
+    screen->buffer_size = ((15) * screen->width * screen->height + 8 + screen->height) / 20;
+    screen->buffer = (wchar_t *)arena_alloc(arena, sizeof(wchar_t) * (size_t)(screen->buffer_size));
 
     set_noncanonical_mode();
     setlocale(LC_ALL, "");
@@ -148,11 +150,10 @@ void add_separator(Screen *screen, int y, int x, Color background, Color foregro
  * Outputs the entire screen buffer with formatting
  */
 void print_screen(const Screen *screen) {
-    wchar_t buffer[(12) * screen->width * screen->height];
-    int idx = 0;
- 
-    idx += swprintf(buffer, 7, L"\033[0;0H");
-
+    int buf_idx = 0;
+    
+    buf_idx += swprintf(screen->buffer, 7, L"\033[0;0H");
+    
     Color last_bg = COLOR_RESET;
     Color last_fg = COLOR_RESET;
 
@@ -160,22 +161,31 @@ void print_screen(const Screen *screen) {
         for (int x = 0; x < screen->width; ++x) {
             Pixel px = screen->pixels[y][x];
 
+            if (buf_idx > screen->buffer_size - 20) {
+                screen->buffer[buf_idx] = L'\0';
+                wprintf(L"%ls", screen->buffer);
+                buf_idx = 0;
+
+                swprintf(screen->buffer, 11, L"%s%s", get_background(last_bg), get_foreground(last_fg));
+                buf_idx = (int)wcslen(screen->buffer);
+            }
+            
             if (px.background != last_bg || px.foreground != last_fg) {
-                idx += swprintf(buffer + idx, 5, L"\033[0m");
-                idx += swprintf(buffer + idx, 11, L"%s%s", get_background(px.background), get_foreground(px.foreground));
-                buffer[idx++] = px.symbol;
+                buf_idx += swprintf(screen->buffer + buf_idx, 5, L"\033[0m");
+                buf_idx += swprintf(screen->buffer + buf_idx, 11, L"%s%s", 
+                                  get_background(px.background), 
+                                  get_foreground(px.foreground));
                 last_bg = px.background;
                 last_fg = px.foreground;
             }
-            else {
-                buffer[idx++] = px.symbol;
-            }
+            
+            screen->buffer[buf_idx++] = px.symbol;
         }
-        buffer[idx++] = L'\n';
+        screen->buffer[buf_idx++] = L'\n';
     }
 
-    buffer[idx] = L'\0';
-    wprintf(L"%ls\033[0m", buffer);
+    screen->buffer[buf_idx] = L'\0';
+    wprintf(L"%ls\033[0m", screen->buffer);
 }
 
 /*

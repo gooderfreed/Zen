@@ -8,13 +8,15 @@
  */
 typedef struct ObjectInterfaces ObjectInterfaces;
 
-typedef struct Drawable Drawable;
-typedef struct Interactable Interactable;
-typedef struct Dynamic Dynamic;
-typedef struct ButtonHandler ButtonHandler;
-typedef struct PositionHandler PositionHandler;
-typedef struct Updateable Updateable;
-typedef struct CardHandler CardHandler;
-typedef struct CoreDependent CoreDependent;
+typedef struct Drawable           Drawable;
+typedef struct CursorInteractable CursorInteractable;
+typedef struct TickDependent      TickDependent;
+typedef struct Dynamic            Dynamic;
+typedef struct ButtonHandler      ButtonHandler;
+typedef struct PositionHandler    PositionHandler;
+typedef struct Updateable         Updateable;
+typedef struct CardHandler        CardHandler;
+typedef struct CoreDependent      CoreDependent;
+typedef struct InputHandler       InputHandler;
 
 #endif

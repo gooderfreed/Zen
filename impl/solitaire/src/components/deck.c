@@ -185,9 +185,9 @@ Deck generate_deck(void) {
         .print = print_deck
     };
 
-    static const Interactable interactable = {
+    static const CursorInteractable cursor_interactable = {
         .place_cursor        = place_cursor_in_deck,
-        .move                = move_in_deck,
+        .move_cursor         = move_in_deck,
         .get_default_coords  = get_default_coords,
         .get_cursor_config   = get_cursor_config_in_deck
     };
@@ -218,15 +218,15 @@ Deck generate_deck(void) {
     deck.interfaces = (ObjectInterfaces) {
         .name           = "Deck",
         .capabilities = {
-            .can_hold_cards  = true,
-            .have_buttons    = true,
-            .is_drawable     = true,
-            .is_interactable = true,
+            .can_hold_cards         = true,
+            .have_buttons           = true,
+            .is_drawable            = true,
+            .is_cursor_interactable = true,
         },
-        .card_handler   = &card_handler,
-        .button_handler = &button_handler,
-        .drawable       = &drawable,
-        .interactable   = &interactable,
+        .card_handler        = &card_handler,
+        .button_handler      = &button_handler,
+        .drawable            = &drawable,
+        .cursor_interactable = &cursor_interactable,
     };
 
     deck_shuffle(&deck);

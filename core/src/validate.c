@@ -28,30 +28,30 @@ static bool validate_drawable(const void *interface, const char *name) {
  * Checks if interface has required movement and cursor placement functions
  * Prints detailed error messages for missing components
  */
-static bool validate_interactable(const void *interface, const char *name) {
-    const Interactable *interactable = interface;
-    if (!interactable) {
-        wprintf(L"Error in '%s': Interactable interface is NULL\n", name);
+static bool validate_cursor_interactable(const void *interface, const char *name) {
+    const CursorInteractable *cursor_interactable = interface;
+    if (!cursor_interactable) {
+        wprintf(L"Error in '%s': CursorInteractable interface is NULL\n", name);
         return false;
     }
 
-    if (!interactable->move) {
-        wprintf(L"Error in '%s': Interactable interface is missing 'move' function\n", name);
+    if (!cursor_interactable->move_cursor) {
+        wprintf(L"Error in '%s': CursorInteractable interface is missing 'move_cursor' function\n", name);
         return false;
     }
 
-    if (!interactable->place_cursor) {
-        wprintf(L"Error in '%s': Interactable interface is missing 'place_cursor' function\n", name);
+    if (!cursor_interactable->place_cursor) {
+        wprintf(L"Error in '%s': CursorInteractable interface is missing 'place_cursor' function\n", name);
         return false;
     }
 
-    if (!interactable->get_default_coords) {
-        wprintf(L"Error in '%s': Interactable interface is missing 'get_default_coords' function\n", name);
+    if (!cursor_interactable->get_default_coords) {
+        wprintf(L"Error in '%s': CursorInteractable interface is missing 'get_default_coords' function\n", name);
         return false;
     }
 
-    if (!interactable->get_cursor_config) {
-        wprintf(L"Error in '%s': Interactable interface is missing 'get_cursor_config' function\n", name);
+    if (!cursor_interactable->get_cursor_config) {
+        wprintf(L"Error in '%s': CursorInteractable interface is missing 'get_cursor_config' function\n", name);
         return false;
     }
 
@@ -186,13 +186,13 @@ static bool validate_updateable(const void *interface, const char *name) {
  */
 bool validate_object_interfaces(const ObjectInterfaces *interfaces) {
     InterfaceValidator validators[] = {
-        VALIDATOR(is_drawable,     drawable,         validate_drawable),
-        VALIDATOR(is_interactable, interactable,     validate_interactable),
-        VALIDATOR(can_hold_cards,  card_handler,     validate_card_handler),
-        VALIDATOR(have_buttons,    button_handler,   validate_button_handler),
-        VALIDATOR(is_positionable, position_handler, validate_position_handler),
-        VALIDATOR(is_dynamic,      dynamic,          validate_dynamic),
-        VALIDATOR(requires_update, updateable,       validate_updateable)
+        VALIDATOR(is_drawable,     drawable,                   validate_drawable),
+        VALIDATOR(is_cursor_interactable, cursor_interactable, validate_cursor_interactable),
+        VALIDATOR(can_hold_cards,  card_handler,               validate_card_handler),
+        VALIDATOR(have_buttons,    button_handler,             validate_button_handler),
+        VALIDATOR(is_positionable, position_handler,           validate_position_handler),
+        VALIDATOR(is_dynamic,      dynamic,                    validate_dynamic),
+        VALIDATOR(requires_update, updateable,                 validate_updateable)
     };
 
     for (size_t i = 0; i < sizeof(validators) / sizeof(validators[0]); i++) {

@@ -27,6 +27,11 @@ typedef struct Card Card;
 
 typedef struct Container Container;
 
+typedef struct TimeManager TimeManager;
+typedef struct TickCounter TickCounter;
+typedef struct FrameTimer FrameTimer;
+typedef struct FpsStats FpsStats; 
+
 typedef struct Core Core;
 
 #endif

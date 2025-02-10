@@ -1,6 +1,16 @@
-#include "../inc/solitaire.h"
-#include <fcntl.h>
-#include <sys/select.h>
+#include "../inc/snake.h"
+
+/*
+ * Border characters for screen elements
+ * Used for drawing borders around cards and game areas
+ */
+const wchar_t fat_border[8] = {
+    L'═', L'║', L'╔', L'╗', L'╚', L'╝', L'╠', L'╣'
+};
+
+const wchar_t card_border[8] = {
+    L'─', L'│', L'┌', L'┐', L'└', L'┘', L'├', L'┤'
+};
 
 /*
  * Initialize game
@@ -9,24 +19,16 @@
 static void init_game(Core *core) {
     Arena *arena = core->arena;
     Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_RESET, ' ');
-    Container *cursor_container = container_init(arena, CONTAINER_SIZE);
-    MapLayer *game_layer = game_layer_init(arena, cursor_container);
-    Game *game = (Game *)game_layer->layer_main_object;
-    MapLayer *menu_layer = menu_layer_init(arena, game);
-    MapLayer *win_layer  = win_layer_init(arena, game);
+    MapLayer *game_layer = game_layer_init(arena);
 
     // create map
-    Map *map = init_map(arena, GAME_LAYERS, (Coords) {.x = 0, .y = 0, .z = 0});
-    map_set_layer(map, menu_layer, MENU_ID);
-    map_set_layer(map, game_layer, GAME_ID);
-    map_set_layer(map, win_layer,  WIN_ID);
+    Map *map = init_map(arena, 1, (Coords) {.x = 0, .y = 1, .z = 0});
+    map_set_layer(map, game_layer, 0);
 
-    MapObject object = map_get_current_object(map);
-    Cursor *cursor = init_cursor(arena, object.object, GET_DEFAULT_COORDS(object.object), cursor_container);
-
-    core_set_cursor(core, cursor);
     core_set_screen(core, screen);
     core_set_map(core, map);
+
+    core->input_type = INPUT_TYPE_DIRECT;
 }
 
 /*
@@ -34,9 +36,9 @@ static void init_game(Core *core) {
  * Main game loop
  */
 static void game_loop(Core *core) {
-    core_set_target_fps(core, 60);
-    core_set_ticks_per_second(core, 20);
-    
+    core_set_target_fps(core, 10);
+    core_set_ticks_per_second(core, 10);
+
     while (!core_should_close(core)) {
         if (core_has_input()) {
             wint_t ch = getwchar();

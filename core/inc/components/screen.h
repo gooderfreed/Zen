@@ -45,10 +45,7 @@ const char *get_background(Color color);
 #define show_cursor() wprintf(L"\033[?25h")
 
 
-/*
- * Screen structure
- * Represents the game screen with background, foreground and actual data layers
- */
+
 #ifndef CUSTOM_SCREEN
 struct Pixel {
     Color background; // Background colors/effects
@@ -56,10 +53,17 @@ struct Pixel {
     wchar_t symbol;   // Actual characters 
 };
 
+/*
+ * Screen structure
+ * Represents the game screen with dimensions, pixel data, and a render buffer.
+ */
 struct Screen {
-    int height;       // height of the screen
-    int width;        // width of the screen
-    Pixel **pixels;   // pixels
+    int height;        // Screen height in pixels
+    int width;         // Screen width in pixels
+    Pixel **pixels;    // 2D array of pixel data
+    
+    wchar_t *buffer;   // Render buffer for output
+    int buffer_size;   // Size of the render buffer
 };
 
 #define SET_PIXEL_FOREGROUND(pixel, color) \

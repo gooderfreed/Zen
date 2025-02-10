@@ -261,9 +261,9 @@ Stock init_stock(void) {
         .print = print_stock
     };
 
-    static const Interactable interactable = {
+    static const CursorInteractable cursor_interactable = {
         .place_cursor        = place_cursor_in_stock,
-        .move                = move_in_stock,
+        .move_cursor         = move_in_stock,
         .get_default_coords  = get_default_coords,
         .get_cursor_config   = get_cursor_config_in_stock
     };
@@ -290,14 +290,14 @@ Stock init_stock(void) {
         .name             = "Stock",
         .capabilities     = {
             .is_drawable     = true,
-            .is_interactable = true,
+            .is_cursor_interactable = true,
             .can_hold_cards  = true,
             .is_positionable = true,
             .requires_update = true,
             .requires_core   = true
         },
         .drawable         = &drawable,
-        .interactable     = &interactable,
+        .cursor_interactable     = &cursor_interactable,
         .card_handler     = &card_handler,
         .position_handler = &position_handler,
         .updateable       = &updateable

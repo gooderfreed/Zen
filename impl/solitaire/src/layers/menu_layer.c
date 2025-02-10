@@ -12,12 +12,13 @@ void prepare_menu_screen(Screen *screen) {
  * Menu loop
  * Handles the menu loop
  */
-static void menu_loop(Core *core, wint_t key) {
+static bool menu_cursor_loop(Core *core, wint_t key) {
     switch (key) {
         case L'w': case L'ц':            core_local_move(core, CURSOR_UP);   break;
         case L's': case L'ы': case L'і': core_local_move(core, CURSOR_DOWN); break;
         case KEY_SPACE: case KEY_ENTER:  core_action(core);                  break;
     }
+    return false;
 }
 
 /*
@@ -37,7 +38,7 @@ MapLayer *menu_layer_init(Arena *arena, Game *game) {
 
     *menu_layer = (MapLayer) {
         .prepare_screen = prepare_menu_screen,
-        .layer_loop = menu_loop,
+        .layer_cursor_loop = menu_cursor_loop,
         .default_layer_coords = MENU_DEFAULT_COORDS,
         .height = MENU_LAYER_HEIGHT,
         .width = MENU_LAYER_WIDTH,
