@@ -5,6 +5,70 @@
 #include "../../inc/solitaire.h"
 
 /*
+ * Shuffle deck array using Fisher-Yates algorithm
+ * Randomly permutes all cards in the deck
+ */
+static void deck_shuffle(Deck *deck) {
+    for (int i = DECK_SIZE - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        
+        Card temp = deck->deck[i];
+        deck->deck[i] = deck->deck[j];
+        deck->deck[j] = temp;
+    }
+    
+    deck->pointer = &deck->deck[0];
+}
+
+/*
+ * Reset deck to initial state
+ * Resets all cards in the deck to default state
+ */
+void deck_reset(Deck *deck) {
+    for (int i = 0; i < DECK_SIZE; i++) {
+        deck->deck[i].object = Deck_enum;
+        deck->deck[i].selected = false;
+        deck->deck[i].hidden = false;
+        deck->deck[i].coords = (Coords) {.x = 1, .y = 0};
+    }
+    deck->pointer = &deck->deck[0];
+    deck_shuffle(deck);
+}
+
+/*
+ * Move to next card in deck
+ * Cycles through deck until finding next available card
+ */
+static void next_card(Deck *deck) {
+    const Card *start = deck->pointer;
+    if (!start) return;
+
+    do {
+        deck->pointer++;
+
+        if (deck->pointer >= &deck->deck[DECK_SIZE]) deck->pointer = &deck->deck[0];
+        if (deck->pointer == start) {
+            if (deck->pointer->object != Deck_enum)
+                deck->pointer = NULL;
+            break;
+        }
+    } while (deck->pointer->object != Deck_enum);
+}
+
+/*
+ * Remove current card from deck
+ * Returns removed card and advances to next card
+ */
+static Card *draw_card(Deck *deck) {
+    Card *card = deck->pointer;
+
+    card->object = Unknown;
+    next_card(deck);
+
+    return card;
+}
+
+/*
  * Draw deck on screen
  * Shows deck pile and current top card
  */
@@ -126,37 +190,19 @@ static bool is_same_card_in_deck(const void *deck_pointer, const Coords cursor_c
     return deck->pointer == card;
 }
 
-/*
- * Shuffle deck array using Fisher-Yates algorithm
- * Randomly permutes all cards in the deck
- */
-static void deck_shuffle(Deck *deck) {
-    for (int i = DECK_SIZE - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        
-        Card temp = deck->deck[i];
-        deck->deck[i] = deck->deck[j];
-        deck->deck[j] = temp;
-    }
-    
-    deck->pointer = &deck->deck[0];
+static Card *deck_peek(void *deck_pointer, Coords coords) {
+    (void)coords;
+    Deck *deck = (Deck *)deck_pointer;
+
+    return deck->pointer;
 }
 
-/*
- * Reset deck to initial state
- * Resets all cards in the deck to default state
- */
-void deck_reset(Deck *deck) {
-    for (int i = 0; i < DECK_SIZE; i++) {
-        deck->deck[i].object = Deck_enum;
-        deck->deck[i].selected = false;
-        deck->deck[i].hidden = false;
-        deck->deck[i].coords = (Coords) {.x = 1, .y = 0};
-    }
-    deck->pointer = &deck->deck[0];
-    deck_shuffle(deck);
-}
+static void deck_pop(void *deck_pointer, Card *card) {
+    (void)card;
+    Deck *deck = (Deck *)deck_pointer;
 
+    next_card(deck);
+}
 
 /*
  * Generate a deck of cards
@@ -229,51 +275,19 @@ Deck generate_deck(void) {
         .cursor_interactable = &cursor_interactable,
     };
 
+
+    static CardProvider card_provider = (CardProvider) {
+        .peek = deck_peek,
+        .pop  = deck_pop,
+    };  
+
+    static DeckMethods deck_methods = (DeckMethods) {
+        .card_provider = &card_provider,
+        .draw_card = draw_card,
+    };
+
+    deck.export_methods = &deck_methods;
+
     deck_shuffle(&deck);
     return deck;
 }
-
-/*
- * Move to next card in deck
- * Cycles through deck until finding next available card
- */
-void next_card(Deck *deck) {
-    const Card *start = deck->pointer;
-    if (!start) return;
-
-    do {
-        deck->pointer++;
-
-        if (deck->pointer >= &deck->deck[DECK_SIZE]) deck->pointer = &deck->deck[0];
-        if (deck->pointer == start) {
-            if (deck->pointer->object != Deck_enum)
-                deck->pointer = NULL;
-            break;
-        }
-    } while (deck->pointer->object != Deck_enum);
-}
-
-/*
- * Remove current card from deck
- * Returns removed card and advances to next card
- */
-Card *draw_card(Deck *deck) {
-    Card *card = deck->pointer;
-
-    card->object = Unknown;
-    next_card(deck);
-
-    return card;
-}
-
-/*
- * Check if deck has hidden cards
- * Iterates through deck and checks if any card is hidden
- */
-bool have_hidden_cards(const Deck *deck) {
-    for (int i = 0; i < DECK_SIZE; i++) {
-        if (deck->deck[i].hidden) return true;
-    }
-    return false;
-}
-

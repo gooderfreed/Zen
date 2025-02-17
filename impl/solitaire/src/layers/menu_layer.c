@@ -3,7 +3,7 @@
 /*
  * Prepare menu screen
  */
-void prepare_menu_screen(Screen *screen) {
+static void prepare_menu_screen(Screen *screen) {
     fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
     add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 }

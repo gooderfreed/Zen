@@ -14,6 +14,12 @@
  * Extends core engine with specific card game logic
  */
 
+
+typedef struct CardProvider {
+    Card *(*peek) (void *source, Coords coords);
+    void  (*pop)  (void *source, Card *card);
+} CardProvider;
+
 /*
  * Card suits enumeration
  * Classic playing card suits
@@ -61,6 +67,14 @@ typedef struct Card {
     bool hidden   : 1;  // Hidden state
 } Card;
 
+extern const wchar_t fat_border[8];
+extern const wchar_t card_border[8];
+wchar_t suit_to_text(const Suit suit);
+const char *numeral_to_text(const Numeral numeral);
+void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x);
+void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
+
+
 /*
  * Deck structure
  * Represents the deck of cards in Solitaire
@@ -69,7 +83,17 @@ typedef struct Deck {
     ObjectInterfaces interfaces;  // Core engine interfaces
     Card deck[DECK_SIZE + 1];     // Array of all cards (+1 for NULL terminator)
     Card *pointer;                // Current top card pointer
+    void *export_methods;
 } Deck;
+
+typedef struct DeckMethods {
+    CardProvider *card_provider;
+    Card *(*draw_card)(Deck *deck);
+} DeckMethods;
+
+Deck generate_deck(void);
+void deck_reset(Deck *deck);
+
 
 /*
  * Stock structure
@@ -81,6 +105,9 @@ typedef struct Stock {
     Card *top_cards[CARD_SUITS];               // Top card pointers for each suit
 } Stock;
 
+Stock init_stock(void);
+void stock_reset(Stock *stock);
+
 
 /*
  * Field structure
@@ -89,42 +116,16 @@ typedef struct Stock {
 typedef struct Field {
     ObjectInterfaces interfaces;                // Core engine interfaces
     Card *field[FIELD_HEIGHT][FIELD_WIDTH];     // Tableau columns for card placement
+    void *export_methods;
 } Field;
 
-/*
- * Menu structure
- * Represents the menu of the game
- */
-typedef struct Menu {
-    ObjectInterfaces interfaces;     // Core engine interfaces
-    bool start_game : 1;             // Start game flag
-} Menu;
+typedef struct FieldMethods {
+    CardProvider *card_provider;
+} FieldMethods;
 
-/*
- * Controls structure
- * Represents the controls screen of the game
- */
-typedef struct Controls {
-    ObjectInterfaces interfaces;     // Core engine interfaces
-} Controls;
+Field init_field(void);
+void field_reset(Field *field, Deck *deck);
 
-/*
- * Win screen structure
- * Represents the win screen of the game
- */
-typedef struct WinScreen {
-    ObjectInterfaces interfaces;    // Core engine interfaces
-} WinScreen;
-
-/*
- * Game structure
- * Contains all game components
- */
-typedef struct Game {
-    Deck *deck;
-    Field *field;
-    Stock *stock;
-} Game;
 
 /*
  * Stock context structure 
@@ -136,43 +137,56 @@ typedef struct StockContext {
     Container *cursor_container;  // Cursor container
 } StockContext;
 
+/*
+ * Game structure
+ * Contains all game components
+ */
+typedef struct Game {
+    Deck *deck;
+    Field *field;
+    Stock *stock;
+} Game;
 
-//field
-Field init_field(void);
-int get_last_card_y(const Field *field, int x);
-void prepare_field(Field *field, Deck *deck);
+void game_reset(Game *game);
 
-//stock
-Stock init_stock(void);
-void stock_reset(Stock *stock);
 
-//deck
-Deck generate_deck(void);
-void next_card(Deck *deck);
-Card *draw_card(Deck *deck);
-bool have_hidden_cards(const Deck *deck);
-void deck_reset(Deck *deck);
+/*
+ * Menu structure
+ * Represents the menu of the game
+ */
+typedef struct Menu {
+    ObjectInterfaces interfaces;     // Core engine interfaces
+    bool start_game : 1;             // Start game flag
+} Menu;
 
-//card
-extern const wchar_t fat_border[8];
-extern const wchar_t card_border[8];
-wchar_t suit_to_text(const Suit suit);
-const char *numeral_to_text(const Numeral numeral);
-void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x);
-void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
-
-//menu
 Menu init_menu(void);
-MapLayer *menu_layer_init(Arena *arena, Game *game);
-void prepare_menu_screen(Screen *screen);
+
+
+/*
+ * Controls structure
+ * Represents the controls screen of the game
+ */
+typedef struct Controls {
+    ObjectInterfaces interfaces;     // Core engine interfaces
+} Controls;
+
 Controls init_controls(void);
 
-//winscreen
-WinScreen init_win_screen(void);
-MapLayer *win_layer_init(Arena *arena, Game *game);
 
-//game
+/*
+ * Win screen structure
+ * Represents the win screen of the game
+ */
+typedef struct WinScreen {
+    ObjectInterfaces interfaces;    // Core engine interfaces
+} WinScreen;
+
+WinScreen init_win_screen(void);
+
+
+// Layers
 MapLayer *game_layer_init(Arena *arena, Container *container);
-void game_reset(Game *game);
+MapLayer *menu_layer_init(Arena *arena, Game *game);
+MapLayer *win_layer_init(Arena *arena, Game *game);
 
 #endif

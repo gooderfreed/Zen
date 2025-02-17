@@ -30,7 +30,7 @@ static Game *game_init(Arena *arena) {
  */
 void game_reset(Game *game) {
     deck_reset(game->deck);
-    prepare_field(game->field, game->deck);
+    field_reset(game->field, game->deck);
     stock_reset(game->stock);
 }
 

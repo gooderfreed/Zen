@@ -43,7 +43,7 @@ static void print_field(const void *field_pointer, Screen *screen, const Cursor 
  * Get last card y position in field
  * Finds the highest y position of a card in the specified column
  */
-int get_last_card_y(const Field *field, int x) {
+static int get_last_card_y(const Field *field, int x) {
     for (int i = FIELD_HEIGHT - 1; i >= 0; --i)
         if (field->field[i][x]) return i;
     return 0;
@@ -235,13 +235,14 @@ static void clear_field(Field *field) {
  * Prepare field
  * Initializes field with cards from deck
  */
-void prepare_field(Field *field, Deck *deck) {
+void field_reset(Field *field, Deck *deck) {
     clear_field(field);
+    DeckMethods *deck_methods = (DeckMethods *)(deck->export_methods);
     for (short row = 0; row < FIELD_WIDTH; row++) {
         for (short col = 0; col < FIELD_HEIGHT; col++) {
             if (col > row) field->field[col][row] = NULL;
             else {
-                Card *card = draw_card(deck);
+                Card *card = deck_methods->draw_card(deck);
                 card->coords.x = row;
                 card->coords.y = col;
                 card->object = Field_enum;
@@ -249,6 +250,23 @@ void prepare_field(Field *field, Deck *deck) {
                 field->field[col][row] = card;
             }
         }
+    }
+}
+
+static Card *field_peek(void *field_pointer, Coords coords) {
+    (void)coords;
+    Field *field = (Field *)field_pointer;
+
+    return field->field[get_last_card_y(field, coords.x)][coords.x];
+}
+
+static void field_pop(void *field_pointer, Card *card) {
+    Field *field = (Field *)field_pointer;
+    Coords coords = card->coords;
+
+    field->field[coords.y][coords.x] = NULL;
+    if (coords.y - 1 >= 0 && field->field[coords.y - 1][coords.x]) {
+        field->field[coords.y - 1][coords.x]->hidden = false;
     }
 }
 
@@ -304,6 +322,18 @@ Field init_field(void) {
     };
 
     field.interfaces.position_handler->restore_coords = (Coords) {.x = 0, .y = 0};
+
+
+    static CardProvider card_provider = (CardProvider) {
+        .peek = field_peek,
+        .pop  = field_pop,
+    };  
+
+    static FieldMethods field_methods = (FieldMethods) {
+        .card_provider = &card_provider,
+    };
+
+    field.export_methods = &field_methods;
 
     return field;
 }

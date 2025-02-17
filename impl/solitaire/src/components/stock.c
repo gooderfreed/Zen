@@ -204,33 +204,29 @@ static void update_stock(void *stock_pointer, void *context) {
     
     Deck  *deck  = (Deck *)stock_context->deck;
     Field *field = (Field *)stock_context->field;
-    // Core  *core  = (Core *)stock_context->core;
     Container *cursor_container = (Container *)stock_context->cursor_container;
 
     // Check if the game is won
     if (is_win(stock)) {
-        // core_change_layer(core, WIN_ID);
         CORE_CHANGE_LAYER(stock, WIN_ID);
         return;
     }
 
     // Place cards from deck to stock
-    if (try_place(stock, deck->pointer, cursor_container)) {
-        next_card(deck);
+    CardProvider *deck_provider = ((DeckMethods *)(deck->export_methods))->card_provider;
+    if (try_place(stock, deck_provider->peek(deck, (Coords){0}), cursor_container)) {
+        deck_provider->pop(deck, NULL);
         return;
     }
     
     // Place cards from field to stock
+    CardProvider *field_provider = ((FieldMethods *)(field->export_methods))->card_provider;
     for (int x = 0; x < FIELD_WIDTH; x++) {
         if (!field->field[0][x]) continue;
 
-        int y = get_last_card_y(field, x);
-        Card *target = field->field[y][x];
-        if (try_place(stock, target, cursor_container)) {
-            field->field[y][x] = NULL;
-            if (y - 1 >= 0 && field->field[y - 1][x]) {
-                field->field[y - 1][x]->hidden = false;
-            }
+        Card *card = field_provider->peek(field, (Coords){.x = (short)x});
+        if (try_place(stock, card, cursor_container)) {
+            field_provider->pop(field, card);
             return;
         }
     }

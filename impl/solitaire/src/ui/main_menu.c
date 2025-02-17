@@ -7,6 +7,8 @@
 static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *cursor) {
     (void)cursor;
     Menu *menu = (Menu *)menu_pointer;
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 
     int text_offset = 1;
     int text_y = 18;
@@ -116,7 +118,6 @@ static void on_controls_click(void *menu_pointer, void *context) {
     
     Menu *menu = (Menu *)menu_pointer;
     SET_DRAWABLE_ACTIVE(menu, false);
-    prepare_menu_screen(CORE_GET_SCREEN(menu_pointer));
     CORE_GLOBAL_MOVE(menu_pointer, CURSOR_RIGHT);
 }
 

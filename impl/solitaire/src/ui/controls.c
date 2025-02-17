@@ -7,6 +7,8 @@
 static void print_controls(const void *controls_pointer, Screen *screen, const Cursor *cursor) {
     (void)controls_pointer;
     (void)cursor;
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 
     int text_y = 18;
     int text_x = 12;
@@ -78,7 +80,6 @@ static void on_back_click(void *controls_pointer, void *context) {
 
     Controls *controls = (Controls *)controls_pointer;
     SET_DRAWABLE_ACTIVE(controls, false);
-    prepare_menu_screen(CORE_GET_SCREEN(controls_pointer));
     CORE_GLOBAL_MOVE(controls_pointer, CURSOR_LEFT);
 }
 
