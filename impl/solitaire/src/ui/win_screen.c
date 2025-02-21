@@ -1,5 +1,8 @@
 #include "../../inc/solitaire.h"
 
+// =========================
+//  DRAWABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Print win screen
  * Draws the win screen on the screen
@@ -31,6 +34,12 @@ static void print_win_screen(const void *win_screen_pointer, Screen *screen, con
     insert_text(screen, text_y + 15,text_x + 13, " Exit",     text_color, background_color);
 }
 
+
+
+
+// =========================
+//  CURSOR_INTERACTABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Place cursor in win screen
  * Places the cursor in the win screen
@@ -72,6 +81,12 @@ static CursorConfig get_cursor_config_in_menu(const void *win_screen_pointer, co
     return (CursorConfig) {.type = CURSOR_RIGHT_SLIM};
 }
 
+
+
+
+// =========================
+//  BUTTONS IMPLEMENTATION
+// =========================
 /*
  * On new game click
  * Handles the new game button click
@@ -100,6 +115,9 @@ static void on_exit_click(void *win_screen_pointer, void *context) {
     CORE_SHUTDOWN(win_screen_pointer);
     exit(0);
 }
+
+
+
 
 /*
  * Initialize win screen

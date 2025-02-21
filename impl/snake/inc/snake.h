@@ -1,5 +1,5 @@
-#ifndef SOLITARE_H
-#define SOLITARE_H
+#ifndef SNAKE_H
+#define SNAKE_H
 
 #define _POSIX_C_SOURCE 199309L
 
@@ -71,7 +71,7 @@ extern const wchar_t card_border[8];
 Snake *init_snake(Arena *arena);
 MapLayer *game_layer_init(Arena *arena);
 
-//conter
+//counter
 ScoreCounter *init_score_conter(Arena *arena);
 
 #endif

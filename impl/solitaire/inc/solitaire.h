@@ -15,10 +15,19 @@
  */
 
 
+
+
+/*
+ * Card Provider structure
+ * This structure is used to provide cards for the game.
+ */
 typedef struct CardProvider {
-    Card *(*peek) (void *source, Coords coords);
-    void  (*pop)  (void *source, Card *card);
+    Card *(*peek) (void *source, Coords coords); // Function to peek at the top card
+    void  (*pop)  (void *source, Card *card);   // Function to pop the top card
 } CardProvider;
+
+
+
 
 /*
  * Card suits enumeration
@@ -68,11 +77,13 @@ typedef struct Card {
 } Card;
 
 extern const wchar_t fat_border[8];
-extern const wchar_t card_border[8];
+extern const wchar_t slim_border[8];
 wchar_t suit_to_text(const Suit suit);
 const char *numeral_to_text(const Numeral numeral);
 void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int size_x);
 void colorize_card(Screen *screen, const Card *card, int y, int x, int height, int width);
+
+
 
 
 /*
@@ -83,7 +94,7 @@ typedef struct Deck {
     ObjectInterfaces interfaces;  // Core engine interfaces
     Card deck[DECK_SIZE + 1];     // Array of all cards (+1 for NULL terminator)
     Card *pointer;                // Current top card pointer
-    void *export_methods;
+    void *export_methods;         // Deck export methods
 } Deck;
 
 typedef struct DeckMethods {
@@ -93,6 +104,8 @@ typedef struct DeckMethods {
 
 Deck generate_deck(void);
 void deck_reset(Deck *deck);
+
+
 
 
 /*
@@ -109,6 +122,8 @@ Stock init_stock(void);
 void stock_reset(Stock *stock);
 
 
+
+
 /*
  * Field structure
  * Represents the tableau of cards in Solitaire
@@ -116,7 +131,7 @@ void stock_reset(Stock *stock);
 typedef struct Field {
     ObjectInterfaces interfaces;                // Core engine interfaces
     Card *field[FIELD_HEIGHT][FIELD_WIDTH];     // Tableau columns for card placement
-    void *export_methods;
+    void *export_methods;                       // Field export methods
 } Field;
 
 typedef struct FieldMethods {
@@ -127,27 +142,34 @@ Field init_field(void);
 void field_reset(Field *field, Deck *deck);
 
 
+
+
 /*
  * Stock context structure 
  * Contains pointers to deck and field for auto-update
  */
 typedef struct StockContext {
-    Deck *deck;                   // Deck pointer
-    Field *field;                 // Field pointer
-    Container *cursor_container;  // Cursor container
+    Deck *deck;               // Deck pointer
+    Field *field;             // Field pointer
+    Cursor *cursor;           // Cursor pointer
 } StockContext;
+
+
+
 
 /*
  * Game structure
  * Contains all game components
  */
 typedef struct Game {
-    Deck *deck;
-    Field *field;
-    Stock *stock;
+    Deck *deck;               // Deck pointer
+    Field *field;             // Field pointer
+    Stock *stock;             // Stock pointer
 } Game;
 
 void game_reset(Game *game);
+
+
 
 
 /*
@@ -162,6 +184,8 @@ typedef struct Menu {
 Menu init_menu(void);
 
 
+
+
 /*
  * Controls structure
  * Represents the controls screen of the game
@@ -171,6 +195,8 @@ typedef struct Controls {
 } Controls;
 
 Controls init_controls(void);
+
+
 
 
 /*
@@ -184,8 +210,10 @@ typedef struct WinScreen {
 WinScreen init_win_screen(void);
 
 
+
+
 // Layers
-MapLayer *game_layer_init(Arena *arena, Container *container);
+MapLayer *game_layer_init(Arena *arena, Cursor *cursor);
 MapLayer *menu_layer_init(Arena *arena, Game *game);
 MapLayer *win_layer_init(Arena *arena, Game *game);
 

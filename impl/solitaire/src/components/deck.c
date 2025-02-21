@@ -4,6 +4,9 @@
  */
 #include "../../inc/solitaire.h"
 
+// =========================
+//  DECK METHODS
+// =========================
 /*
  * Shuffle deck array using Fisher-Yates algorithm
  * Randomly permutes all cards in the deck
@@ -68,6 +71,12 @@ static Card *draw_card(Deck *deck) {
     return card;
 }
 
+
+
+
+// =========================
+//  DRAWABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Draw deck on screen
  * Shows deck pile and current top card
@@ -79,7 +88,7 @@ static void print_deck(const void *deck_pointer, Screen *screen, const Cursor *c
     if (deck->pointer) {
         print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
         fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░', COLOR_RESET, COLOR_RESET);
-        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_BRIGHT_BLACK, COLOR_WHITE, slim_border);
     }
     else {
         add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
@@ -87,6 +96,12 @@ static void print_deck(const void *deck_pointer, Screen *screen, const Cursor *c
     }
 }
 
+
+
+
+// =========================
+//  CURSOR_INTERACTABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Handle cursor movement in deck area
  * Restricts movement to horizontal only between deck and current card
@@ -132,21 +147,12 @@ static CursorConfig get_cursor_config_in_deck(const void *deck_pointer, const Co
     return (CursorConfig) {.type = CURSOR_UP_WIDE};
 }
 
-/*
- * Handle next card button click
- * Advances to next card in deck and clears cursor container
- */
-static void handle_next_card_button(void *deck_pointer, void *context) {
-    next_card((Deck *)deck_pointer);
-    Container *container = (Container *)context;
-    if (container->size > 0 && ((Deck *)deck_pointer)->pointer) {
-        while (!container_is_empty(container)) {
-            Card *card = (Card *)container_pop_element(container);
-            card->selected = false;
-        }
-    }
-}
 
+
+
+// =========================
+//  CARD_HANDLER INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Select card in deck
  * Adds selected card to container and marks it as selected
@@ -190,6 +196,37 @@ static bool is_same_card_in_deck(const void *deck_pointer, const Coords cursor_c
     return deck->pointer == card;
 }
 
+
+
+
+// =========================
+//  BUTTONS IMPLEMENTATION
+// =========================
+/*
+ * Handle next card button click
+ * Advances to next card in deck and clears cursor container
+ */
+static void handle_next_card_button(void *deck_pointer, void *context) {
+    next_card((Deck *)deck_pointer);
+    Container *container = (Container *)context;
+    if (container->size > 0 && ((Deck *)deck_pointer)->pointer) {
+        while (!container_is_empty(container)) {
+            Card *card = (Card *)container_pop_element(container);
+            card->selected = false;
+        }
+    }
+}
+
+
+
+
+// =========================
+//  CARD_PROVIDER INTERFACE IMPLEMENTATION
+// =========================
+/*
+ * Peek at top card of deck
+ * Returns a pointer to the top card without modifying the deck
+ */
 static Card *deck_peek(void *deck_pointer, Coords coords) {
     (void)coords;
     Deck *deck = (Deck *)deck_pointer;
@@ -197,11 +234,89 @@ static Card *deck_peek(void *deck_pointer, Coords coords) {
     return deck->pointer;
 }
 
+/*
+ * Remove top card from deck
+ * Advances the deck pointer to the next card
+ */
 static void deck_pop(void *deck_pointer, Card *card) {
     (void)card;
     Deck *deck = (Deck *)deck_pointer;
 
     next_card(deck);
+}
+
+
+
+
+/*
+ * Set deck interfaces
+ * Assigns function pointers and properties for deck object
+ */
+static void deck_set_interfaces(ObjectInterfaces *oi) {
+    /* 
+     * Define drawable properties
+     * Marks object as active and assigns print function 
+     */
+    static Drawable drawable = {
+        .is_active = true,
+        .print = print_deck
+    };
+
+    /* 
+     * Define cursor interaction behavior
+     * Handles cursor movement, placement, and config retrieval 
+     */
+    static const CursorInteractable cursor_interactable = {
+        .place_cursor       = place_cursor_in_deck,
+        .move_cursor        = move_in_deck,
+        .get_default_coords = get_default_coords,
+        .get_cursor_config  = get_cursor_config_in_deck
+    };
+
+    /* 
+     * Define card handling behavior
+     * Specifies rules for selecting, placing, and comparing cards
+     */
+    static const CardHandler card_handler = {
+        .can_give_cards = true,
+        .select_cards   = select_card_in_deck,
+        .get_cards      = get_card_in_deck,
+        .is_same_card   = is_same_card_in_deck,
+        
+        .can_take_cards = false,
+        .place_cards    = NULL,
+        .can_place      = NULL
+    };
+
+    static Button next_card_button = {
+        .coords = {.x = 0, .y = 0},
+        .on_click = handle_next_card_button,
+    };
+
+    static ButtonHandler button_handler = {
+        .buttons_count = 1,
+        .buttons = {
+            [0] = &next_card_button
+        },
+    };
+
+    /* 
+     * Assign all handlers and properties to the deck object
+     * Defines capabilities and links to functional interfaces
+     */
+    *oi = (ObjectInterfaces) {
+        .name           = "Deck",
+        .capabilities = {
+            .can_hold_cards         = true,
+            .have_buttons           = true,
+            .is_drawable            = true,
+            .is_cursor_interactable = true,
+        },
+        .card_handler        = &card_handler,
+        .button_handler      = &button_handler,
+        .drawable            = &drawable,
+        .cursor_interactable = &cursor_interactable,
+    };
 }
 
 /*
@@ -226,55 +341,7 @@ Deck generate_deck(void) {
     }
     deck.pointer = &deck.deck[0];
 
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_deck
-    };
-
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor        = place_cursor_in_deck,
-        .move_cursor         = move_in_deck,
-        .get_default_coords  = get_default_coords,
-        .get_cursor_config   = get_cursor_config_in_deck
-    };
-
-    static const CardHandler card_handler = {
-        .can_give_cards = true,
-        .select_cards   = select_card_in_deck,
-        .get_cards      = get_card_in_deck,
-        .is_same_card   = is_same_card_in_deck,
-        
-        .can_take_cards = false,
-        .place_cards    = NULL,
-        .can_place      = NULL
-    };
-    
-    static Button next_card_button = {
-        .coords = {.x = 0, .y = 0},
-        .on_click = handle_next_card_button,
-    };
-
-    static ButtonHandler button_handler = {
-        .buttons_count = 1,
-        .buttons = {
-            [0] = &next_card_button
-        },
-    };
-
-    deck.interfaces = (ObjectInterfaces) {
-        .name           = "Deck",
-        .capabilities = {
-            .can_hold_cards         = true,
-            .have_buttons           = true,
-            .is_drawable            = true,
-            .is_cursor_interactable = true,
-        },
-        .card_handler        = &card_handler,
-        .button_handler      = &button_handler,
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
-    };
-
+    deck_set_interfaces(&deck.interfaces);
 
     static CardProvider card_provider = (CardProvider) {
         .peek = deck_peek,

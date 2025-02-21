@@ -21,7 +21,7 @@ const wchar_t fat_border[8] = {
     L'═', L'║', L'╔', L'╗', L'╚', L'╝', L'╠', L'╣'
 };
 
-const wchar_t card_border[8] = {
+const wchar_t slim_border[8] = {
     L'─', L'│', L'┌', L'┐', L'└', L'┘', L'├', L'┤'
 };
 
@@ -53,21 +53,21 @@ void print_card(Screen *screen, const Card *card, int y, int x, int size_y, int 
 
     if (card->hidden) {
         fill_area(screen, y_0, x_0, size_y, size_x, L'░', COLOR_RESET, COLOR_RESET);
-        add_borders(screen, y_0, x_0, size_y, size_x, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
+        add_borders(screen, y_0, x_0, size_y, size_x, COLOR_BRIGHT_BLACK, COLOR_WHITE, slim_border);
         if (y != CARD_HEIGHT + 2 * BORDER_OFFSET_Y + 1 && y != BORDER_OFFSET_Y) {
-            screen->pixels[y_0][x_0].symbol = card_border[6];
-            screen->pixels[y_0][x_0 + CARD_WIDTH - 1].symbol = card_border[7];
+            screen->pixels[y_0][x_0].symbol = slim_border[6];
+            screen->pixels[y_0][x_0 + CARD_WIDTH - 1].symbol = slim_border[7];
         }
         return;
     }
 
     fill_area(screen, y_0, x_0, size_y, size_x, ' ', COLOR_RESET, COLOR_RESET);
     colorize_card(screen, card, y_0 + 1, x_0 + 1, CARD_HEIGHT - 2, CARD_WIDTH - 2);
-    add_borders(screen, y_0, x_0, size_y, size_x, COLOR_BRIGHT_BLACK, COLOR_WHITE, card_border);
+    add_borders(screen, y_0, x_0, size_y, size_x, COLOR_BRIGHT_BLACK, COLOR_WHITE, slim_border);
 
     if (y != CARD_HEIGHT + 2 * BORDER_OFFSET_Y + 1 && y != BORDER_OFFSET_Y) {
-        screen->pixels[y_0][x_0].symbol = card_border[6];
-        screen->pixels[y_0][x_0 + CARD_WIDTH - 1].symbol = card_border[7];
+        screen->pixels[y_0][x_0].symbol = slim_border[6];
+        screen->pixels[y_0][x_0 + CARD_WIDTH - 1].symbol = slim_border[7];
     }
 
     if (card->selected) {

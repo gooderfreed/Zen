@@ -6,19 +6,36 @@
 
 
 /*
- * Initialize cursor with starting object and position
- * Returns cursor structure ready for use
+ * Initialize cursor
+ * Allocates memory for cursor and sets initial state
  */
-Cursor *init_cursor(Arena *arena, void *start_object, Coords start_coords, Container *cursor_cards) {
+Cursor *init_cursor(Arena *arena, Container *cursor_cards) {
     Cursor *cursor = (Cursor *)arena_alloc(arena, sizeof(Cursor));
 
     *cursor = (Cursor) {
-        .coords = start_coords,
+        .coords = {0},
         .cards = cursor_cards,
-        .subject = start_object,
+        .subject = NULL,
     };
 
     return cursor;
+}
+
+/*
+ * Assign subject to cursor
+ * Links cursor to a subject and resets its coordinates
+ */
+void cursor_set_subject(Cursor *cursor, void *subject) {
+    cursor->subject = subject;
+    cursor->coords = GET_DEFAULT_COORDS(subject);
+}
+
+/*
+ * Update cursor coordinates
+ * Sets cursor position to given coordinates
+ */
+void cursor_set_coords(Cursor *cursor, Coords coords) {
+    cursor->coords = coords;
 }
 
 /*
@@ -37,9 +54,6 @@ void print_cursor(Cursor *cursor, Screen *screen) {
         PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
 
         CursorConfig config = GET_CURSOR_CONFIG(cursor->subject, cursor->coords);
-        // if (config.type != CURSOR_CUSTOM) {
-        //     if (config.foreground == COLOR_UNDEFINED) config.foreground = COLOR_NONE;
-        // }
 
         // If subject has custom cursor, let it draw it
         if (config.type == CURSOR_CUSTOM) {

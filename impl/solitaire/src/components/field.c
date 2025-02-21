@@ -4,6 +4,61 @@
  */
 #include "../../inc/solitaire.h"
 
+// =========================
+//  FIELD METHODS
+// =========================
+/*
+ * Get last card y position in field
+ * Finds the highest y position of a card in the specified column
+ */
+static int get_last_card_y(const Field *field, int x) {
+    for (int i = FIELD_HEIGHT - 1; i >= 0; --i)
+        if (field->field[i][x]) return i;
+    return 0;
+}
+
+/*
+ * Clear field
+ * Removes all cards from field
+ */
+static void clear_field(Field *field) {
+    for (short row = 0; row < FIELD_WIDTH; row++) {
+        for (short col = 0; col < FIELD_HEIGHT; col++) {
+            if (field->field[col][row]) {
+                field->field[col][row] = NULL;
+            }
+        }
+    }
+}
+
+/*
+ * Prepare field
+ * Initializes field with cards from deck
+ */
+void field_reset(Field *field, Deck *deck) {
+    clear_field(field);
+    DeckMethods *deck_methods = (DeckMethods *)(deck->export_methods);
+    for (short row = 0; row < FIELD_WIDTH; row++) {
+        for (short col = 0; col < FIELD_HEIGHT; col++) {
+            if (col > row) field->field[col][row] = NULL;
+            else {
+                Card *card = deck_methods->draw_card(deck);
+                card->coords.x = row;
+                card->coords.y = col;
+                card->object = Field_enum;
+                card->hidden = col == row ? false : true;
+                field->field[col][row] = card;
+            }
+        }
+    }
+}
+
+
+
+
+// =========================
+//  DRAWABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Print field content to screen
  * Draws the field with cards and borders
@@ -39,16 +94,12 @@ static void print_field(const void *field_pointer, Screen *screen, const Cursor 
     }
 }
 
-/*
- * Get last card y position in field
- * Finds the highest y position of a card in the specified column
- */
-static int get_last_card_y(const Field *field, int x) {
-    for (int i = FIELD_HEIGHT - 1; i >= 0; --i)
-        if (field->field[i][x]) return i;
-    return 0;
-}
 
+
+
+// =========================
+//  CURSOR_INTERACTABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Place cursor in field
  * Calculates target coordinates based on cursor position and updates them
@@ -95,6 +146,12 @@ static CursorConfig get_cursor_config_in_field(const void *field_pointer, const 
     return (CursorConfig) {.type = CURSOR_UP_WIDE, .background = COLOR_NONE, .foreground = COLOR_BOLD};
 }
 
+
+
+
+// =========================
+//  CARD_HANDLER INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Get cards from field
  * Removes selected cards from field and marks them as not selected
@@ -198,6 +255,12 @@ static bool is_same_card_in_field(const void *field_pointer, const Coords cursor
     return field->field[cursor_coords.y][cursor_coords.x] == card;
 }
 
+
+
+
+// =========================
+//  POSITION_HANDLER INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Save current position in field
  * Sets current coordinates to restore coordinates
@@ -217,42 +280,16 @@ static void restore_pos_in_field(void *field_pointer, Coords *current_coords) {
     current_coords->y = (short)get_last_card_y(field, current_coords->x);
 }
 
-/*
- * Clear field
- * Removes all cards from field
- */
-static void clear_field(Field *field) {
-    for (short row = 0; row < FIELD_WIDTH; row++) {
-        for (short col = 0; col < FIELD_HEIGHT; col++) {
-            if (field->field[col][row]) {
-                field->field[col][row] = NULL;
-            }
-        }
-    }
-}
 
-/*
- * Prepare field
- * Initializes field with cards from deck
- */
-void field_reset(Field *field, Deck *deck) {
-    clear_field(field);
-    DeckMethods *deck_methods = (DeckMethods *)(deck->export_methods);
-    for (short row = 0; row < FIELD_WIDTH; row++) {
-        for (short col = 0; col < FIELD_HEIGHT; col++) {
-            if (col > row) field->field[col][row] = NULL;
-            else {
-                Card *card = deck_methods->draw_card(deck);
-                card->coords.x = row;
-                card->coords.y = col;
-                card->object = Field_enum;
-                card->hidden = col == row ? false : true;
-                field->field[col][row] = card;
-            }
-        }
-    }
-}
 
+
+// =========================
+//  CARD_PROVIDER INTERFACE IMPLEMENTATION
+// =========================
+/*
+ * Peek at top card in field column
+ * Returns the last card in the specified column
+ */
 static Card *field_peek(void *field_pointer, Coords coords) {
     (void)coords;
     Field *field = (Field *)field_pointer;
@@ -260,6 +297,10 @@ static Card *field_peek(void *field_pointer, Coords coords) {
     return field->field[get_last_card_y(field, coords.x)][coords.x];
 }
 
+/*
+ * Remove card from field
+ * Uncovers the card below if present
+ */
 static void field_pop(void *field_pointer, Card *card) {
     Field *field = (Field *)field_pointer;
     Coords coords = card->coords;
@@ -270,25 +311,37 @@ static void field_pop(void *field_pointer, Card *card) {
     }
 }
 
-/*
- * Initialize field with cards from deck
- * Sets up field structure and interfaces
- */
-Field init_field(void) {
-    Field field = {0};
 
+
+/*
+ * Set field interfaces
+ * Assigns function pointers and properties for field object
+ */
+static void field_set_interfaces(ObjectInterfaces *oi) {
+    /* 
+     * Define drawable properties
+     * Marks object as active and assigns print function 
+     */
     static Drawable drawable = {
         .is_active = true,
         .print = print_field
     };
 
+    /* 
+     * Define cursor interaction behavior
+     * Handles cursor movement, placement, and config retrieval 
+     */
     static const CursorInteractable cursor_interactable = {
-        .place_cursor        = place_cursor_in_field,
-        .move_cursor         = move_in_field,
-        .get_default_coords  = get_default_coords,
-        .get_cursor_config   = get_cursor_config_in_field
+        .place_cursor       = place_cursor_in_field,
+        .move_cursor        = move_in_field,
+        .get_default_coords = get_default_coords,
+        .get_cursor_config  = get_cursor_config_in_field
     };
 
+    /* 
+     * Define card handling behavior
+     * Specifies rules for selecting, placing, and comparing cards
+     */
     static const CardHandler card_handler = {
         .can_give_cards = true,
         .select_cards   = select_cards_in_field,
@@ -300,13 +353,21 @@ Field init_field(void) {
         .place_cards    = place_cards_in_field,
     };
 
+    /* 
+     * Define position handling behavior
+     * Saves and restores object coordinates
+     */
     static PositionHandler position_handler = {
-        .restore_coords   = {0},
+        .restore_coords   = {.x = 0, .y = 0},
         .save_current_pos = save_current_pos_in_field,
         .restore_pos      = restore_pos_in_field
     };
 
-    field.interfaces = (ObjectInterfaces) {
+    /* 
+     * Assign all handlers and properties to the field object
+     * Defines capabilities and links to functional interfaces
+     */
+    *oi = (ObjectInterfaces) {
         .name           = "Field",
         .capabilities = {
             .can_hold_cards         = true,
@@ -320,9 +381,15 @@ Field init_field(void) {
         .card_handler        = &card_handler,
         .position_handler    = &position_handler
     };
+}
 
-    field.interfaces.position_handler->restore_coords = (Coords) {.x = 0, .y = 0};
-
+/*
+ * Initialize field with cards from deck
+ * Sets up field structure and interfaces
+ */
+Field init_field(void) {
+    Field field = {0};
+    field_set_interfaces(&field.interfaces);
 
     static CardProvider card_provider = (CardProvider) {
         .peek = field_peek,

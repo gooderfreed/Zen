@@ -1,6 +1,4 @@
 #include "../inc/solitaire.h"
-#include <fcntl.h>
-#include <sys/select.h>
 
 /*
  * Initialize game
@@ -10,7 +8,9 @@ static void init_game(Core *core) {
     Arena *arena = core->arena;
     Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_RESET, ' ');
     Container *cursor_container = container_init(arena, CONTAINER_SIZE);
-    MapLayer *game_layer = game_layer_init(arena, cursor_container);
+    Cursor *cursor = init_cursor(arena, cursor_container);
+    
+    MapLayer *game_layer = game_layer_init(arena, cursor);
     Game *game = (Game *)game_layer->layer_main_object;
     MapLayer *menu_layer = menu_layer_init(arena, game);
     MapLayer *win_layer  = win_layer_init(arena, game);
@@ -22,7 +22,7 @@ static void init_game(Core *core) {
     map_set_layer(map, win_layer,  WIN_ID);
 
     MapObject object = map_get_current_object(map);
-    Cursor *cursor = init_cursor(arena, object.object, GET_DEFAULT_COORDS(object.object), cursor_container);
+    cursor_set_subject(cursor, object.object);
 
     core_set_cursor(core, cursor);
     core_set_screen(core, screen);
@@ -36,7 +36,7 @@ static void init_game(Core *core) {
 static void game_loop(Core *core) {
     core_set_target_fps(core, 60);
     core_set_ticks_per_second(core, 20);
-    
+
     while (!core_should_close(core)) {
         if (core_has_input()) {
             wint_t ch = getwchar();

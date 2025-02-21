@@ -1,5 +1,8 @@
 #include "../../inc/solitaire.h"
 
+// =========================
+//  DRAWABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Print controls
  * Draws the controls on the screen
@@ -29,6 +32,12 @@ static void print_controls(const void *controls_pointer, Screen *screen, const C
     insert_text(screen, text_y + 11, text_x + 12, " Back", text_color, background_color);
 }
 
+
+
+
+// =========================
+//  CURSOR_INTERACTABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Place cursor in controls
  * Places the cursor in the controls
@@ -71,6 +80,12 @@ static CursorConfig get_cursor_config_in_controls(const void *controls_pointer, 
     return (CursorConfig) {.type = CURSOR_RIGHT_SLIM};
 }
 
+
+
+
+// =========================
+//  BUTTONS IMPLEMENTATION
+// =========================
 /*
  * On back click
  * Handles the back button click
@@ -82,6 +97,8 @@ static void on_back_click(void *controls_pointer, void *context) {
     SET_DRAWABLE_ACTIVE(controls, false);
     CORE_GLOBAL_MOVE(controls_pointer, CURSOR_LEFT);
 }
+
+
 
 
 /*

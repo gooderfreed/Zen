@@ -61,8 +61,9 @@ typedef struct CursorConfig {
  * Cursor functions
  * Cursor manipulation and rendering
  */
-Cursor *init_cursor(Arena *arena, void *start_object, Coords start_coords, Container *cursor_cards);
+Cursor *init_cursor(Arena *arena, Container *cursor_cards);
+void cursor_set_subject(Cursor *cursor, void *subject);
+void cursor_set_coords(Cursor *cursor, Coords coords);
 void print_cursor(Cursor *cursor, Screen *screen);
-void set_cursor(Cursor *cursor, Coords coords, void *target_subject);
 
 #endif

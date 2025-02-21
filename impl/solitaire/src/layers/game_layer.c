@@ -74,18 +74,18 @@ static bool cursor_loop(Core *core, wint_t key) {
  * Initialize game layer
  * Creates game layer with required interfaces
  */
-MapLayer *game_layer_init(Arena *arena, Container *container) {
+MapLayer *game_layer_init(Arena *arena, Cursor *cursor) {
     Game *game = game_init(arena);
 
     StockContext *stock_context = (StockContext *)arena_alloc(arena, sizeof(StockContext));
     *stock_context = (StockContext) {
         .deck  = game->deck,
         .field = game->field,
-        .cursor_container = container
+        .cursor = cursor,
     };
 
     SET_UPDATE_CONTEXT(game->stock,   stock_context);
-    SET_BUTTON_CONTEXT(game->deck, 0, container);
+    SET_BUTTON_CONTEXT(game->deck, 0, cursor->cards);
 
     MapLayer *game_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
 

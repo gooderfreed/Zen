@@ -1,5 +1,8 @@
 #include "../../inc/solitaire.h"
 
+// =========================
+//  DRAWABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Print menu
  * Draws the menu on the screen
@@ -32,6 +35,12 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
     insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, " Exit",     text_color, background_color);
 }
 
+
+
+
+// =========================
+//  CURSOR_INTERACTABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Place cursor in menu
  * Places the cursor in the menu
@@ -77,6 +86,12 @@ static CursorConfig get_cursor_config_in_menu(const void *menu_pointer, const Co
     return (CursorConfig) {.type = CURSOR_RIGHT_SLIM};
 }
 
+
+
+
+// =========================
+//  BUTTONS IMPLEMENTATION
+// =========================
 /*
  * On continue click
  * Handles the continue button click
@@ -120,6 +135,9 @@ static void on_controls_click(void *menu_pointer, void *context) {
     SET_DRAWABLE_ACTIVE(menu, false);
     CORE_GLOBAL_MOVE(menu_pointer, CURSOR_RIGHT);
 }
+
+
+
 
 /*
  * Init menu
