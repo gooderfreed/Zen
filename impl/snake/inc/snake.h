@@ -72,6 +72,6 @@ Snake *init_snake(Arena *arena);
 MapLayer *game_layer_init(Arena *arena);
 
 //counter
-ScoreCounter *init_score_conter(Arena *arena);
+ScoreCounter *init_score_counter(Arena *arena);
 
 #endif

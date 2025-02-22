@@ -23,7 +23,7 @@ static void print_score(const void *score_pointer, Screen *screen, const Cursor 
  * Initialize score counter
  * Allocates and initializes a new score counter in the given memory arena.
  */
-ScoreCounter *init_score_conter(Arena *arena) {
+ScoreCounter *init_score_counter(Arena *arena) {
     ScoreCounter *score_counter = (ScoreCounter *)arena_alloc(arena, sizeof(ScoreCounter));
 
     *score_counter = (ScoreCounter) {

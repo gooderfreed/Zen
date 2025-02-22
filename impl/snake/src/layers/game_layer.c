@@ -24,7 +24,7 @@ static void game_loop(Core *core, wint_t key) {
  */
 MapLayer *game_layer_init(Arena *arena) {
     Snake *snake = init_snake(arena);
-    ScoreCounter *score_counter = init_score_conter(arena);
+    ScoreCounter *score_counter = init_score_counter(arena);
 
     MapLayer *game_layer = create_map_layer(arena, 2, 1, SNAKE_DEFAULT_COORDS);
 

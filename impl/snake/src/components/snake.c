@@ -64,9 +64,16 @@ static void print_snake(const void *snake_pointer, Screen *screen, const Cursor 
 
     // Draw snake body
     for (int i = 1; i < snake->length; i++) {
-        fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->segments[i].y * SNAKE_GRID_CELL_SIZE, 
-                  BORDER_SIZE + snake->segments[i].x * SNAKE_GRID_CELL_SIZE * 2, 
-                  SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_WHITE);
+        if (i % 2 == 0) {
+            fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->segments[i].y * SNAKE_GRID_CELL_SIZE, 
+                      BORDER_SIZE + snake->segments[i].x * SNAKE_GRID_CELL_SIZE * 2, 
+                      SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_WHITE);
+        }
+        else {
+            fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->segments[i].y * SNAKE_GRID_CELL_SIZE, 
+                      BORDER_SIZE + snake->segments[i].x * SNAKE_GRID_CELL_SIZE * 2, 
+                      SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_BRIGHT_BLACK);
+        }
     }
 
     // Draw snake head
@@ -205,7 +212,7 @@ Snake *init_snake(Arena *arena) {
     };
     
 
-    
+
     // Assign interfaces for core integration
     snake->interfaces = (ObjectInterfaces) {
         .name          = "Snake",
