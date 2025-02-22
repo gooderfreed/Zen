@@ -1,137 +1,81 @@
 # MiniCore
-A lightweight game engine written in pure C, designed for console-based card based games.
+
+**Lightweight Modular Framework for Building Console Applications in C**
 
 ## Overview
-MiniCore is a minimalistic yet powerful framework that provides:
-- Flexible *"object-oriented"* architecture
-- Interface-based component system
-- Screen rendering capabilities
-- Input handling
-- Event system
+
+MiniCore is a streamlined framework written in pure C, designed to facilitate the development of robust and efficient console-based applications.  It provides a flexible, modular architecture centered around an interface-based component system.  MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games.
+
+Key framework capabilities include:
+
+*   **Modular "Object-Oriented" Architecture**: Encourages code reusability and maintainability through a component-based design.
+*   **Interface-Driven Component System**:  Promotes flexibility and extensibility by defining clear contracts between modules.
+*   **Console Screen Rendering**:  Offers functionalities for text-based output with color and formatting.
+*   **Keyboard Input Handling**:  Manages user input from the keyboard for interactive applications.
 
 ## Features
-- **Modular Design**: Core/Implementation separation
-- **Interface System**: 
-  - CardHandler
-  - Drawable
-  - Interactable
-  - Dynamic
-  - ButtonHandler
-  - PositionHandler
-  - Updateable
-- **Screen Management**: ASCII/Unicode rendering
-- **Input Handling**: Keyboard events
-- **Memory Efficient**: No dynamic allocations by default
 
-## Example Implementation
-The framework comes with a Solitaire card game implementation showcasing the engine's capabilities:
-- Card game mechanics
-- Unicode card rendering
-- Terminal-based UI\
-![Klondike Solitaire Implementation](.github/solitaire.png)
+*   **Modular Core Design**: Clear separation between the core framework (`core`) and example implementations (`impl`), promoting a clean and organized project structure.
+*   **Comprehensive Interface System**: The framework leverages interfaces to define object capabilities and interactions. Key interfaces include:
+    *   **`CardHandler`**: Defines functionalities for objects that manage and interact with cards (relevant for card games, but can be adapted for other data management).
+    *   **`Drawable`**:  Enables objects to render themselves on the console screen.
+    *   **`CursorInteractable`**:  Provides mechanisms for objects to interact with a cursor, handling movement and actions.
+    *   **`Dynamic`**:  Indicates objects that require dynamic memory management and defines a freeing mechanism.
+    *   **`ButtonHandler`**:  Implements button-like interactions within console applications.
+    *   **`PositionHandler`**:  Manages object positions and state persistence across map movements.
+    *   **`Updateable`**:  Allows objects to perform periodic updates within the application loop.
+    *   **`CoreDependent`**:  Provides access to core engine functionalities for dependent objects.
+    *   **`InputHandler`**:  Enables direct input handling for specific objects.
+    *   **`TickDependent`**:  Allows objects to synchronize actions with the framework's tick-based system.
+*   **Console Screen Management**:  Supports both ASCII and Unicode rendering for diverse character sets and visual presentation in the console.
+*   **Keyboard Input Management**:  Provides utilities for capturing and processing keyboard input events.
+*   **Memory Efficiency Focus**:  Emphasizes memory control with arena allocation, minimizing dynamic memory allocations by default for predictable performance.
+
+## Example Implementations
+
+The framework includes the following example implementations within the `impl` directory to showcase different types of console applications that can be built with MiniCore:
+
+*   **Solitaire Game**:  A complete Klondike Solitaire card game implementation demonstrating advanced framework features like complex game logic, user interface elements (menus, win screen), Unicode card rendering, and terminal-based user interaction.
+
+    ![Klondike Solitaire Implementation](.github/solitaire.png)
+
+*   **Snake Game**: A classic Snake game implementation, illustrating game loop management, real-time input handling, and dynamic object updates within the MiniCore framework.
+
+    ![Snake Implementation](.github/snake.png)
 
 ## Building
+
 **Clone the repository**
+
 ```bash
-git clone https://github.com/gooderfreed/minicore.git
+git clone https://github.com/gooderfreed/MiniCore.git
+cd MiniCore
 ```
+
 **Build the project**
 
-Build all implementations
+To build all implementations:
+
 ```bash
 make
 ```
-**or build a specific implementation:**
 
-Go to the implementation directory
+To build a specific implementation (e.g., Solitaire):
+
 ```bash
 cd impl/solitaire
-```
-Build the project
-```bash
 make
 ```
 
-## Usage
-### 1. Create Your Object
-First, define your object structure and initialize it with required interfaces:
+## Usage Example
 
-```c
-typedef struct MyObject {
-    ObjectInterfaces interfaces;
-    // Your object data
-} MyObject;
+For a step-by-step guide and a basic code example demonstrating the fundamental usage of MiniCore, please refer to the [**impl/simple_demo**](impl/simple_demo/) directory. This example provides a clear illustration of how to initialize the core, create objects, implement interfaces, and integrate them into the main application loop. It serves as an excellent starting point for understanding the framework's core concepts and building your own console applications.
 
-MyObject init_object(void) {
-    MyObject obj = {0};
-
-    static const Drawable drawable = {
-        .print = my_print_function
-    };
-
-    static const Interactable interactable = {
-        .move = my_move_function,
-        .place_cursor = my_place_cursor_function
-    };
-
-    obj.interfaces = (ObjectInterfaces){
-        .name = "MyObject",
-        .capabilities = {
-            .is_drawable = true,
-            .is_interactable = true
-        },
-        .drawable = &drawable,
-        .interactable = &interactable
-    };
-    return obj;
-}
-```
-
-### 2. Register in Object Map
-Add your object to the map to make it part of the game world:
-
-```c
-MyObject my_object = init_object();
-Screen   screen   = init_screen();
-
-Map map = {
-    .objects = {
-        {
-            {&my_object, MY_OBJECT_DEFAULT_COORDS},
-            // Other objects...
-        }
-    },
-    .global_coords = (Coords){.x = 0, .y = 0}
-};
-
-// Initialize cursor and core
-MapObject object = map_get_current_object(&map);
-Cursor    cursor = init_cursor(object.object, object.default_coords);
-Core      core   = init_core(&map, &cursor, &screen);
-```
-### 3. Main Loop
-Handle input and update screen:
-
-```c
-while (true) {
-    wint_t input = getwchar();
-    bool need_update = true;
-    
-    switch (input) {
-        case KEY_LEFT:  core_move(&core, CURSOR_LEFT);  break;
-        case KEY_RIGHT: core_move(&core, CURSOR_RIGHT); break;
-        case KEY_SPACE: core_action(&core);             break;
-        default: need_update = false;
-    }
-
-    if (need_update) {
-        core_update_screen(&core);
-    }
-}
-```
 
 ## License
+
 Licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Contributing
+
 Contributions are welcome! Please feel free to submit a Pull Request.
