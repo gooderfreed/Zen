@@ -1,5 +1,8 @@
 #include "../../inc/snake.h"
 
+// =========================
+//  DECK METHODS
+// =========================
 /*
  * Generate apple position
  * Randomly places an apple on the grid, avoiding the snake's body.
@@ -25,6 +28,23 @@ static Coords generate_apple(const Snake *snake) {
     return apple;
 }
 
+/*
+ * Set snake movement direction
+ * Changes the direction of the snake, preventing 180-degree turns.
+ */
+static void set_snake_direction(Snake *snake, Coords new_direction) {
+    if (snake->direction.x + new_direction.x != 0 || 
+        snake->direction.y + new_direction.y != 0) {
+        snake->direction = new_direction;
+    }
+}
+
+
+
+
+// =========================
+//  DRAWABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Render the snake on the screen
  * Draws the snake, apple, and game area using colored characters.
@@ -55,6 +75,12 @@ static void print_snake(const void *snake_pointer, Screen *screen, const Cursor 
               SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_BLACK);
 }
 
+
+
+
+// =========================
+//  UPDATABLE INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Update snake movement and handle collisions
  * Moves the snake, checks for collisions, and handles apple consumption.
@@ -95,6 +121,7 @@ static void update_snake(void *snake_pointer, void *context) {
         if (snake->length < SNAKE_MAX_SIZE) {
             snake->apple = generate_apple(snake);
         } else {
+            // we win, but for now just "freeze" snake
             snake->is_alive = false;
         }
     }
@@ -107,17 +134,12 @@ static void update_snake(void *snake_pointer, void *context) {
     snake->segments[0] = tmp;
 }
 
-/*
- * Set snake movement direction
- * Changes the direction of the snake, preventing 180-degree turns.
- */
-static void set_snake_direction(Snake *snake, Coords new_direction) {
-    if (snake->direction.x + new_direction.x != 0 || 
-        snake->direction.y + new_direction.y != 0) {
-        snake->direction = new_direction;
-    }
-}
 
+
+
+// =========================
+//  INPUT HANDLER INTERFACE IMPLEMENTATION
+// =========================
 /*
  * Handle snake movement input
  * Updates the snake's direction based on player input.
@@ -136,6 +158,9 @@ static bool input_snake(void *snake_pointer, Core *core, wint_t key) {
 
     return false;
 }
+
+
+
 
 /*
  * Initialize snake object
@@ -161,6 +186,8 @@ Snake *init_snake(Arena *arena) {
     // Generate initial apple position
     snake->apple = generate_apple(snake);
 
+
+
     // Define rendering behavior
     static Drawable drawable = {
         .is_active = true,
@@ -176,7 +203,9 @@ Snake *init_snake(Arena *arena) {
     static InputHandler input_handler = {
         .handle_input = input_snake
     };
+    
 
+    
     // Assign interfaces for core integration
     snake->interfaces = (ObjectInterfaces) {
         .name          = "Snake",

@@ -9,11 +9,14 @@ static void print_score(const void *score_pointer, Screen *screen, const Cursor 
 
     ScoreCounter *score_counter = (ScoreCounter *)score_pointer;
     fill_area(screen, BORDER_SIZE, BORDER_SIZE, SCORE_COUNER_HEIGHT, SNAKE_AREA_WIDTH, ' ', COLOR_BLUE, COLOR_RESET);
-    char buffer[50];
-    snprintf(buffer, 50, "Score: %i", score_counter->cur_score);
-    int len = snprintf(buffer, 50, "Record: %i", score_counter->max_score);
-    insert_text(screen, BORDER_SIZE, BORDER_SIZE, buffer, COLOR_BOLD, COLOR_NONE);
-    insert_text(screen, BORDER_SIZE, SCREEN_WIDTH - BORDER_SIZE - len, buffer, COLOR_BOLD, COLOR_NONE);
+    
+    char score_buffer[50];
+    snprintf(score_buffer, 50, "Score: %i", score_counter->cur_score);
+    insert_text(screen, BORDER_SIZE, BORDER_SIZE, score_buffer, COLOR_BOLD, COLOR_NONE);
+
+    char score_record_buffer[50];
+    int len = snprintf(score_record_buffer, 50, "Record: %i", score_counter->max_score);
+    insert_text(screen, BORDER_SIZE, SCREEN_WIDTH - BORDER_SIZE - len, score_record_buffer, COLOR_BOLD, COLOR_NONE);
 }
 
 /*

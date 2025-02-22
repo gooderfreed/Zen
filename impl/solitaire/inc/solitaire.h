@@ -23,7 +23,7 @@
  */
 typedef struct CardProvider {
     Card *(*peek) (void *source, Coords coords); // Function to peek at the top card
-    void  (*pop)  (void *source, Card *card);   // Function to pop the top card
+    void  (*pop)  (void *source, Card *card);    // Function to pop the top card
 } CardProvider;
 
 
