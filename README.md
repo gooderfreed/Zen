@@ -4,13 +4,13 @@
 
 ## Overview
 
-MiniCore is a streamlined framework written in pure C, designed to facilitate the development of robust and efficient console-based applications.  It provides a flexible, modular architecture centered around an interface-based component system.  MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games.
+MiniCore is a streamlined framework written in pure C, designed to facilitate the development of robust and efficient console-based applications.  It provides a flexible, modular architecture centered around an interface-based component system.  MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
 
 Key framework capabilities include:
 
 *   **Modular "Object-Oriented" Architecture**: Encourages code reusability and maintainability through a component-based design.
 *   **Interface-Driven Component System**:  Promotes flexibility and extensibility by defining clear contracts between modules.
-*   **Console Screen Rendering**:  Offers functionalities for text-based output with color and formatting.
+*   **Enhanced Console Screen Rendering**:  Offers advanced functionalities for text-based output with color and formatting, including **full RGB color support with automatic conversion for compatibility across various terminals.**
 *   **Keyboard Input Handling**:  Manages user input from the keyboard for interactive applications.
 
 ## Features
@@ -27,7 +27,8 @@ Key framework capabilities include:
     *   **`CoreDependent`**:  Provides access to core engine functionalities for dependent objects.
     *   **`InputHandler`**:  Enables direct input handling for specific objects.
     *   **`TickDependent`**:  Allows objects to synchronize actions with the framework's tick-based system.
-*   **Console Screen Management**:  Supports both ASCII and Unicode rendering for diverse character sets and visual presentation in the console.
+*   **Advanced Console Screen Management**:  Supports ASCII, Unicode, and **full RGB color rendering**. The framework **automatically detects terminal color capabilities** (Truecolor, 256-color, or basic 16 colors) and **dynamically converts RGB colors to the optimal format** supported by the terminal.
+*   **Optional `tput` Support**:  Leverages the `tput` utility (if available) to **query the terminal for advanced capabilities**, ensuring accurate color detection and optimal rendering.  If `tput` is not found, a fallback detection method is used.
 *   **Keyboard Input Management**:  Provides utilities for capturing and processing keyboard input events.
 *   **Memory Efficiency Focus**:  Emphasizes memory control with arena allocation, minimizing dynamic memory allocations by default for predictable performance.
 
