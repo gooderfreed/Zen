@@ -10,26 +10,26 @@
 static void print_controls(const void *controls_pointer, Screen *screen, const Cursor *cursor) {
     (void)controls_pointer;
     (void)cursor;
-    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_WHITE);
     add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 
     int text_y = 18;
     int text_x = 12;
-    Color text_color = COLOR_BOLD;
+    Color text_color = COLOR_NONE;
     Color background_color = COLOR_NONE;
 
-    insert_text(screen, text_y + 0, text_x + 10, " Controls:",                          text_color, background_color);
-    insert_text(screen, text_y + 1, text_x + 0, "  w            - move up",             text_color, background_color);
-    insert_text(screen, text_y + 2, text_x + 0, "  a            - move left",           text_color, background_color);
-    insert_text(screen, text_y + 3, text_x + 0, "  s            - move down",           text_color, background_color);
-    insert_text(screen, text_y + 4, text_x + 0, "  d            - move right",          text_color, background_color);
-    insert_text(screen, text_y + 5, text_x + 0, "  space\\enter  - action",             text_color, background_color);
-    insert_text(screen, text_y + 6, text_x + 0, "  q            - menu",                text_color, background_color);
-    insert_text(screen, text_y + 7, text_x + 0, "  esc          - exit",                text_color, background_color);
-    insert_text(screen, text_y + 8, text_x + 0, "  ctrl+a       - move left globally",  text_color, background_color);
-    insert_text(screen, text_y + 9, text_x + 0, "  ctrl+d       - move right globally", text_color, background_color);
+    insert_text(screen, text_y + 0, text_x + 10, " Controls:",                          text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 1, text_x + 0, "  w            - move up",             text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 2, text_x + 0, "  a            - move left",           text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 3, text_x + 0, "  s            - move down",           text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 4, text_x + 0, "  d            - move right",          text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 5, text_x + 0, "  space\\enter  - action",             text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 6, text_x + 0, "  q            - menu",                text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 7, text_x + 0, "  esc          - exit",                text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 8, text_x + 0, "  ctrl+a       - move left globally",  text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 9, text_x + 0, "  ctrl+d       - move right globally", text_color, background_color, Effect_Bold);
 
-    insert_text(screen, text_y + 11, text_x + 12, " Back", text_color, background_color);
+    insert_text(screen, text_y + 11, text_x + 12, " Back", text_color, background_color, Effect_Bold);
 }
 
 
@@ -77,7 +77,12 @@ static Coords get_default_coords(const void *controls_pointer) {
 static CursorConfig get_cursor_config_in_controls(const void *controls_pointer, const Coords cursor_coords) {
     (void)controls_pointer;
     (void)cursor_coords;
-    return (CursorConfig) {.type = CURSOR_RIGHT_SLIM};
+    return (CursorConfig) {
+        .type = CURSOR_RIGHT_SLIM,
+        .background = COLOR_NONE,
+        .foreground = COLOR_WHITE,
+        .effect = Effect_Bold,
+    };
 }
 
 

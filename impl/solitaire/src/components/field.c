@@ -68,7 +68,7 @@ static void print_field(const void *field_pointer, Screen *screen, const Cursor 
     int contentHeight = 2 * FIELD_HEIGHT - 1 + CARD_HEIGHT - 2;
     int contentWidth = SCREEN_WIDTH - BORDER_OFFSET_X - 1;
 
-    fill_area(screen, DECK_OFFSET + BORDER_OFFSET_Y, BORDER_OFFSET_X, contentHeight, contentWidth, ' ', COLOR_GREEN, COLOR_RESET);
+    fill_area(screen, DECK_OFFSET + BORDER_OFFSET_Y, BORDER_OFFSET_X, contentHeight, contentWidth, ' ', ((Color){0x0030992e}), COLOR_NONE);
 
     int y_offset_base = DECK_OFFSET + BORDER_OFFSET_Y;
     int hovered_x = hovered_card->coords.x;
@@ -85,7 +85,7 @@ static void print_field(const void *field_pointer, Screen *screen, const Cursor 
             const Card *current_card = field->field[y][x];
 
             if (y == 0 && !current_card) {
-                add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
+                add_borders(screen, y_offset_base, x_0, CARD_HEIGHT, CARD_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
             }
             else {
                 print_card(screen, current_card, y_0 + additional_offset, x_0, CARD_HEIGHT, CARD_WIDTH);
@@ -143,7 +143,12 @@ static Coords get_default_coords(const void *field_pointer) {
 static CursorConfig get_cursor_config_in_field(const void *field_pointer, const Coords cursor_coords) {
     (void)field_pointer;
     (void)cursor_coords;
-    return (CursorConfig) {.type = CURSOR_UP_WIDE, .background = COLOR_NONE, .foreground = COLOR_BOLD};
+    return (CursorConfig) {
+        .type = CURSOR_UP_WIDE,
+        .background = COLOR_NONE,
+        .foreground = COLOR_WHITE,
+        .effect = Effect_Bold,
+    };
 }
 
 

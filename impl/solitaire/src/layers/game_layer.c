@@ -38,9 +38,9 @@ void game_reset(Game *game) {
  * Prepare game screen
  */
 static void prepare_game_screen(Screen *screen) {
-    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_GREEN, COLOR_RESET);
-    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLACK, COLOR_BLUE, fat_border);
-    add_separator(screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, COLOR_BLACK, COLOR_BLUE, fat_border);
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', ((Color){0x0030992e}), COLOR_NONE);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ((Color){0x004a4201}), ((Color){0x00242001}), fat_border);
+    add_separator(screen, DECK_OFFSET + BORDER_OFFSET_Y - 1, 0, ((Color){0x004a4201}), ((Color){0x00242001}), fat_border);
 }
 
 /*

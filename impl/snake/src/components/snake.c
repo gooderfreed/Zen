@@ -55,7 +55,7 @@ static void print_snake(const void *snake_pointer, Screen *screen, const Cursor 
 
     // Draw game area
     fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE, BORDER_SIZE, 
-              SNAKE_AREA_HEIGHT, SNAKE_AREA_WIDTH, ' ', COLOR_GREEN, COLOR_WHITE);
+              SNAKE_AREA_HEIGHT, SNAKE_AREA_WIDTH, ' ', ((Color){0x002fa82d}), COLOR_WHITE);
 
     // Draw apple
     fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->apple.y * SNAKE_GRID_CELL_SIZE, 
@@ -67,19 +67,19 @@ static void print_snake(const void *snake_pointer, Screen *screen, const Cursor 
         if (i % 2 == 0) {
             fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->segments[i].y * SNAKE_GRID_CELL_SIZE, 
                       BORDER_SIZE + snake->segments[i].x * SNAKE_GRID_CELL_SIZE * 2, 
-                      SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_WHITE);
+                      SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, ((Color){0x00cc9752}));
         }
         else {
             fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->segments[i].y * SNAKE_GRID_CELL_SIZE, 
                       BORDER_SIZE + snake->segments[i].x * SNAKE_GRID_CELL_SIZE * 2, 
-                      SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_BRIGHT_BLACK);
+                      SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, ((Color){0x00dea357}));
         }
     }
 
     // Draw snake head
     fill_area(screen, SNAKE_AREA_OFFSET_Y + BORDER_SIZE + snake->segments[0].y * SNAKE_GRID_CELL_SIZE, 
               BORDER_SIZE + snake->segments[0].x * SNAKE_GRID_CELL_SIZE * 2, 
-              SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, COLOR_BLACK);
+              SNAKE_GRID_CELL_SIZE, SNAKE_GRID_CELL_SIZE * 2, L'█', COLOR_NONE, ((Color){0x005c584f}));
 }
 
 

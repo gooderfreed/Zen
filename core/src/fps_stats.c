@@ -69,7 +69,7 @@ void draw_fps_stats(const FpsStats *stats, Screen *screen) {
     int result_len = snprintf(fps_buffer, sizeof(fps_buffer), "FPS:%.2f (min: %.2f, avg:%.2f)",
                               stats->cur_fps, stats->min_fps, stats->avg_fps);
     if (screen->width >= result_len) {
-        insert_text(screen, 0, 0, fps_buffer, COLOR_BOLD, COLOR_BLACK);
+        insert_text(screen, 0, 0, fps_buffer, COLOR_WHITE, COLOR_BLACK, Effect_Bold);
     }
 }
 

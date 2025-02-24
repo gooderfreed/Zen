@@ -6,7 +6,9 @@
  * Provides primitives for types
  * Do not include this file in your object
  */
-typedef unsigned char Color;
+// typedef unsigned char Color;
+typedef unsigned char TextEffect;
+typedef struct Color Color;
 typedef struct Pixel Pixel;
 typedef struct Screen Screen;
 

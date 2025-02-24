@@ -8,15 +8,15 @@ static void print_score(const void *score_pointer, Screen *screen, const Cursor 
     (void)cursor;
 
     ScoreCounter *score_counter = (ScoreCounter *)score_pointer;
-    fill_area(screen, BORDER_SIZE, BORDER_SIZE, SCORE_COUNER_HEIGHT, SNAKE_AREA_WIDTH, ' ', COLOR_BLUE, COLOR_RESET);
+    fill_area(screen, BORDER_SIZE, BORDER_SIZE, SCORE_COUNER_HEIGHT, SNAKE_AREA_WIDTH, ' ', COLOR_BLUE, COLOR_NONE);
     
     char score_buffer[50];
     snprintf(score_buffer, 50, "Score: %i", score_counter->cur_score);
-    insert_text(screen, BORDER_SIZE, BORDER_SIZE, score_buffer, COLOR_BOLD, COLOR_NONE);
+    insert_text(screen, BORDER_SIZE, BORDER_SIZE, score_buffer, COLOR_WHITE, COLOR_NONE, Effect_Bold);
 
     char score_record_buffer[50];
     int len = snprintf(score_record_buffer, 50, "Record: %i", score_counter->max_score);
-    insert_text(screen, BORDER_SIZE, SCREEN_WIDTH - BORDER_SIZE - len, score_record_buffer, COLOR_BOLD, COLOR_NONE);
+    insert_text(screen, BORDER_SIZE, SCREEN_WIDTH - BORDER_SIZE - len, score_record_buffer, COLOR_WHITE, COLOR_NONE, Effect_Bold);
 }
 
 /*

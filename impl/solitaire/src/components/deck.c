@@ -84,15 +84,15 @@ static Card *draw_card(Deck *deck) {
 static void print_deck(const void *deck_pointer, Screen *screen, const Cursor *cursor) {
     const Deck *deck = (const Deck *)deck_pointer;
     (void) cursor;
-    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, DECK_OFFSET - 1, 2 * CARD_WIDTH, L' ', COLOR_GREEN, COLOR_RESET);
+    fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, DECK_OFFSET - 1, 2 * CARD_WIDTH, L' ', ((Color){0x0030992e}), COLOR_WHITE);
     if (deck->pointer) {
         print_card(screen, deck->pointer, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH);
-        fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░', COLOR_RESET, COLOR_RESET);
-        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_BRIGHT_BLACK, COLOR_WHITE, slim_border);
+        fill_area(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT - 1, CARD_WIDTH, L'░', ((Color){0x006e651a}), ((Color){0x006e651a}));
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, ((Color){0x00383307}), COLOR_WHITE, slim_border);
     }
     else {
-        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
-        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X + CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
+        add_borders(screen, BORDER_OFFSET_Y, BORDER_OFFSET_X, CARD_HEIGHT, CARD_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
     }
 }
 
@@ -144,7 +144,12 @@ static Coords get_default_coords(const void *deck_pointer) {
 static CursorConfig get_cursor_config_in_deck(const void *deck_pointer, const Coords cursor_coords) {
     (void)deck_pointer;
     (void)cursor_coords;
-    return (CursorConfig) {.type = CURSOR_UP_WIDE};
+    return (CursorConfig) {
+        .type = CURSOR_UP_WIDE,
+        .background = COLOR_NONE,
+        .foreground = COLOR_WHITE,
+        .effect = Effect_Bold,
+    };
 }
 
 

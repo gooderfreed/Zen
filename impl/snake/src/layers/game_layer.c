@@ -4,8 +4,8 @@
  * Prepare game screen
  */
 static void prepare_game_screen(Screen *screen) {
-    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLUE, COLOR_BOLD, fat_border);
-    add_separator(screen, SNAKE_AREA_OFFSET_Y, 0, COLOR_BLUE, COLOR_BOLD, fat_border);
+    add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLUE, COLOR_WHITE, fat_border);
+    add_separator(screen, SNAKE_AREA_OFFSET_Y, 0, COLOR_BLUE, COLOR_WHITE, fat_border);
 }
 
 /*

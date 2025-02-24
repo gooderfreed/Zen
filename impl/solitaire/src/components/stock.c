@@ -110,7 +110,7 @@ static void print_stock(const void *stock_pointer, Screen *screen, const Cursor 
     (void)cursor;
     const Stock *stock = (const Stock *)stock_pointer;
     
-    fill_area(screen, BORDER_OFFSET_X, STOCK_X_BASE, STOCK_AREA_HEIGHT, STOCK_AREA_WIDTH, L' ', COLOR_GREEN, COLOR_RESET);
+    fill_area(screen, BORDER_OFFSET_X, STOCK_X_BASE, STOCK_AREA_HEIGHT, STOCK_AREA_WIDTH, L' ', ((Color){0x0030992e}), COLOR_NONE);
 
     for (int suit = 0; suit < CARD_SUITS; suit++) {
         int x = STOCK_X_BASE + suit * CARD_WIDTH;
@@ -119,7 +119,7 @@ static void print_stock(const void *stock_pointer, Screen *screen, const Cursor 
             print_card(screen, stock->top_cards[suit], BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH);
         }
         else {
-            add_borders(screen, BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH, COLOR_GREEN, COLOR_WHITE, fat_border);
+            add_borders(screen, BORDER_OFFSET_Y, x, CARD_HEIGHT, CARD_WIDTH, ((Color){0x0030992e}), COLOR_WHITE, fat_border);
             screen->pixels[BORDER_OFFSET_Y + CARD_HEIGHT / 2][x + CARD_WIDTH / 2 - 1].symbol = suit_to_text((Suit)suit);
             screen->pixels[BORDER_OFFSET_Y + CARD_HEIGHT / 2][x + CARD_WIDTH / 2 - 1].foreground = (suit % 2 != 0) ? COLOR_RED : COLOR_BLACK;
         }
@@ -172,7 +172,12 @@ static Coords get_default_coords(const void *stock_pointer) {
 static CursorConfig get_cursor_config_in_stock(const void *stock_pointer, const Coords cursor_coords) {
     (void)stock_pointer;
     (void)cursor_coords;
-    return (CursorConfig) {.type = CURSOR_UP_WIDE};
+    return (CursorConfig) {
+        .type = CURSOR_UP_WIDE,
+        .background = COLOR_NONE,
+        .foreground = COLOR_WHITE,
+        .effect = Effect_Bold,
+    };
 }
 
 

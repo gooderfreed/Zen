@@ -10,29 +10,29 @@
 static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *cursor) {
     (void)cursor;
     Menu *menu = (Menu *)menu_pointer;
-    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    fill_area(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_WHITE);
     add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 
     int text_offset = 1;
     int text_y = 18;
 
-    Color text_color = COLOR_BOLD;
+    Color text_color = COLOR_NONE;
     Color background_color = COLOR_NONE;
 
-    insert_text(screen, text_y + 0, text_offset, ".dP\"Y8  dP\"Yb  88     88 888888    db    88 88\"\"Yb 88888", text_color, background_color);
-    insert_text(screen, text_y + 1, text_offset, "`Ybo.\" dP   Yb 88     88   88     dPYb   88 88__dP 88__ ",    text_color, background_color);
-    insert_text(screen, text_y + 2, text_offset, "o.`Y8b Yb   dP 88  .o 88   88    dP__Yb  88 88\"Yb  88\"\" ",  text_color, background_color);
-    insert_text(screen, text_y + 3, text_offset, "8bodP'  YbodP  88ood8 88   88   dP\"\"\"\"Yb 88 88  Yb 88888", text_color, background_color);
+    insert_text(screen, text_y + 0, text_offset, ".dP\"Y8  dP\"Yb  88     88 888888    db    88 88\"\"Yb 88888", text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 1, text_offset, "`Ybo.\" dP   Yb 88     88   88     dPYb   88 88__dP 88__ ",    text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 2, text_offset, "o.`Y8b Yb   dP 88  .o 88   88    dP__Yb  88 88\"Yb  88\"\" ",  text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 3, text_offset, "8bodP'  YbodP  88ood8 88   88   dP\"\"\"\"Yb 88 88  Yb 88888", text_color, background_color, Effect_Bold);
 
     if (menu->start_game) {
-        insert_text(screen, text_y + 8, SCREEN_WIDTH/2 - 6, " Start", text_color, background_color);
+        insert_text(screen, text_y + 8, SCREEN_WIDTH/2 - 6, " Start", text_color, background_color, Effect_Bold);
     }
     else {
-        insert_text(screen, text_y + 7, SCREEN_WIDTH/2 - 6, " Continue", text_color, background_color);
-        insert_text(screen, text_y + 8, SCREEN_WIDTH/2 - 6, " New Game", text_color, background_color);
+        insert_text(screen, text_y + 7, SCREEN_WIDTH/2 - 6, " Continue", text_color, background_color, Effect_Bold);
+        insert_text(screen, text_y + 8, SCREEN_WIDTH/2 - 6, " New Game", text_color, background_color, Effect_Bold);
     }
-    insert_text(screen, text_y + 9,  SCREEN_WIDTH/2 - 6, " Controls", text_color, background_color);
-    insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, " Exit",     text_color, background_color);
+    insert_text(screen, text_y + 9,  SCREEN_WIDTH/2 - 6, " Controls", text_color, background_color, Effect_Bold);
+    insert_text(screen, text_y + 10, SCREEN_WIDTH/2 - 6, " Exit",     text_color, background_color, Effect_Bold);
 }
 
 
@@ -83,7 +83,12 @@ static Coords get_default_coords(const void *menu_pointer) {
 static CursorConfig get_cursor_config_in_menu(const void *menu_pointer, const Coords cursor_coords) {
     (void)menu_pointer;
     (void)cursor_coords;
-    return (CursorConfig) {.type = CURSOR_RIGHT_SLIM};
+    return (CursorConfig) {
+        .type = CURSOR_RIGHT_SLIM,
+        .background = COLOR_NONE,
+        .foreground = COLOR_WHITE,
+        .effect = Effect_Bold,
+    };
 }
 
 

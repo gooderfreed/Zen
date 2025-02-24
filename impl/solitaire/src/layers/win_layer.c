@@ -8,7 +8,7 @@ static void prepare_win_screen(Screen *screen) {
     int y = (SCREEN_HEIGHT - WIN_SCREEN_HEIGHT) / 2;
     int x = (SCREEN_WIDTH - WIN_SCREEN_WIDTH) / 2;
 
-    fill_area(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_RESET);
+    fill_area(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, ' ', COLOR_BLACK, COLOR_NONE);
     add_borders(screen, y, x, WIN_SCREEN_HEIGHT, WIN_SCREEN_WIDTH, COLOR_NONE, COLOR_WHITE, fat_border);
 }
 

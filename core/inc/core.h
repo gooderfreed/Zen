@@ -16,7 +16,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <locale.h>
+#include <string.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdint.h>
 
 #include "interfaces/interfaces.h"
 #include "components/components.h"

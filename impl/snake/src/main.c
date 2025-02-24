@@ -18,7 +18,7 @@ const wchar_t card_border[8] = {
  */
 static void init_game(Core *core) {
     Arena *arena = core->arena;
-    Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_RESET, ' ');
+    Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_NONE, ' ');
     MapLayer *game_layer = game_layer_init(arena);
 
     // create map

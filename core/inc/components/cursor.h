@@ -52,6 +52,7 @@ enum CursorType {
  */
 typedef struct CursorConfig {
     CursorType type;
+    TextEffect effect;
     Color background;
     Color foreground;
     wchar_t *custom;

@@ -6,7 +6,7 @@
  */
 static void init_game(Core *core) {
     Arena *arena = core->arena;
-    Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_RESET, ' ');
+    Screen *screen = init_screen(arena, SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_GREEN, COLOR_WHITE, ' ');
     Container *cursor_container = container_init(arena, CONTAINER_SIZE);
     Cursor *cursor = init_cursor(arena, cursor_container);
     
