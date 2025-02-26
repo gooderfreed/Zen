@@ -44,6 +44,15 @@ The framework includes the following example implementations within the `impl` d
 
     ![Snake Implementation](.github/snake.png)
 
+*   **Rotating 3D Donut**: A visually impressive, rotating 3D donut rendered using ASCII art and grayscale shading. This example demonstrates:
+
+    *   **Advanced Rendering Techniques:**  Projection of a 3D object (a torus) onto a 2D terminal screen.
+    *   **Real-time Animation:** Smooth rotation of the donut using frame-based updates.
+    *   **Grayscale Shading:**  Dynamic calculation of brightness levels to create a 3D effect using only background colors.
+    *   **Efficient Algorithms:** Optimized calculations for inverse distance (z-buffering) and normalized luminance.
+
+    ![Donut Implementation](.github/donut.png)
+
 ## Building
 
 **Clone the repository**
