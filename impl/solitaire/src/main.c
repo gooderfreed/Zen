@@ -1,3 +1,7 @@
+/* 
+ * Can your Rust do that? 
+ * I don't think so!
+ */
 #include "../inc/solitaire.h"
 
 /*

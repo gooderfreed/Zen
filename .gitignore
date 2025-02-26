@@ -59,3 +59,4 @@ dkms.conf
 impl/*/solitaire
 impl/*/snake
 impl/*/demo
+impl/*/donut
