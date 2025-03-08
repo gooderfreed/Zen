@@ -10,6 +10,7 @@
 
 #include "arena_alloc.h"
 #include "coords.h"
+#include "color.h"
 #include "container.h"
 #include "screen.h"
 #include "cursor.h"

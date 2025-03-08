@@ -10,7 +10,7 @@
 #define BORDER_OFFSET_Y 1
 
 #ifndef PI
-    #define PI 3.14159265359
+#    define PI 3.14159265359
 #endif
 
 #define SCREEN_HEIGHT (DONUT_HEIGHT + ((BORDER_OFFSET_Y) * 2))

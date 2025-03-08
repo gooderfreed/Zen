@@ -11,16 +11,6 @@
 // -----------------------------------------------------------------------------
 //  Constants and Macros
 // -----------------------------------------------------------------------------
-#define COLOR_BLACK  ((Color){0x00000000})
-#define COLOR_RED    ((Color){0x00FF0000})
-#define COLOR_GREEN  ((Color){0x0000FF00})
-#define COLOR_BLUE   ((Color){0x000000FF})
-#define COLOR_WHITE  ((Color){0x00FFFFFF})
-#define COLOR_YELLOW ((Color){0x00FFFF00})
-
-#define COLOR_NONE   ((Color){0xF0FFFFFF}) // Use a value unlikely to be a valid color
-
-
 #define MAX_ANSI_LENGTH 50 // Define a reasonable maximum for ANSI sequences
 
 #ifndef CUSTOM_SCREEN // Allow users to provide their own screen implementation
@@ -35,11 +25,9 @@
 // -----------------------------------------------------------------------------
 //  Type Definitions
 // -----------------------------------------------------------------------------
-struct Color {
-    uint32_t color; // 32-bit integer for color (0x00RRGGBB)
-};
-
-// Text effects (bold, italic, etc.).
+/*
+ * Text effects (bold, italic, etc.).
+ */
 enum TextEffect {
     Effect_None       = 0,
     Effect_Bold       = 1,  // Bold/bright
@@ -50,7 +38,9 @@ enum TextEffect {
     Effect_Conceal    = 8,  // Conceal (hide text, rarely supported)
 };
 
-// Represents a single pixel on the screen.
+/*
+ * Represents a single pixel on the screen.
+ */
 struct Pixel {
     Color      background; // Background color
     Color      foreground; // Foreground color
@@ -58,7 +48,12 @@ struct Pixel {
     TextEffect effect;     // Text effect (bold, italic, etc.)
 };
 
-// Terminal color modes.
+/*
+ * Terminal color modes
+ * Basic 8/16 colors
+ * 256-color mode
+ * TrueColor (RGB) mode
+ */
 typedef enum {
     Color_Base, // Basic 8/16 colors
     Color_256,  // 256-color mode
@@ -86,12 +81,6 @@ struct Screen {
 * Screen functions
 * Screen manipulation and drawing
 */
-// Color component extraction (inline for efficiency)
-inline unsigned char get_red(Color color);
-inline unsigned char get_green(Color color);
-inline unsigned char get_blue(Color color);
-inline Color create_color_rgb(int r, int g, int b);
-inline bool is_none(Color color);
 
 // Screen management
 Screen *init_screen(Arena *arena, int width, int height, Color background, Color foreground, wchar_t symbol);

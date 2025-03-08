@@ -3,6 +3,10 @@
 
 #include "../../../core/inc/core.h"
 
+/*
+ * Sinple Demo structure
+ * Represents a demo object
+ */
 typedef struct Demo {
     ObjectInterfaces interfaces;
     char *my_string;

@@ -10,9 +10,9 @@ static void print_demo(const void *demo_pointer, Screen *screen, const Cursor *c
     (void)cursor;
     Demo *demo = (Demo *)demo_pointer;
 
-    insert_text(screen, 3, 3, "Hello",               COLOR_RED, COLOR_BLACK, Effect_Blink);
-    insert_text(screen, 4, 3, "from",                COLOR_RED, COLOR_BLACK, Effect_Underline);
-    insert_text(screen, 5, 3, demo->interfaces.name, COLOR_GREEN, COLOR_BLACK, Effect_Italic);
+    insert_text(screen, 3, 3, "Hello",               COLOR_RED,    COLOR_BLACK, Effect_Blink);
+    insert_text(screen, 4, 3, "from",                COLOR_RED,    COLOR_BLACK, Effect_Underline);
+    insert_text(screen, 5, 3, demo->interfaces.name, COLOR_GREEN,  COLOR_BLACK, Effect_Italic);
     insert_text(screen, 6, 1, demo->my_string,       COLOR_YELLOW, COLOR_BLACK, Effect_Bold);
 }
 
@@ -61,6 +61,11 @@ static void prepare_screen(Screen *screen) {
     add_borders(screen, 0, 0, 10, 10, COLOR_BLUE, COLOR_WHITE, L"-|++++++");
 }
 
+
+/*
+ * Main loop
+ * This function handles user input and updates the core
+ */
 static void loop(Core *core, wint_t key) {
     switch (key) {
         case L'q': case L'й': core_shutdown(core); exit(0); break;
@@ -123,6 +128,5 @@ int main(void) {
         }
     }
 
-    // Return 0 to indicate successful execution
     return 0;
 }

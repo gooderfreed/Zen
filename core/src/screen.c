@@ -6,32 +6,14 @@
 #include "../inc/core.h"
 
 // -----------------------------------------------------------------------------
-//  Color Utilities
-// -----------------------------------------------------------------------------
-// Extracts the red component from a 32-bit color.
-inline unsigned char get_red(Color color) { return (color.color >> 16) & 0xFF; }
-
-// Extracts the green component from a 32-bit color.
-inline unsigned char get_green(Color color) { return (color.color >> 8) & 0xFF; }
-
-// Extracts the blue component from a 32-bit color.
-inline unsigned char get_blue(Color color) { return color.color & 0xFF; }
-
-// Checks if a color is set to the 'NONE' value.
-inline bool is_none(Color color) { return color.color == COLOR_NONE.color; }
-
-// Creates a 32-bit RGB color from individual red, green, and blue components.
-inline Color create_color_rgb(int r, int g, int b) {
-    return (Color){0x00000000 | (uint32_t)((r & 0xFF) << 16) | (uint32_t)((g & 0xFF) << 8) | (uint32_t)(b & 0xFF << 0)};
-}
-
-
-// -----------------------------------------------------------------------------
 //  ANSI Escape Code Generation
 // -----------------------------------------------------------------------------
-// Generates an ANSI escape sequence for text effects.
+/*
+ * Generates an ANSI escape sequence for text effects.
+ * It formats the text effect into the ANSI escape sequence.
+ */
 static char* get_effect_ansi(TextEffect effect) {
-    static char ansi_str[16]; // Buffer for the ANSI escape sequence
+    static char ansi_str[16];             // Buffer for the ANSI escape sequence
     if (effect == Effect_None) return ""; // Return empty string if no effect
 
     snprintf(ansi_str, sizeof(ansi_str), "\033[%dm", (int)effect);
@@ -48,12 +30,18 @@ static char* get_effect_ansi(TextEffect effect) {
 //     return isatty(STDOUT_FILENO);
 // }
 
-// Checks if the 'tput' command exists in the system.
+/*
+ * Checks if the 'tput' command exists in the system.
+ * It checks if the 'tput' command exists in the system by trying to access it.
+ */
 static inline int tput_exists(void) {
     return access("/usr/bin/tput", X_OK) == 0 || access("/bin/tput", X_OK) == 0;
 }
 
-// Executes a 'tput' command and returns the integer result.
+/*
+ * Executes a 'tput' command and returns the integer result.
+ * It executes a 'tput' command and returns the integer result.
+ */
 static int tput_command(const char *command) {
     FILE *fp = popen(command, "r");
     if (!fp) return -1; // Return -1 on failure
@@ -67,7 +55,11 @@ static int tput_command(const char *command) {
     return result;
 }
 
-// Retrieves and caches the number of colors supported by the terminal.
+/*
+ * Retrieves and caches the number of colors supported by the terminal.
+ * It checks if the tput command exists and uses it to get the number of colors,
+ * caching the result to avoid repeated calls.
+ */
 static int get_cached_tput_colors(void) {
     static int cached_colors = -2; // -2: uninitialized, -1: tput failed
 
@@ -78,7 +70,11 @@ static int get_cached_tput_colors(void) {
     return cached_colors;
 }
 
-// Checks if the terminal supports RGB (TrueColor) mode.
+/*
+ * Checks if the terminal supports RGB (TrueColor) mode.
+ * It checks if the COLORTERM environment variable matches common terminal types that often support TrueColor,
+ * and uses tput if available to check for TrueColor support.
+ */
 static int supports_rgb(int tput_colors) {
     const char *colorterm = getenv("COLORTERM");
     if (colorterm && strstr(colorterm, "truecolor")) return 1;
@@ -94,7 +90,11 @@ static int supports_rgb(int tput_colors) {
     return 0;
 }
 
-// Checks if the terminal supports 256 colors.
+/*
+ * Checks if the terminal supports 256 colors.
+ * It checks if the TERM environment variable matches common terminal types that often support 256 colors,
+ * and uses tput if available to check for 256-color support.
+ */
 static int supports_256(int tput_colors) {
     const char *term = getenv("TERM");
     if (term && strstr(term, "256color")) return 1;
@@ -116,7 +116,11 @@ static int supports_256(int tput_colors) {
     return 0;
 }
 
-// Determines the terminal's color mode (Base, 256, or RGB).
+/*
+ * Determines the terminal's color mode (Base, 256, or RGB).
+ * It checks if the terminal supports TrueColor or 256-color mode,
+ * and returns the appropriate TerminalMode enum value.
+ */
 static TerminalMode get_terminal_mode(void) {
     int tput_colors = get_cached_tput_colors();
 
@@ -131,7 +135,10 @@ static TerminalMode get_terminal_mode(void) {
 //  ANSI Escape Code Generation (Color Conversion)
 // -----------------------------------------------------------------------------
 
-// Converts RGB color to an ANSI escape sequence for TrueColor terminals.
+/*
+ * Converts RGB color to an ANSI escape sequence for TrueColor terminals.
+ * It formats the RGB values into the ANSI escape sequence for TrueColor terminals.
+ */
 static char* rgb_to_ansi(Color fg_color, Color bg_color) {
     static char ansi_str[128]; // Buffer for the ANSI escape sequence
 
@@ -142,7 +149,11 @@ static char* rgb_to_ansi(Color fg_color, Color bg_color) {
     return ansi_str;
 }
 
-// Converts RGB color to the nearest index in the 256-color palette.
+/*
+ * Converts RGB color to the nearest index in the 256-color palette.
+ * It first checks for grayscale colors and maps them to the corresponding index,
+ * then maps the RGB values to the 6x6x6 color cube and returns the corresponding index.
+ */
 static int rgb_to_256_index(Color color) {
     int r = get_red(color);
     int g = get_green(color);
@@ -171,7 +182,11 @@ static int rgb_to_256_index(Color color) {
     return 16 + 36 * r_6 + 6 * g_6 + b_6;
 }
 
-// Converts RGB color to an ANSI escape sequence for 256-color terminals.
+/*
+ * Converts RGB colors to the nearest ANSI escape sequence for 256-color terminals.
+ * It first converts the RGB values to the nearest index in the 256-color palette,
+ * then returns the corresponding ANSI escape sequence.
+ */
 static char* rgb_to_ansi_256(Color fg_color, Color bg_color) {
     static char ansi_str[64]; // Buffer for the ANSI escape sequence
 
@@ -181,7 +196,11 @@ static char* rgb_to_ansi_256(Color fg_color, Color bg_color) {
     return ansi_str;
 }
 
-// Converts RGB color to an ANSI escape sequence for basic 8/16 color terminals.
+/*
+ * Converts RGB colors to the nearest ANSI escape sequence for basic 8/16 color terminals.
+ * It first calculates the Euclidean distance between the RGB values and the basic colors,
+ * then selects the closest color and returns the corresponding ANSI escape sequence.
+ */
 static char *rgb_to_ansi_base(Color fg_color, Color bg_color) {
     static char ansi_str[32];  // Buffer for the ANSI escape sequence
     int r_fg = get_red(fg_color);
@@ -262,14 +281,20 @@ static char *rgb_to_ansi_base(Color fg_color, Color bg_color) {
         }
     }
     // Determine ANSI color codes based on foreground and background indices
-    int fg_code = (index_fg < 8) ? (30 + index_fg) : (90 + (index_fg - 8)); // 30-37 or 90-97
+    int fg_code = (index_fg < 8) ? (30 + index_fg) : (90 + (index_fg - 8));  // 30-37 or 90-97
     int bg_code = (index_bg < 8) ? (40 + index_bg) : (100 + (index_bg - 8)); // 40-47 or 100-107
 
     snprintf(ansi_str, sizeof(ansi_str), "\033[%d;%dm", fg_code, bg_code);
     return ansi_str;
 }
 
-// Selects the appropriate ANSI escape sequence based on terminal color mode.
+/*
+ * Selects the appropriate ANSI escape sequence based on the terminal color mode.
+ * Uses different conversion functions based on the color mode:
+ * - Color_RGB: Uses rgb_to_ansi for TrueColor terminals
+ * - Color_256: Uses rgb_to_ansi_256 for 256-color terminals
+ * - Color_Base: Uses rgb_to_ansi_base for basic 8/16 color terminals
+ */
 static char* get_color_ansi(Color fg_color, Color bg_color, TerminalMode mode) {
     switch (mode) {
         case Color_RGB:   return rgb_to_ansi(fg_color, bg_color);
@@ -400,8 +425,8 @@ void print_screen(const Screen *screen) {
             // Buffer overflow check
             if ((int)buf_idx > screen->buffer_size - MAX_ANSI_LENGTH) {
                 screen->buffer[buf_idx] = L'\0'; // Null-terminate the string
-                wprintf(L"%ls", screen->buffer);  // Print the buffer
-                buf_idx = 0;                  // Reset the index
+                wprintf(L"%ls", screen->buffer); // Print the buffer
+                buf_idx = 0;                     // Reset the index
             }
 
             // Check if colors or effect have changed
@@ -427,7 +452,7 @@ void print_screen(const Screen *screen) {
         screen->buffer[buf_idx++] = L'\n'; // Add a newline at the end of each row
     }
 
-    screen->buffer[buf_idx] = L'\0'; // Null-terminate the string
+    screen->buffer[buf_idx] = L'\0';        // Null-terminate the string
     wprintf(L"%ls\033[0m", screen->buffer); // Print the entire buffer and reset
 }
 
