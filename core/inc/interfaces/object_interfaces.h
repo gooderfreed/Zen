@@ -16,6 +16,8 @@ typedef struct ObjectInterfaces {
         bool is_drawable            : 1;
         bool is_cursor_interactable : 1;
         bool is_dynamic             : 1;
+        bool is_observer            : 1;
+        bool is_emitter             : 1;
         bool is_positionable        : 1;
         bool requires_update        : 1;
         bool requires_core          : 1;
@@ -33,7 +35,8 @@ typedef struct ObjectInterfaces {
     Updateable               *updateable;
     InputHandler             *input_handler;
     TickDependent            *tick_dependent;
-    
+    Observer                 *observer;
+    Emitter                  *emitter;
 } ObjectInterfaces;
 
 // Get interfaces

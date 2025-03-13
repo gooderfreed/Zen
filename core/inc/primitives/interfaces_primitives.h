@@ -9,14 +9,20 @@
 typedef struct ObjectInterfaces ObjectInterfaces;
 
 typedef struct Drawable           Drawable;
+typedef struct Updateable         Updateable;
 typedef struct CursorInteractable CursorInteractable;
-typedef struct TickDependent      TickDependent;
-typedef struct Dynamic            Dynamic;
 typedef struct ButtonHandler      ButtonHandler;
 typedef struct PositionHandler    PositionHandler;
-typedef struct Updateable         Updateable;
 typedef struct CardHandler        CardHandler;
-typedef struct CoreDependent      CoreDependent;
 typedef struct InputHandler       InputHandler;
+typedef struct TickDependent      TickDependent;
+typedef struct CoreDependent      CoreDependent;
+typedef struct Dynamic            Dynamic;
+typedef struct Observer           Observer;
+typedef struct Emitter            Emitter;
+
+typedef struct SignalListeners    SignalListeners;
+typedef struct SignalSubscription SignalSubscription;
+typedef struct SignalSubscriptionList SignalSubscriptionList;
 
 #endif

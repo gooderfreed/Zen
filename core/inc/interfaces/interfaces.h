@@ -17,5 +17,7 @@
 #include "input_handler.h"
 #include "tick_dependent.h"
 #include "object_interfaces.h"
+#include "observer.h"
+#include "emitter.h"
 
 #endif

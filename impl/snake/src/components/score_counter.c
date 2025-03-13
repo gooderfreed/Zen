@@ -20,6 +20,18 @@ static void print_score(const void *score_pointer, Screen *screen, const Cursor 
 }
 
 /*
+ * Update score
+ * Increases the current score by the value of the context.
+ */
+static void score_update_callback(void *score_pointer, void *context) {
+    ScoreCounter *score_counter = (ScoreCounter *)score_pointer;
+    score_counter->cur_score += *(int *)context;
+    if (score_counter->cur_score > score_counter->max_score) {
+        score_counter->max_score = score_counter->cur_score;
+    }
+}
+
+/*
  * Initialize score counter
  * Allocates and initializes a new score counter in the given memory arena.
  */
@@ -43,6 +55,10 @@ ScoreCounter *init_score_counter(Arena *arena) {
         },
         .drawable      = &drawable,
     };
+
+    OBSERVER(arena, score_counter, {
+        NEW_OBSERVER("score_update", score_update_callback);
+    });
 
     return score_counter;
 }

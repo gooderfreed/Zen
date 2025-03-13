@@ -40,6 +40,9 @@ void core_set_map(Core *core, Map *map) {
 
     for (int z = 0; z < map->layers_count; z++) {
         MapLayer *layer = map_get_layer(map, z);
+        SignalListenersList *listeners = NULL;
+        EmitterList *emitters = NULL;
+
         for (int y = 0; y < layer->height; y++) {
             for (int x = 0; x < layer->width; x++) {
                 MapObject object = map_get_object(map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
@@ -53,8 +56,31 @@ void core_set_map(Core *core, Map *map) {
                     ObjectInterfaces *interfaces = GET_INTERFACES(object.object);
                     interfaces->core_dependent = &core_dependent;
                 }
+
+                if (IS_OBSERVER(object.object)) {
+                    Observer *observer = OBSERVER_HANDLER(object.object);
+                    if (observer->subscriptions) {
+                        while (observer->subscriptions) {
+                            SignalSubscription subscription = observer->subscriptions->subscription;
+                            listeners = add_subscription_to_listeners(core->arena, listeners, subscription, object.object);
+
+                            observer->subscriptions = observer->subscriptions->next;
+                        }
+                    }
+                }
+
+                if (IS_EMITTER(object.object)) {
+                    Emitter *emitter = EMITTER_HANDLER(object.object);
+                    EmitterList *new_emitter_list = arena_alloc(core->arena, sizeof(EmitterList));
+                    new_emitter_list->emitter = emitter;
+                    new_emitter_list->next = emitters;
+                    emitters = new_emitter_list;
+                }
             }
         }
+
+        link_observers_to_emitters(core->arena, listeners, emitters);
+
     }
 
     core_validate_interfaces(core);

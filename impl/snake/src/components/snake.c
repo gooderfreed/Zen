@@ -127,6 +127,8 @@ static void update_snake(void *snake_pointer, void *context) {
         snake->length++;
         if (snake->length < SNAKE_MAX_SIZE) {
             snake->apple = generate_apple(snake);
+            int score_increase = 10;
+            emit_signal(snake, "score_update", &score_increase);
         } else {
             // we win, but for now just "freeze" snake
             snake->is_alive = false;
@@ -212,7 +214,6 @@ Snake *init_snake(Arena *arena) {
     };
     
 
-
     // Assign interfaces for core integration
     snake->interfaces = (ObjectInterfaces) {
         .name          = "Snake",
@@ -226,6 +227,10 @@ Snake *init_snake(Arena *arena) {
         .updateable    = &updateable,
         .input_handler = &input_handler,
     };
+
+    EMITTER(arena, snake, {
+        NEW_EMITTER("score_update");
+    });
 
     return snake;
 }
