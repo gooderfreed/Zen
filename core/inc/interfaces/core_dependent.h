@@ -72,5 +72,13 @@ static inline void CORE_SHUTDOWN(const void *object) {
     }
 }
 
+#define CORE_DEPENDENT_FULL(arena, object)                               \
+    do {                                                                 \
+        if (!IS_CORE_DEPENDENT(object))                                  \
+            GET_INTERFACES(object)->capabilities.requires_core = true;   \
+    } while (0)
+
+#define CORE_DEPENDENT() \
+    CORE_DEPENDENT_FULL(cur_arena, cur_object)
 
 #endif

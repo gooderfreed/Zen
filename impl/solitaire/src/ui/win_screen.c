@@ -128,20 +128,8 @@ static void on_exit_click(void *win_screen_pointer, void *context) {
  * Initialize win screen
  * Creates the win screen with required interfaces
  */
-WinScreen init_win_screen(void) {
-    WinScreen win_screen = {0};
-
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_win_screen
-    };
-
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor        = place_cursor_in_menu,
-        .move_cursor         = move_in_menu,
-        .get_default_coords  = get_default_coords,
-        .get_cursor_config   = get_cursor_config_in_menu
-    };
+WinScreen *init_win_screen(Arena *arena) {
+    WinScreen *win_screen = (WinScreen *)arena_alloc(arena, sizeof(WinScreen));
 
     static Button new_game_button = {
         .coords = {.x = 0, .y = 0},
@@ -167,18 +155,18 @@ WinScreen init_win_screen(void) {
         }
     };
 
-    win_screen.interfaces = (ObjectInterfaces) {
-        .name = "WinScreen",
+    win_screen->interfaces = (ObjectInterfaces) {
         .capabilities = {
-            .is_drawable            = true,
-            .is_cursor_interactable = true,
-            .have_buttons           = true,
-            .requires_core          = true
+            .have_buttons = true,
         },
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
-        .button_handler      = &button_handler
+        .button_handler = &button_handler
     };
+
+    INTERFACES(arena, win_screen, {
+        DRAWABLE(print_win_screen);
+        CURSOR_INTERACTABLE(place_cursor_in_menu, move_in_menu, get_default_coords, get_cursor_config_in_menu);
+        CORE_DEPENDENT();
+    });
 
     return win_screen;
 }

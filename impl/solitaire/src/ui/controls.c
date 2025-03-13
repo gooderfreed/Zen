@@ -110,20 +110,8 @@ static void on_back_click(void *controls_pointer, void *context) {
  * Init controls
  * Initializes the controls
  */
-Controls init_controls(void) {
-    Controls controls = {0};
-
-    static Drawable drawable = {
-        .is_active = false,
-        .print = print_controls
-    };
-
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor        = place_cursor_in_controls,
-        .move_cursor         = move_in_controls,
-        .get_default_coords  = get_default_coords,
-        .get_cursor_config   = get_cursor_config_in_controls
-    };
+Controls *init_controls(Arena *arena) {
+    Controls *controls = (Controls *)arena_alloc(arena, sizeof(Controls));
 
     static Button back_button = {
         .coords = {.x = 0, .y = 0},
@@ -137,18 +125,18 @@ Controls init_controls(void) {
         }
     };
 
-    controls.interfaces = (ObjectInterfaces) {
-        .name = "Controls",
+    controls->interfaces = (ObjectInterfaces) {
         .capabilities = {
-            .is_drawable            = true,
-            .have_buttons           = true,
-            .is_cursor_interactable = true,
-            .requires_core          = true
+            .have_buttons = true,
         },
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
-        .button_handler      = &button_handler
+        .button_handler = &button_handler
     };
+    
+    INTERFACES(arena, controls, {
+        DRAWABLE_INACTIVE(print_controls);
+        CURSOR_INTERACTABLE(place_cursor_in_controls, move_in_controls, get_default_coords, get_cursor_config_in_controls);
+        CORE_DEPENDENT();
+    });
     
     return controls;
 }

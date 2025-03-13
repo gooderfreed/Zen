@@ -30,22 +30,10 @@ static Demo *init_demo(Arena *arena) {
     // Set the demo's string
     demo->my_string = "Mystring";
 
-
-    // Initialize the drawable object
-    static Drawable drawable = (Drawable) {
-        .is_active = true,
-        .print = print_demo,
-    };
-
-
     // Initialize the demo's interfaces
-    demo->interfaces = (ObjectInterfaces) {
-        .name = "Demo",
-        .capabilities = {
-            .is_drawable = true,
-        },
-        .drawable = &drawable,
-    };
+    INTERFACES(arena, demo, {
+        DRAWABLE(print_demo);
+    });
 
     // Return the initialized demo object
     return demo;

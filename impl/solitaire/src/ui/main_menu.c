@@ -148,21 +148,10 @@ static void on_controls_click(void *menu_pointer, void *context) {
  * Init menu
  * Initializes the menu
  */
-Menu init_menu(void) {
-    Menu menu = {
+Menu *init_menu(Arena *arena) {
+    Menu *menu = (Menu *)arena_alloc(arena, sizeof(Menu));
+    *menu = (Menu) {
         .start_game = true
-    };
-
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_menu
-    };
-
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor        = place_cursor_in_menu,
-        .move_cursor         = move_in_menu,
-        .get_default_coords  = get_default_coords,
-        .get_cursor_config   = get_cursor_config_in_menu
     };
 
     static Button continue_button = {
@@ -195,18 +184,18 @@ Menu init_menu(void) {
         }
     };
 
-    menu.interfaces = (ObjectInterfaces) {
-        .name = "Menu",
+    menu->interfaces = (ObjectInterfaces) {
         .capabilities = {
-            .is_drawable            = true,
-            .have_buttons           = true,
-            .is_cursor_interactable = true,
-            .requires_core          = true
+            .have_buttons = true,
         },
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
-        .button_handler      = &button_handler
+        .button_handler = &button_handler
     };
+
+    INTERFACES(arena, menu, {
+        DRAWABLE(print_menu);
+        CURSOR_INTERACTABLE(place_cursor_in_menu, move_in_menu, get_default_coords, get_cursor_config_in_menu);
+        CORE_DEPENDENT();
+    });
     
     return menu;
 }

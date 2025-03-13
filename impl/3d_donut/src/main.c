@@ -114,29 +114,10 @@ static Donut *init_donut(Arena *arena) {
     donut->A = 0;
     donut->B = 0;
 
-    // Initialize the drawable object
-    static Drawable drawable = (Drawable) {
-        .is_active = true,
-        .print = print_donut,
-    };
-
-
-    // Initialize the updatable object
-    static Updateable updateable = {
-        .update = update_donut,
-    };
-
-
-    // Initialize the donut's interfaces
-    donut->interfaces = (ObjectInterfaces) {
-        .name = "Donut",
-        .capabilities = {
-            .is_drawable = true,
-            .requires_update = true,
-        },
-        .drawable = &drawable,
-        .updateable = &updateable,
-    };
+    INTERFACES(arena, donut, {
+        DRAWABLE(print_donut);
+        UPDATEABLE(update_donut);
+    });
 
     // Return the initialized donut object
     return donut;

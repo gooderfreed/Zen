@@ -318,84 +318,26 @@ static void field_pop(void *field_pointer, Card *card) {
 
 
 
-/*
- * Set field interfaces
- * Assigns function pointers and properties for field object
- */
-static void field_set_interfaces(ObjectInterfaces *oi) {
-    /* 
-     * Define drawable properties
-     * Marks object as active and assigns print function 
-     */
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_field
-    };
-
-    /* 
-     * Define cursor interaction behavior
-     * Handles cursor movement, placement, and config retrieval 
-     */
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor       = place_cursor_in_field,
-        .move_cursor        = move_in_field,
-        .get_default_coords = get_default_coords,
-        .get_cursor_config  = get_cursor_config_in_field
-    };
-
-    /* 
-     * Define card handling behavior
-     * Specifies rules for selecting, placing, and comparing cards
-     */
-    static const CardHandler card_handler = {
-        .can_give_cards = true,
-        .select_cards   = select_cards_in_field,
-        .is_same_card   = is_same_card_in_field,
-        .get_cards      = get_cards_in_field,
-
-        .can_take_cards = true,
-        .can_place      = can_place_in_field,
-        .place_cards    = place_cards_in_field,
-    };
-
-    /* 
-     * Define position handling behavior
-     * Saves and restores object coordinates
-     */
-    static PositionHandler position_handler = {
-        .restore_coords   = {.x = 0, .y = 0},
-        .save_current_pos = save_current_pos_in_field,
-        .restore_pos      = restore_pos_in_field
-    };
-
-    /* 
-     * Assign all handlers and properties to the field object
-     * Defines capabilities and links to functional interfaces
-     */
-    *oi = (ObjectInterfaces) {
-        .name           = "Field",
-        .capabilities = {
-            .can_hold_cards         = true,
-            .is_drawable            = true,
-            .is_positionable        = true,
-            .is_cursor_interactable = true,
-            .requires_core          = true
-        },
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
-        .card_handler        = &card_handler,
-        .position_handler    = &position_handler
-    };
-}
 
 /*
  * Initialize field with cards from deck
  * Sets up field structure and interfaces
  */
-Field init_field(void) {
-    Field field = {0};
-    field_set_interfaces(&field.interfaces);
+Field *init_field(Arena *arena) {
+    Field *field = (Field *)arena_alloc(arena, sizeof(Field));
 
+    INTERFACES(arena, field, {
+        DRAWABLE(print_field);
+        CURSOR_INTERACTABLE(place_cursor_in_field, move_in_field, get_default_coords, get_cursor_config_in_field);
+        POSITION_HANDLER(save_current_pos_in_field, restore_pos_in_field);
+        CARD_HANDLER({
+            CAN_GIVE_CARDS(select_cards_in_field, is_same_card_in_field, get_cards_in_field);
+            CAN_TAKE_CARDS(can_place_in_field, place_cards_in_field);
+        });
+        CORE_DEPENDENT();
+    });
+
+    
     static CardProvider card_provider = (CardProvider) {
         .peek = field_peek,
         .pop  = field_pop,
@@ -405,7 +347,7 @@ Field init_field(void) {
         .card_provider = &card_provider,
     };
 
-    field.export_methods = &field_methods;
+    field->export_methods = &field_methods;
 
     return field;
 }

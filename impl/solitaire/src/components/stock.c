@@ -296,55 +296,19 @@ static void update_stock(void *stock_pointer, void *context) {
  * Initialize empty stock structure
  * Creates stock with empty foundation piles and required interfaces
  */
-Stock init_stock(void) {
-    Stock stock = {0};
+Stock *init_stock(Arena *arena) {
+    Stock *stock = (Stock *)arena_alloc(arena, sizeof(Stock));
 
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_stock
-    };
-
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor       = place_cursor_in_stock,
-        .move_cursor        = move_in_stock,
-        .get_default_coords = get_default_coords,
-        .get_cursor_config  = get_cursor_config_in_stock
-    };
-
-    static const CardHandler card_handler = {
-        .can_take_cards = true,
-        .can_give_cards = false,
-
-        .can_place   = can_place_in_stock,
-        .place_cards = place_cards_in_stock
-    };
-
-    static PositionHandler position_handler = {
-        .restore_coords = {0},
-        .save_current_pos = save_current_pos_in_stock,
-        .restore_pos      = restore_pos_in_stock
-    };
-
-    static Updateable updateable = {
-        .update = update_stock
-    };
-
-    stock.interfaces = (ObjectInterfaces) {
-        .name             = "Stock",
-        .capabilities     = {
-            .is_drawable     = true,
-            .is_cursor_interactable = true,
-            .can_hold_cards  = true,
-            .is_positionable = true,
-            .requires_update = true,
-            .requires_core   = true
-        },
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
-        .card_handler        = &card_handler,
-        .position_handler    = &position_handler,
-        .updateable          = &updateable
-    };
+    INTERFACES(arena, stock, {
+        DRAWABLE(print_stock);
+        CURSOR_INTERACTABLE(place_cursor_in_stock, move_in_stock, get_default_coords, get_cursor_config_in_stock);
+        CARD_HANDLER({
+            CAN_TAKE_CARDS(can_place_in_stock, place_cards_in_stock);
+        });
+        POSITION_HANDLER(save_current_pos_in_stock, restore_pos_in_stock);
+        UPDATEABLE(update_stock);
+        CORE_DEPENDENT();
+    });
 
     return stock;
 }

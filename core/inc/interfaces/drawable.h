@@ -33,4 +33,27 @@ static inline void SET_DRAWABLE_ACTIVE(void *object, bool active) {
     DRAW_HANDLER(object)->is_active = active;
 }
 
+static inline void SET_DRAWABLE_INACTIVE(void *object) {
+    DRAW_HANDLER(object)->is_active = false;
+}
+
+#define DRAWABLE_FULL(arena, object, active, _print)                                                       \
+    do {                                                                                           \
+        if (!IS_DRAWABLE(object))                                                                  \
+            GET_INTERFACES(object)->capabilities.is_drawable = true;                               \
+        Drawable *drawable = DRAW_HANDLER(object);                                                 \
+        if (drawable == NULL) {                                                                    \
+            GET_INTERFACES(object)->drawable = (Drawable *)arena_alloc(arena, sizeof(Drawable));   \
+            drawable = DRAW_HANDLER(object);                                                       \
+            drawable->is_active = active;                                                          \
+        }                                                                                          \
+        drawable->print = _print;                                                                  \
+    } while (0)
+
+#define DRAWABLE(_print)                              \
+    DRAWABLE_FULL(cur_arena, cur_object, true, _print)
+
+#define DRAWABLE_INACTIVE(_print) \
+    DRAWABLE_FULL(cur_arena, cur_object, false, _print)
+
 #endif

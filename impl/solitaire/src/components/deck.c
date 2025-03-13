@@ -254,44 +254,26 @@ static void deck_pop(void *deck_pointer, Card *card) {
 
 
 /*
- * Set deck interfaces
- * Assigns function pointers and properties for deck object
+ * Generate a deck of cards
+ * Initializes deck structure and fills it with cards
  */
-static void deck_set_interfaces(ObjectInterfaces *oi) {
-    /* 
-     * Define drawable properties
-     * Marks object as active and assigns print function 
-     */
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_deck
-    };
-
-    /* 
-     * Define cursor interaction behavior
-     * Handles cursor movement, placement, and config retrieval 
-     */
-    static const CursorInteractable cursor_interactable = {
-        .place_cursor       = place_cursor_in_deck,
-        .move_cursor        = move_in_deck,
-        .get_default_coords = get_default_coords,
-        .get_cursor_config  = get_cursor_config_in_deck
-    };
-
-    /* 
-     * Define card handling behavior
-     * Specifies rules for selecting, placing, and comparing cards
-     */
-    static const CardHandler card_handler = {
-        .can_give_cards = true,
-        .select_cards   = select_card_in_deck,
-        .get_cards      = get_card_in_deck,
-        .is_same_card   = is_same_card_in_deck,
-        
-        .can_take_cards = false,
-        .place_cards    = NULL,
-        .can_place      = NULL
-    };
+Deck *generate_deck(Arena *arena) {
+    Deck *deck = arena_alloc(arena, sizeof(Deck));
+    
+    int i = 0;
+    for (Suit suit = Spades; suit < CARD_SUITS; suit++) {
+        for (Numeral numeral = Ace; numeral <= CARD_NUMERALS; numeral++) {
+            Card card = {
+                .suit = suit,
+                .numeral = numeral,
+                .selected = false,
+                .object = Deck_enum,
+                .coords = {.x = 1, .y = 0}
+            };
+            deck->deck[i++] = card;
+        }
+    }
+    deck->pointer = &deck->deck[0];
 
     static Button next_card_button = {
         .coords = {.x = 0, .y = 0},
@@ -305,48 +287,22 @@ static void deck_set_interfaces(ObjectInterfaces *oi) {
         },
     };
 
-    /* 
-     * Assign all handlers and properties to the deck object
-     * Defines capabilities and links to functional interfaces
-     */
-    *oi = (ObjectInterfaces) {
-        .name           = "Deck",
+    deck->interfaces = (ObjectInterfaces) {
         .capabilities = {
-            .can_hold_cards         = true,
-            .have_buttons           = true,
-            .is_drawable            = true,
-            .is_cursor_interactable = true,
+            .have_buttons = true,
         },
-        .card_handler        = &card_handler,
-        .button_handler      = &button_handler,
-        .drawable            = &drawable,
-        .cursor_interactable = &cursor_interactable,
+        .button_handler = &button_handler,
     };
-}
 
-/*
- * Generate a deck of cards
- * Initializes deck structure and fills it with cards
- */
-Deck generate_deck(void) {
-    Deck deck = {0};
-    
-    int i = 0;
-    for (Suit suit = Spades; suit < CARD_SUITS; suit++) {
-        for (Numeral numeral = Ace; numeral <= CARD_NUMERALS; numeral++) {
-            Card card = {
-                .suit = suit,
-                .numeral = numeral,
-                .selected = false,
-                .object = Deck_enum,
-                .coords = {.x = 1, .y = 0}
-            };
-            deck.deck[i++] = card;
-        }
-    }
-    deck.pointer = &deck.deck[0];
 
-    deck_set_interfaces(&deck.interfaces);
+    INTERFACES(arena, deck, {
+        DRAWABLE(print_deck);
+        CURSOR_INTERACTABLE(place_cursor_in_deck, move_in_deck, get_default_coords, get_cursor_config_in_deck);
+        CARD_HANDLER({
+            CAN_GIVE_CARDS(select_card_in_deck, is_same_card_in_deck, get_card_in_deck);
+        });
+    });
+
 
     static CardProvider card_provider = (CardProvider) {
         .peek = deck_peek,
@@ -358,8 +314,8 @@ Deck generate_deck(void) {
         .draw_card = draw_card,
     };
 
-    deck.export_methods = &deck_methods;
+    deck->export_methods = &deck_methods;
 
-    deck_shuffle(&deck);
+    deck_shuffle(deck);
     return deck;
 }

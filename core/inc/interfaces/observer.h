@@ -83,7 +83,7 @@ typedef struct SignalListenersList SignalListenersList;
  * Represents a list of signal listeners.
  */
 struct SignalListenersList {
-    SignalListeners *listeners;     // listeners object
+    SignalListeners *listeners;    // listeners object
     SignalListenersList *next;     // next listeners
 };
 
@@ -97,7 +97,7 @@ static inline bool IS_OBSERVER(const void *object) {
 }
 
 
-#define NEW_OBSERVER(signal_name, callback_function)                                                           \
+#define NEW_OBSERVER(signal_name, callback_function)                                             \
     do {                                                                                         \
         SignalSubscriptionList *new_sub = arena_alloc(arena, sizeof(SignalSubscriptionList));    \
         new_sub->subscription.signal = signal_name;                                              \
@@ -107,18 +107,21 @@ static inline bool IS_OBSERVER(const void *object) {
     } while (0)
 
 
-#define OBSERVER(arena, object, observers)                                       \
-    do {                                                                         \
-        if (!IS_OBSERVER(object))                                                \
-            GET_INTERFACES(object)->capabilities.is_observer = true;             \
-        Observer *observer = OBSERVER_HANDLER(object);                           \
-        if (observer == NULL) {                                                  \
-            GET_INTERFACES(object)->observer = (Observer *)arena_alloc(arena, sizeof(Observer));     \
-            observer = OBSERVER_HANDLER(object);                                 \
-            observer->observer = object;                                         \
-        }                                                                        \
-        observers;                                                               \
+#define OBSERVER_FULL(arena, object, observers)                                                    \
+    do {                                                                                           \
+        if (!IS_OBSERVER(object))                                                                  \
+            GET_INTERFACES(object)->capabilities.is_observer = true;                               \
+        Observer *observer = OBSERVER_HANDLER(object);                                             \
+        if (observer == NULL) {                                                                    \
+            GET_INTERFACES(object)->observer = (Observer *)arena_alloc(arena, sizeof(Observer));   \
+            observer = OBSERVER_HANDLER(object);                                                   \
+            observer->observer = object;                                                           \
+        }                                                                                          \
+        observers;                                                                                 \
     } while (0)
+
+#define OBSERVER(observers) \
+    OBSERVER_FULL(cur_arena, cur_object, observers)
 
 
 static inline SignalListener *create_signal_listener(Arena *arena, void *observer, Observer_callback callback) {

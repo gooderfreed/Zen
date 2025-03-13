@@ -25,23 +25,32 @@ typedef struct ObjectInterfaces {
         bool requires_ticks         : 1;
     } capabilities;
 
-    const CardHandler        *card_handler;
-    const CursorInteractable *cursor_interactable;
-    const Dynamic            *dynamic;
-    const CoreDependent      *core_dependent;
-    Drawable                 *drawable;
-    ButtonHandler            *button_handler;
-    PositionHandler          *position_handler;
-    Updateable               *updateable;
-    InputHandler             *input_handler;
-    TickDependent            *tick_dependent;
-    Observer                 *observer;
-    Emitter                  *emitter;
+    CardHandler        *card_handler;
+    CursorInteractable *cursor_interactable;
+    Dynamic            *dynamic;
+    CoreDependent      *core_dependent;
+    Drawable           *drawable;
+    ButtonHandler      *button_handler;
+    PositionHandler    *position_handler;
+    Updateable         *updateable;
+    InputHandler       *input_handler;
+    TickDependent      *tick_dependent;
+    Observer           *observer;
+    Emitter            *emitter;
 } ObjectInterfaces;
 
 // Get interfaces
 static inline ObjectInterfaces *GET_INTERFACES(const void *object) {
     return (ObjectInterfaces*)(object);
 }
+
+#define INTERFACES(arena, object, interfaces)            \
+    do {                                                 \
+        if (!GET_INTERFACES(object)->name)               \
+            GET_INTERFACES(object)->name = #object;      \
+        void *cur_object = (void *)(object);             \
+        Arena *cur_arena = (Arena *)(arena);             \
+        interfaces;                                      \
+    } while (0)
 
 #endif

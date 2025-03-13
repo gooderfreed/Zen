@@ -77,7 +77,7 @@ static inline bool IS_EMITTER(const void *object) {
     } while (0)
 
 
-#define EMITTER(arena, object, emitters)                                                      \
+#define EMITTER_FULL(arena, object, emitters)                                                 \
     do {                                                                                      \
         if (!IS_EMITTER(object))                                                              \
             GET_INTERFACES(object)->capabilities.is_emitter = true;                           \
@@ -88,6 +88,9 @@ static inline bool IS_EMITTER(const void *object) {
         }                                                                                     \
         emitters;                                                                             \
     } while (0)
+
+#define EMITTER(emitters) \
+    EMITTER_FULL(cur_arena, cur_object, emitters)
 
 
 static inline void link_observers_to_emitters(Arena *arena, SignalListenersList *listeners, EmitterList *emitters) {

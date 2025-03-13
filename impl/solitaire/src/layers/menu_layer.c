@@ -26,13 +26,10 @@ static bool menu_cursor_loop(Core *core, wint_t key) {
  * Creates the menu layer
  */
 MapLayer *menu_layer_init(Arena *arena, Game *game) {
-    static Menu menu = {0};
-    menu = init_menu();
+    Menu     *menu     = init_menu(arena);
+    Controls *controls = init_controls(arena);
 
-    static Controls controls;
-    controls = init_controls();
-
-    SET_BUTTON_CONTEXT(&menu, 1, game);
+    SET_BUTTON_CONTEXT(menu, 1, game);
 
     MapLayer *menu_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
 
@@ -49,8 +46,8 @@ MapLayer *menu_layer_init(Arena *arena, Game *game) {
         menu_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(menu_layer->width) * sizeof(MapObject));
     }
     
-    menu_layer->objects[0][0].object = &menu;
-    menu_layer->objects[0][1].object = &controls;
+    menu_layer->objects[0][0].object = menu;
+    menu_layer->objects[0][1].object = controls;
 
     return menu_layer;
 }

@@ -29,4 +29,13 @@ static inline int GET_CURRENT_TICK(const void *object) {
     return TICK_DEPENDENT(object)->get_current_tick(TICK_DEPENDENT(object)->tick_counter);
 }
 
+#define TICK_DEPENDENT_FULL(arena, object)                              \
+    do {                                                                \
+        if (!IS_TICK_DEPENDENT(object))                                 \
+            GET_INTERFACES(object)->capabilities.tick_dependent = true; \
+    } while (0)
+
+#define TICK_DEPENDENT() \
+    TICK_DEPENDENT_FULL(cur_arena, cur_object)
+
 #endif

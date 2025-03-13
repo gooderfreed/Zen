@@ -30,10 +30,9 @@ static bool win_cursor_loop(Core *core, wint_t key) {
  * Prepares the win screen for drawing
  */
 MapLayer *win_layer_init(Arena *arena, Game *game) {
-    static WinScreen win_screen = {0};
-    win_screen = init_win_screen();
+    WinScreen *win_screen = init_win_screen(arena);
 
-    SET_BUTTON_CONTEXT(&win_screen, 0, game);
+    SET_BUTTON_CONTEXT(win_screen, 0, game);
 
     MapLayer *win_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
 
@@ -50,7 +49,7 @@ MapLayer *win_layer_init(Arena *arena, Game *game) {
         win_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(win_layer->width) * sizeof(MapObject));
     }
     
-    win_layer->objects[0][0].object = &win_screen;
+    win_layer->objects[0][0].object = win_screen;
 
     return win_layer;
 }

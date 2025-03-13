@@ -102,7 +102,7 @@ typedef struct DeckMethods {
     Card *(*draw_card)(Deck *deck);
 } DeckMethods;
 
-Deck generate_deck(void);
+Deck *generate_deck(Arena *arena);
 void deck_reset(Deck *deck);
 
 
@@ -118,7 +118,7 @@ typedef struct Stock {
     Card *top_cards[CARD_SUITS];               // Top card pointers for each suit
 } Stock;
 
-Stock init_stock(void);
+Stock *init_stock(Arena *arena);
 void stock_reset(Stock *stock);
 
 
@@ -138,7 +138,7 @@ typedef struct FieldMethods {
     CardProvider *card_provider;
 } FieldMethods;
 
-Field init_field(void);
+Field *init_field(Arena *arena);
 void field_reset(Field *field, Deck *deck);
 
 
@@ -181,7 +181,7 @@ typedef struct Menu {
     bool start_game : 1;             // Start game flag
 } Menu;
 
-Menu init_menu(void);
+Menu *init_menu(Arena *arena);
 
 
 
@@ -194,7 +194,7 @@ typedef struct Controls {
     ObjectInterfaces interfaces;     // Core engine interfaces
 } Controls;
 
-Controls init_controls(void);
+Controls *init_controls(Arena *arena);
 
 
 
@@ -207,7 +207,7 @@ typedef struct WinScreen {
     ObjectInterfaces interfaces;    // Core engine interfaces
 } WinScreen;
 
-WinScreen init_win_screen(void);
+WinScreen *init_win_screen(Arena *arena);
 
 
 

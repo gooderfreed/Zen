@@ -43,21 +43,11 @@ ScoreCounter *init_score_counter(Arena *arena) {
         .max_score = 0,
     };
 
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_score
-    };
-
-    score_counter->interfaces = (ObjectInterfaces) {
-        .name          = "Score Counter",
-        .capabilities = {
-            .is_drawable = true,
-        },
-        .drawable      = &drawable,
-    };
-
-    OBSERVER(arena, score_counter, {
-        NEW_OBSERVER("score_update", score_update_callback);
+    INTERFACES(arena, score_counter, {
+        DRAWABLE(print_score);
+        OBSERVER({
+            NEW_OBSERVER("score_update", score_update_callback);
+        });
     });
 
     return score_counter;

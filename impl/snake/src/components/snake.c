@@ -195,41 +195,13 @@ Snake *init_snake(Arena *arena) {
     // Generate initial apple position
     snake->apple = generate_apple(snake);
 
-
-
-    // Define rendering behavior
-    static Drawable drawable = {
-        .is_active = true,
-        .print = print_snake
-    };
-
-    // Define update behavior
-    static Updateable updateable = {
-        .update = update_snake
-    };
-
-    // Define input handling behavior
-    static InputHandler input_handler = {
-        .handle_input = input_snake
-    };
-    
-
-    // Assign interfaces for core integration
-    snake->interfaces = (ObjectInterfaces) {
-        .name          = "Snake",
-        .capabilities = {
-            .is_drawable     = true,
-            .requires_update = true,
-            .requires_core   = true,
-            .requires_input  = true
-        },
-        .drawable      = &drawable,
-        .updateable    = &updateable,
-        .input_handler = &input_handler,
-    };
-
-    EMITTER(arena, snake, {
-        NEW_EMITTER("score_update");
+    INTERFACES(arena, snake, {
+        DRAWABLE(print_snake);
+        UPDATEABLE(update_snake);
+        INPUT_HANDLER(input_snake);
+        EMITTER({
+            NEW_EMITTER("score_update");
+        });
     });
 
     return snake;

@@ -7,18 +7,14 @@
 static Game *game_init(Arena *arena) {
     Game *game = (Game *)arena_alloc(arena, sizeof(Game));
 
-    static Deck deck;
-    static Field field;
-    static Stock stock;
-
-    deck = generate_deck();
-    field = init_field();
-    stock = init_stock();
+    Deck  *deck  = generate_deck(arena);
+    Field *field = init_field(arena);
+    Stock *stock = init_stock(arena);
 
     *game = (Game) {
-        .deck  = &deck,
-        .field = &field,
-        .stock = &stock
+        .deck  = deck,
+        .field = field,
+        .stock = stock
     };
 
     return game;
