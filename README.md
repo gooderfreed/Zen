@@ -4,7 +4,7 @@
 
 ## Overview
 
-MiniCore is a streamlined framework written in pure C, designed to facilitate the development of robust and efficient console-based applications.  It provides a flexible, modular architecture centered around an interface-based component system.  MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
+MiniCore is a streamlined framework written in C, designed to facilitate the development of robust and efficient console-based applications.  It provides a flexible, modular architecture centered around an interface-based component system.  MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
 
 Key framework capabilities include:
 
