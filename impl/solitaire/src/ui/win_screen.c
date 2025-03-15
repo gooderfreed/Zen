@@ -131,40 +131,16 @@ static void on_exit_click(void *win_screen_pointer, void *context) {
 WinScreen *init_win_screen(Arena *arena) {
     WinScreen *win_screen = (WinScreen *)arena_alloc(arena, sizeof(WinScreen));
 
-    static Button new_game_button = {
-        .coords = {.x = 0, .y = 0},
-        .on_click = on_new_game_click
-    };
-
-    static Button menu_button = {
-        .coords = {.x = 0, .y = 1},
-        .on_click = on_menu_click
-    };
-
-    static Button exit_button = {
-        .coords = {.x = 0, .y = 2},
-        .on_click = on_exit_click
-    };
-
-    static ButtonHandler button_handler = {
-        .buttons_count = 3,
-        .buttons = {
-            [0] = &new_game_button,
-            [1] = &menu_button,
-            [2] = &exit_button
-        }
-    };
-
-    win_screen->interfaces = (ObjectInterfaces) {
-        .capabilities = {
-            .have_buttons = true,
-        },
-        .button_handler = &button_handler
-    };
-
     INTERFACES(arena, win_screen, {
         DRAWABLE(print_win_screen);
         CURSOR_INTERACTABLE(place_cursor_in_menu, move_in_menu, get_default_coords, get_cursor_config_in_menu);
+        BUTTONS_HANDLER({
+            BUTTONS_GROUP({
+                BUTTON(on_new_game_click);
+                BUTTON(on_menu_click);
+                BUTTON(on_exit_click);
+            });
+        });
         CORE_DEPENDENT();
     });
 

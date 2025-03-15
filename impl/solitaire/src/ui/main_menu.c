@@ -154,46 +154,17 @@ Menu *init_menu(Arena *arena) {
         .start_game = true
     };
 
-    static Button continue_button = {
-        .coords = {.x = 0, .y = 0},
-        .on_click = on_continue_click
-    };
-
-    static Button start_button = {
-        .coords = {.x = 0, .y = 1},
-        .on_click = on_start_click
-    };
-
-    static Button controls_button = {
-        .coords = {.x = 0, .y = 2},
-        .on_click = on_controls_click
-    };
-
-    static Button exit_button = {
-        .coords = {.x = 0, .y = 3},
-        .on_click = on_exit_click
-    };
-
-    static ButtonHandler button_handler = {
-        .buttons_count = 4,
-        .buttons = {
-            [0] = &continue_button,
-            [1] = &start_button,
-            [2] = &controls_button,
-            [3] = &exit_button
-        }
-    };
-
-    menu->interfaces = (ObjectInterfaces) {
-        .capabilities = {
-            .have_buttons = true,
-        },
-        .button_handler = &button_handler
-    };
-
     INTERFACES(arena, menu, {
         DRAWABLE(print_menu);
         CURSOR_INTERACTABLE(place_cursor_in_menu, move_in_menu, get_default_coords, get_cursor_config_in_menu);
+        BUTTONS_HANDLER({
+            BUTTONS_GROUP({
+                BUTTON(on_continue_click);
+                BUTTON(on_start_click);
+                BUTTON(on_controls_click);
+                BUTTON(on_exit_click);
+            });
+        });
         CORE_DEPENDENT();
     });
     

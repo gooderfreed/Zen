@@ -108,7 +108,6 @@ static void update_donut(void *donut_pointer, void *context) {
  * This function initializes the donut object
  */
 static Donut *init_donut(Arena *arena) {
-    // Allocate memory for the donut object
     Donut *donut = (Donut *)arena_alloc(arena, sizeof(Donut));
 
     donut->A = 0;
@@ -119,7 +118,6 @@ static Donut *init_donut(Arena *arena) {
         UPDATEABLE(update_donut);
     });
 
-    // Return the initialized donut object
     return donut;
 }
 

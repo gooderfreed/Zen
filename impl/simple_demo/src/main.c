@@ -67,7 +67,7 @@ static void loop(Core *core, wint_t key) {
  */
 int main(void) {
     // Initialize the memory arena
-    Arena *arena = arena_new_dynamic(1024*10);
+    Arena *arena = arena_new_dynamic(1024*100);
     // Initialize the core
     Core  *core  = core_init(arena);
 

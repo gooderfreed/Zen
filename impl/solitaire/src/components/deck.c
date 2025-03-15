@@ -275,29 +275,14 @@ Deck *generate_deck(Arena *arena) {
     }
     deck->pointer = &deck->deck[0];
 
-    static Button next_card_button = {
-        .coords = {.x = 0, .y = 0},
-        .on_click = handle_next_card_button,
-    };
-
-    static ButtonHandler button_handler = {
-        .buttons_count = 1,
-        .buttons = {
-            [0] = &next_card_button
-        },
-    };
-
-    deck->interfaces = (ObjectInterfaces) {
-        .capabilities = {
-            .have_buttons = true,
-        },
-        .button_handler = &button_handler,
-    };
-
-
     INTERFACES(arena, deck, {
         DRAWABLE(print_deck);
         CURSOR_INTERACTABLE(place_cursor_in_deck, move_in_deck, get_default_coords, get_cursor_config_in_deck);
+        BUTTONS_HANDLER({
+            BUTTONS_GROUP({
+                BUTTON(handle_next_card_button);
+            });
+        });
         CARD_HANDLER({
             CAN_GIVE_CARDS(select_card_in_deck, is_same_card_in_deck, get_card_in_deck);
         });

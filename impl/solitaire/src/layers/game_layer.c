@@ -80,8 +80,8 @@ MapLayer *game_layer_init(Arena *arena, Cursor *cursor) {
         .cursor = cursor,
     };
 
-    SET_UPDATE_CONTEXT(game->stock,   stock_context);
-    SET_BUTTON_CONTEXT(game->deck, 0, cursor->cards);
+    SET_UPDATE_CONTEXT(game->stock, stock_context);
+    SET_BUTTON_CONTEXT(game->deck, "handle_next_card_button", cursor->cards);
 
     MapLayer *game_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
 

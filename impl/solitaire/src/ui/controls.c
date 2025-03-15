@@ -112,29 +112,15 @@ static void on_back_click(void *controls_pointer, void *context) {
  */
 Controls *init_controls(Arena *arena) {
     Controls *controls = (Controls *)arena_alloc(arena, sizeof(Controls));
-
-    static Button back_button = {
-        .coords = {.x = 0, .y = 0},
-        .on_click = on_back_click
-    };
-
-    static ButtonHandler button_handler = {
-        .buttons_count = 1,
-        .buttons = {
-            [0] = &back_button,
-        }
-    };
-
-    controls->interfaces = (ObjectInterfaces) {
-        .capabilities = {
-            .have_buttons = true,
-        },
-        .button_handler = &button_handler
-    };
     
     INTERFACES(arena, controls, {
         DRAWABLE_INACTIVE(print_controls);
         CURSOR_INTERACTABLE(place_cursor_in_controls, move_in_controls, get_default_coords, get_cursor_config_in_controls);
+        BUTTONS_HANDLER({
+            BUTTONS_GROUP({
+                BUTTON(on_back_click);
+            });
+        });
         CORE_DEPENDENT();
     });
     

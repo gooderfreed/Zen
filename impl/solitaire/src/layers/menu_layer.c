@@ -29,7 +29,7 @@ MapLayer *menu_layer_init(Arena *arena, Game *game) {
     Menu     *menu     = init_menu(arena);
     Controls *controls = init_controls(arena);
 
-    SET_BUTTON_CONTEXT(menu, 1, game);
+    SET_BUTTON_CONTEXT(menu, "on_start_click", game);
 
     MapLayer *menu_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
 

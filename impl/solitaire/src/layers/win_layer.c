@@ -32,7 +32,7 @@ static bool win_cursor_loop(Core *core, wint_t key) {
 MapLayer *win_layer_init(Arena *arena, Game *game) {
     WinScreen *win_screen = init_win_screen(arena);
 
-    SET_BUTTON_CONTEXT(win_screen, 0, game);
+    SET_BUTTON_CONTEXT(win_screen, "on_new_game_click", game);
 
     MapLayer *win_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
 
