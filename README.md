@@ -4,7 +4,7 @@
 
 ## Overview
 
-MiniCore is a streamlined framework written in C, designed to facilitate the development of robust and efficient console-based applications. It provides a flexible, modular architecture centered around an interface-based component system and a **powerful Domain-Specific Language (DSL)** for declarative application configuration. MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
+MiniCore is a streamlined framework written in C, designed to facilitate the development of robust and efficient console-based applications. It provides a flexible, modular architecture centered around an interface-based component system and a **powerful Domain-Specific Language (DSL)** for declarative application configuration. **Despite its rich functionality, MiniCore produces remarkably compact executables, even for complex applications.** MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
 
 Key framework capabilities include:
 
@@ -113,6 +113,32 @@ The framework includes the following example implementations within the `impl` d
     *   **Efficient Algorithms:** Optimized calculations for inverse distance (z-buffering) and normalized luminance.
 
     ![Donut Implementation](.github/donut.png)
+
+## Dependencies
+
+MiniCore is designed to be lightweight and portable, with minimal external dependencies:
+
+**Required dependencies:**
+*  Standard C Library (libc)
+*  Math Library (libm)
+  
+**Optional tools:**
+* `tput` - Used for enhanced terminal capability detection. If not available, MiniCore will fall back to a simpler detection method that works in most environments.
+
+No third-party libraries are required, making MiniCore easy to integrate into any project or environment.
+
+## Performance and Optimization
+
+MiniCore is designed with performance and resource efficiency in mind. The framework generates highly optimized executables with minimal overhead:
+
+| Example Application | Executable Size |
+|---------------------|-----------------|
+| Solitaire           | 51.7KB          |
+| Snake               | 35.3KB          |
+| 3D Donut            | 31.2KB          |
+| Simple Demo         | 31.1KB          |
+
+These compact sizes make MiniCore suitable for resource-constrained environments while still providing rich functionality and developer-friendly abstractions.
 
 ## Building
 
