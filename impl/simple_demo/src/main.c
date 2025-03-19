@@ -45,7 +45,7 @@ static Demo *init_demo(Arena *arena) {
 /*
  * Prepare screen
  */
-static void prepare_screen(Screen *screen) {
+static void layer_prepare_screen(Screen *screen) {
     add_borders(screen, 0, 0, 10, 10, COLOR_BLUE, COLOR_WHITE, L"-|++++++");
 }
 
@@ -54,7 +54,7 @@ static void prepare_screen(Screen *screen) {
  * Main loop
  * This function handles user input and updates the core
  */
-static void loop(Core *core, wint_t key) {
+static void layer_loop(Core *core, wint_t key) {
     switch (key) {
         case L'q': case L'й': core_shutdown(core); exit(0); break;
     }
@@ -67,7 +67,8 @@ static void loop(Core *core, wint_t key) {
  */
 int main(void) {
     // Initialize the memory arena
-    Arena *arena = arena_new_dynamic(1024*100);
+    size_t buffer[1024*10]; // 4KB | demo requires 3740 bytes
+    Arena *arena = arena_new_static(buffer, sizeof(buffer));
     // Initialize the core
     Core  *core  = core_init(arena);
 
@@ -79,10 +80,13 @@ int main(void) {
     Map *map = init_map(arena, 1, (Coords){.x = 0, .y = 0, .z = 0});
     
     // Initialize the map layer
-    MapLayer *layer = create_map_layer(arena, 1, 1, (Coords){.x = 0, .y = 0});
-    layer->prepare_screen = prepare_screen;
-    layer->layer_loop = loop;
-    layer->objects[0][0].object = init_demo(arena);
+    MapLayer *layer = NULL;
+    MAP_LAYER(arena, layer, {
+        prepare_screen = layer_prepare_screen;
+        loop = layer_loop;
+    }, {
+        OBJECT(init_demo(arena), COORDS(0, 0));
+    });
 
     // Set the map layer
     map_set_layer(map, layer, 0);
@@ -94,10 +98,6 @@ int main(void) {
     core_set_target_fps(core, 10);
     // Set the ticks per second
     core_set_ticks_per_second(core, 10);
-    // Enable FPS stats
-    core_enable_fps_stats(core);
-    // Show FPS
-    core_show_fps(core, true);
 
     // Game loop
     while (!core_should_close(core)) {

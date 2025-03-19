@@ -31,23 +31,15 @@ MapLayer *menu_layer_init(Arena *arena, Game *game) {
 
     SET_BUTTON_CONTEXT(menu, "on_start_click", game);
 
-    MapLayer *menu_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
-
-    *menu_layer = (MapLayer) {
-        .prepare_screen = prepare_menu_screen,
-        .layer_cursor_loop = menu_cursor_loop,
-        .default_layer_coords = MENU_DEFAULT_COORDS,
-        .height = MENU_LAYER_HEIGHT,
-        .width = MENU_LAYER_WIDTH,
-    };
-
-    menu_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(menu_layer->height) * sizeof(MapObject *));
-    for (int i = 0; i < menu_layer->height; i++) {
-        menu_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(menu_layer->width) * sizeof(MapObject));
-    }
-    
-    menu_layer->objects[0][0].object = menu;
-    menu_layer->objects[0][1].object = controls;
+    MapLayer *menu_layer = NULL;
+    MAP_LAYER(arena, menu_layer, {
+        prepare_screen = prepare_menu_screen;
+        cursor_loop = menu_cursor_loop;
+        main_object = menu;
+    }, {
+        OBJECT(menu,     COORDS(0, 0));
+        OBJECT(controls, COORDS(1, 0));
+    });
 
     return menu_layer;
 }

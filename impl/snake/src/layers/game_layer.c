@@ -26,14 +26,14 @@ MapLayer *game_layer_init(Arena *arena) {
     Snake *snake = init_snake(arena);
     ScoreCounter *score_counter = init_score_counter(arena);
 
-    MapLayer *game_layer = create_map_layer(arena, 2, 1, SNAKE_DEFAULT_COORDS);
-
-    game_layer->prepare_screen = prepare_game_screen;
-    game_layer->layer_loop = game_loop;
-    game_layer->layer_main_object = snake;
-
-    game_layer->objects[0][0].object = score_counter;
-    game_layer->objects[1][0].object = snake;
+    MapLayer *game_layer = NULL;
+    MAP_LAYER(arena, game_layer, {
+        prepare_screen = prepare_game_screen;
+        loop = game_loop;
+    }, {
+        OBJECT(score_counter, COORDS(0, 0));
+        OBJECT(snake, COORDS(0, 1), {is_main = true;});
+    });
 
     return game_layer;
 }

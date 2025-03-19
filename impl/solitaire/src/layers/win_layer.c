@@ -34,23 +34,14 @@ MapLayer *win_layer_init(Arena *arena, Game *game) {
 
     SET_BUTTON_CONTEXT(win_screen, "on_new_game_click", game);
 
-    MapLayer *win_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
-
-    *win_layer = (MapLayer) {
-        .prepare_screen = prepare_win_screen,
-        .layer_cursor_loop = win_cursor_loop,
-        .default_layer_coords = WIN_DEFAULT_COORDS,
-        .height = WIN_LAYER_HEIGHT,
-        .width = WIN_LAYER_WIDTH,
-    };
-
-    win_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(win_layer->height) * sizeof(MapObject *));
-    for (int i = 0; i < win_layer->height; i++) {
-        win_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(win_layer->width) * sizeof(MapObject));
-    }
-    
-    win_layer->objects[0][0].object = win_screen;
-
+    MapLayer *win_layer = NULL;
+    MAP_LAYER(arena, win_layer, {
+        prepare_screen = prepare_win_screen;
+        cursor_loop = win_cursor_loop;
+        main_object = win_screen;
+    }, {
+        OBJECT(win_screen, COORDS(0, 0));
+    });
     return win_layer;
 }
 

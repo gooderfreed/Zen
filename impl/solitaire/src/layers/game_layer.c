@@ -55,7 +55,7 @@ static void game_loop(Core *core, wint_t key) {
  * Game cursor loop
  * Handles game cursor loop
  */
-static bool cursor_loop(Core *core, wint_t key) {
+static bool game_cursor_loop(Core *core, wint_t key) {
     switch (key) {
         case L'a': case L'ф':            core_local_move(core, CURSOR_LEFT);   break;
         case L'd': case L'в':            core_local_move(core, CURSOR_RIGHT);  break;
@@ -83,26 +83,17 @@ MapLayer *game_layer_init(Arena *arena, Cursor *cursor) {
     SET_UPDATE_CONTEXT(game->stock, stock_context);
     SET_BUTTON_CONTEXT(game->deck, "handle_next_card_button", cursor->cards);
 
-    MapLayer *game_layer = (MapLayer *)arena_alloc(arena, sizeof(MapLayer));
-
-    *game_layer = (MapLayer) {
-        .prepare_screen = prepare_game_screen,
-        .layer_loop = game_loop,
-        .layer_cursor_loop = cursor_loop,
-        .default_layer_coords = GAME_DEFAULT_COORDS,
-        .layer_main_object = game,
-        .height = GAME_LAYER_HEIGHT,
-        .width = GAME_LAYER_WIDTH,
-    };
-
-    game_layer->objects = (MapObject **)arena_alloc(arena, (size_t)(game_layer->height) * sizeof(MapObject *));
-    for (int i = 0; i < game_layer->height; i++) {
-        game_layer->objects[i] = (MapObject *)arena_alloc(arena, (size_t)(game_layer->width) * sizeof(MapObject));
-    }
-
-    game_layer->objects[0][0].object = game->deck;
-    game_layer->objects[0][1].object = game->field;
-    game_layer->objects[0][2].object = game->stock;
+    MapLayer *game_layer = NULL;
+    MAP_LAYER(arena, game_layer, {
+        prepare_screen = prepare_game_screen;
+        loop = game_loop;
+        cursor_loop = game_cursor_loop;
+        main_object = game;
+    }, {
+        OBJECT(game->deck,  COORDS(0, 0));
+        OBJECT(game->field, COORDS(1, 0), {is_main = true;});
+        OBJECT(game->stock, COORDS(2, 0));
+    });
 
     return game_layer;
 }

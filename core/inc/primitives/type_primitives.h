@@ -18,6 +18,7 @@ typedef struct Arena Arena;
 typedef struct Map Map;
 typedef struct MapLayer MapLayer;
 typedef struct MapObject MapObject;
+typedef struct MapObjectList MapObjectList;
 
 typedef unsigned char CursorType;
 typedef struct CursorConfig CursorConfig;

@@ -22,7 +22,7 @@ static void init_game(Core *core) {
     MapLayer *game_layer = game_layer_init(arena);
 
     // create map
-    Map *map = init_map(arena, 1, (Coords) {.x = 0, .y = 1, .z = 0});
+    Map *map = init_map(arena, 1, COORDS(0, 1, 0));
     map_set_layer(map, game_layer, 0);
 
     core_set_screen(core, screen);

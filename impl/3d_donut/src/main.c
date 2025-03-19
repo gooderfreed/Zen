@@ -127,12 +127,12 @@ static Donut *init_donut(Arena *arena) {
 /*
  * Prepare screen
  */
-static void prepare_screen(Screen *screen) {
+static void layer_prepare_screen(Screen *screen) {
     (void) screen;
     add_borders(screen, 0, 0, SCREEN_HEIGHT, SCREEN_WIDTH, COLOR_BLUE, COLOR_WHITE, L"-|++++++");
 }
 
-static void loop(Core *core, wint_t key) {
+static void layer_loop(Core *core, wint_t key) {
     switch (key) {
         case L'q': case L'й': core_shutdown(core); exit(0); break;
     }
@@ -157,10 +157,13 @@ int main(void) {
     Map *map = init_map(arena, 1, (Coords){.x = 0, .y = 0, .z = 0});
     
     // Initialize the map layer
-    MapLayer *layer = create_map_layer(arena, 1, 1, (Coords){.x = 0, .y = 0});
-    layer->prepare_screen = prepare_screen;
-    layer->layer_loop = loop;
-    layer->objects[0][0].object = init_donut(arena);
+    MapLayer *layer = NULL;
+    MAP_LAYER(arena, layer, {
+        prepare_screen = layer_prepare_screen;
+        loop = layer_loop;
+    }, {
+        OBJECT(init_donut(arena), COORDS(0, 0));
+    });
 
     // Set the map layer
     map_set_layer(map, layer, 0);
