@@ -41,8 +41,9 @@ Key framework capabilities include:
         OBJECT(object2, COORDS(0, 1), {is_main = true;});
     });
     ```
-*   **Expressive UI Components**: Create interactive UI elements with minimal code:
+*   **Expressive UI Components**: Create interactive UI elements with minimal code and flexible customization:
     ```c
+    // Minimal button declaration with automatic positioning
     BUTTONS_HANDLER({
         BUTTONS_GROUP({
             BUTTON(on_start_click);
@@ -50,6 +51,41 @@ Key framework capabilities include:
             BUTTON(on_exit_click);
         });
     });
+    
+    // Advanced button customization with optional parameters
+    BUTTONS_HANDLER({
+        BUTTONS_GROUP({
+            // Configure group layout direction and start position
+            direction = HORIZONTAL;
+            base_coords = COORDS(5, 10);
+        }, {
+            // Basic button with automatic positioning
+            BUTTON(on_start_click);
+            
+            // Customized button with explicit coordinates
+            BUTTON({
+                coords = COORDS(7, 12);  // Override automatic positioning
+                context = some_data;     // Attach custom data to button
+            }, on_settings_click);
+            
+            // Another customized button
+            BUTTON({
+                name = "custom_button";  // Custom name for referencing
+            }, on_exit_click);
+        });
+        
+        // Multiple button groups in one handler
+        BUTTONS_GROUP({
+            direction = VERTICAL;
+            base_coords = COORDS(20, 5);
+        }, {
+            BUTTON(on_help_click);
+            BUTTON(on_about_click);
+        });
+    });
+    
+    // Setting button context by name
+    SET_BUTTON_CONTEXT(game->ui, "custom_button", player_data);
     ```
 *   **Event-Based Communication**: Objects communicate through a signal system using a simple, declarative syntax.
 *   **Advanced Console Screen Management**:  Supports ASCII, Unicode, and **full RGB color rendering**. The framework **automatically detects terminal color capabilities** (Truecolor, 256-color, or basic 16 colors) and **dynamically converts RGB colors to the optimal format** supported by the terminal, and includes **all 140+ standard CSS/X11 color names** (like `COLOR_CHOCOLATE` or `COLOR_SLATE_BLUE`) for easier development.
