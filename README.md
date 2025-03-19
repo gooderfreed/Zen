@@ -91,7 +91,32 @@ Key framework capabilities include:
 *   **Advanced Console Screen Management**:  Supports ASCII, Unicode, and **full RGB color rendering**. The framework **automatically detects terminal color capabilities** (Truecolor, 256-color, or basic 16 colors) and **dynamically converts RGB colors to the optimal format** supported by the terminal, and includes **all 140+ standard CSS/X11 color names** (like `COLOR_CHOCOLATE` or `COLOR_SLATE_BLUE`) for easier development.
 *   **Optional `tput` Support**:  Leverages the `tput` utility (if available) to **query the terminal for advanced capabilities**, ensuring accurate color detection and optimal rendering.  If `tput` is not found, a fallback detection method is used.
 *   **Keyboard Input Management**:  Provides utilities for capturing and processing keyboard input events.
-*   **Memory Efficiency Focus**:  Emphasizes memory control with arena allocation, minimizing dynamic memory allocations by default for predictable performance.
+*   **Flexible Memory Management**: Seamlessly switch between static (zero heap allocations) and dynamic memory models with a single line change, making the framework suitable for everything from embedded systems to complex applications.
+    ```c
+    // Static allocation - perfect for embedded systems or memory-constrained environments
+    size_t buffer[1024*10]; // Static buffer of 40KB
+    Arena *arena = arena_new_static(buffer, sizeof(buffer));
+
+    // OR
+
+    // Dynamic allocation - for applications with varying memory needs
+    Arena *arena = arena_new_dynamic(1024*1024); // Dynamically allocate 1MB
+    ```
+
+## Modular Components
+
+MiniCore is designed as a collection of modular components that can be used independently:
+
+### Standalone Libraries
+
+* **[Arena Allocator](https://github.com/gooderfreed/arena_c)**: A header-only arena memory allocation library extracted from MiniCore. Provides efficient memory management with both static and dynamic allocation options.
+
+* **Screen Renderer** *(coming soon)*: A standalone library for terminal rendering with color support and automatic terminal capability detection.
+
+This modular approach allows you to:
+* Use only the components you need
+* Integrate individual parts into existing projects
+* Benefit from MiniCore's optimized implementations without adopting the entire framework
 
 ## Example Implementations
 
