@@ -1,34 +1,57 @@
 # MiniCore
 
-**Lightweight Modular Framework for Building Console Applications in C**
+**Lightweight Modular Framework for Building Console Applications in C with Declarative DSL**
 
 ## Overview
 
-MiniCore is a streamlined framework written in C, designed to facilitate the development of robust and efficient console-based applications.  It provides a flexible, modular architecture centered around an interface-based component system.  MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
+MiniCore is a streamlined framework written in C, designed to facilitate the development of robust and efficient console-based applications. It provides a flexible, modular architecture centered around an interface-based component system and a **powerful Domain-Specific Language (DSL)** for declarative application configuration. MiniCore aims to offer a solid foundation for projects ranging from simple utilities to complex interactive console applications, including text-based games, now with **enhanced color fidelity across different terminal types.**
 
 Key framework capabilities include:
 
 *   **Modular "Object-Oriented" Architecture**: Encourages code reusability and maintainability through a component-based design.
 *   **Interface-Driven Component System**:  Promotes flexibility and extensibility by defining clear contracts between modules.
+*   **Declarative DSL**: Provides an elegant, React-like syntax for defining interfaces, components, and application structure directly in C.
 *   **Enhanced Console Screen Rendering**:  Offers advanced functionalities for text-based output with color and formatting, including **full RGB color support with automatic conversion for compatibility across various terminals.**
 *   **Keyboard Input Handling**:  Manages user input from the keyboard for interactive applications.
 
 ## Features
 
 *   **Modular Core Design**: Clear separation between the core framework (`core`) and example implementations (`impl`), promoting a clean and organized project structure.
-*   **Comprehensive Interface System**: The framework leverages interfaces to define object capabilities and interactions. Key interfaces include:
-    *   **`CardHandler`**: Defines functionalities for objects that manage and interact with cards (relevant for card games, but can be adapted for other data management).
-    *   **`Drawable`**:  Enables objects to render themselves on the console screen.
-    *   **`CursorInteractable`**:  Provides mechanisms for objects to interact with a cursor, handling movement and actions.
-    *   **`Dynamic`**:  Indicates objects that require dynamic memory management and defines a freeing mechanism.
-    *   **`ButtonHandler`**:  Implements button-like interactions within console applications.
-    *   **`PositionHandler`**:  Manages object positions and state persistence across map movements.
-    *   **`Updateable`**:  Allows objects to perform periodic updates within the application loop.
-    *   **`CoreDependent`**:  Provides access to core engine functionalities for dependent objects.
-    *   **`InputHandler`**:  Enables direct input handling for specific objects.
-    *   **`TickDependent`**:  Allows objects to synchronize actions with the framework's tick-based system.
-    *   **`Emitter`**:  Enables objects to emit signals and notify observers.
-    *   **`Observer`**:  Enables objects to observe signals emitted by other objects.
+*   **Comprehensive Interface System**: The framework leverages interfaces to define object capabilities and interactions, with a **declarative syntax for effortless implementation**:
+    ```c
+    // Declarative interface definition
+    INTERFACES(arena, object, {
+        DRAWABLE(print_function);
+        UPDATEABLE(update_function);
+        EMITTER({
+            NEW_EMITTER("signal_name");
+        });
+        OBSERVER({
+            NEW_OBSERVER("signal_name", callback_function);
+        });
+    });
+    ```
+*   **Declarative Layer Creation**: Easily build application layers with an intuitive DSL:
+    ```c
+    MAP_LAYER(arena, layer, {
+        prepare_screen = prepare_function;
+        loop = loop_function;
+    }, {
+        OBJECT(object1, COORDS(0, 0));
+        OBJECT(object2, COORDS(0, 1), {is_main = true;});
+    });
+    ```
+*   **Expressive UI Components**: Create interactive UI elements with minimal code:
+    ```c
+    BUTTONS_HANDLER({
+        BUTTONS_GROUP({
+            BUTTON(on_start_click);
+            BUTTON(on_settings_click);
+            BUTTON(on_exit_click);
+        });
+    });
+    ```
+*   **Event-Based Communication**: Objects communicate through a signal system using a simple, declarative syntax.
 *   **Advanced Console Screen Management**:  Supports ASCII, Unicode, and **full RGB color rendering**. The framework **automatically detects terminal color capabilities** (Truecolor, 256-color, or basic 16 colors) and **dynamically converts RGB colors to the optimal format** supported by the terminal, and includes **all 140+ standard CSS/X11 color names** (like `COLOR_CHOCOLATE` or `COLOR_SLATE_BLUE`) for easier development.
 *   **Optional `tput` Support**:  Leverages the `tput` utility (if available) to **query the terminal for advanced capabilities**, ensuring accurate color detection and optimal rendering.  If `tput` is not found, a fallback detection method is used.
 *   **Keyboard Input Management**:  Provides utilities for capturing and processing keyboard input events.
