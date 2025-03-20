@@ -317,16 +317,19 @@ Screen *init_screen(Arena *arena, int width, int height, Color background, Color
     Screen *screen = (Screen *)arena_alloc(arena, sizeof(Screen));
     screen->width = width;
     screen->height = height;
-    screen->pixels = (Pixel **)arena_alloc(arena, (size_t)(height) * sizeof(Pixel *));
     screen->mode = get_terminal_mode();
+    
+    void *blob = arena_alloc(arena, (size_t)(width * height) * sizeof(Pixel) + sizeof(Pixel *) * (size_t)(height));
+    screen->pixels = (Pixel **)blob;
 
     Pixel pixel = (Pixel) {background, foreground, symbol, Effect_None};
     for (int i = 0; i < height; i++) {
-        screen->pixels[i] = (Pixel *)arena_alloc(arena, (size_t)(width) * sizeof(Pixel));
-        for (int j = 0; j < screen->width; j++) {
+        screen->pixels[i] = (Pixel *)(void *)((char *)blob + sizeof(Pixel *) * (size_t)(height) + (size_t)(i) * (size_t)(width) * sizeof(Pixel));
+        for (int j = 0; j < width; j++) {
             screen->pixels[i][j] = pixel;
         }
     }
+    
     screen->buffer_size = ((15) * screen->width * screen->height + 8 + screen->height) / 20;
     screen->buffer = (wchar_t *)arena_alloc(arena, sizeof(wchar_t) * (size_t)(screen->buffer_size));
 
@@ -344,6 +347,9 @@ Screen *init_screen(Arena *arena, int width, int height, Color background, Color
  */
 void screen_shutdown(Screen *screen) {
     if (!screen) return; // defensive check
+
+    arena_free_block(screen->buffer);  // free buffer
+    arena_free_block(screen->pixels);  // free pixels
     clear();           // Clear the screen
     show_cursor();     // Show the cursor
     restore_terminal_settings(); // Restore terminal settings

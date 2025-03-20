@@ -182,7 +182,6 @@ static inline SignalListenersList *add_subscription_to_listeners(Arena *arena, S
     SignalListenersList *_listeners = listeners;
 
     while (_listeners) {
-        wprintf(L"Listeners: %p\n", _listeners);
         SignalListeners *listeners_elem = _listeners->listeners;
         if (strcmp(listeners_elem->signal, subscription.signal) == 0) {
             SignalListener *listener = create_signal_listener(arena, object, subscription.callback);

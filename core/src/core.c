@@ -121,7 +121,9 @@ Screen *core_get_screen(Core *core) {
 void core_shutdown(Core *core) {
     screen_shutdown(core->screen);
     core_free(core);
+    
     print_arena(core->arena);
+    print_fancy(core->arena, 102);
     arena_free(core->arena);
 }
 
@@ -392,7 +394,7 @@ bool core_has_input(void) {
  * Allocates and enables FPS tracking for performance monitoring.
  */
 void core_enable_fps_stats(Core *core) {
-    if (core->frame_timer.stats) arena_free_block(core->arena, core->frame_timer.stats);
+    if (core->frame_timer.stats) arena_free_block(core->frame_timer.stats);
     core->frame_timer.stats = create_fps_stats(core->arena);
 }
 
@@ -401,7 +403,7 @@ void core_enable_fps_stats(Core *core) {
  * Frees and disables FPS tracking.
  */
 void core_disable_fps_stats(Core *core) {
-    if (core->frame_timer.stats) arena_free_block(core->arena, core->frame_timer.stats);
+    if (core->frame_timer.stats) arena_free_block(core->frame_timer.stats);
     core->frame_timer.stats = NULL;
 }
 

@@ -121,7 +121,7 @@ static inline void link_observers_to_emitters(Arena *arena, SignalListenersList 
             emitter->signals = emitter->signals->next;
         }
 
-        arena_free_block(arena, emitters);
+        arena_free_block(emitters);
         emitters = next;
     }
 }

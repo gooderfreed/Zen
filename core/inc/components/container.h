@@ -20,7 +20,7 @@ typedef struct Container {
 */
 #ifndef CUSTOM_CONTAINER_IMPL
     Container *container_init(Arena *arena, int length);
-    void container_free(Arena *arena, Container *container);
+    void container_free(Container *container);
     void container_add_element(Container *container, void *element);
     void container_clear_container(Container *container);
     bool container_is_empty(const Container *container);

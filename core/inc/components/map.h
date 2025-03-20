@@ -104,7 +104,7 @@ MapObject map_get_object(Map *map, Coords coords);
         MapLayer *cur_layer = _name;                                                                                         \
         _objects;                                                                                                            \
         if (!objects_list) {                                                                                                 \
-            arena_free_block(cur_arena, _name);                                                                              \
+            arena_free_block(_name);                                                                              \
             _name = NULL;                                                                                                    \
         } else {                                                                                                             \
             _name->width++;                                                                                                  \
@@ -130,7 +130,7 @@ MapObject map_get_object(Map *map, Coords coords);
                     _name->default_layer_coords = cur_object_list->coords;                                                   \
                 }                                                                                                            \
                 objects_list = cur_object_list->next;                                                                        \
-                arena_free_block(cur_arena, cur_object_list);                                                                \
+                arena_free_block(cur_object_list);                                                                \
             }                                                                                                                \
         }                                                                                                                    \
     } while (0)

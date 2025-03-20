@@ -40,7 +40,7 @@ static inline void SET_RESTORE_COORDS(void *object, Coords coords) {
 
 #define POSITION_HANDLER_FULL(arena, object, _save_current_pos, _restore_pos)                                            \
     do {                                                                                                                 \
-        if (!IS_POSITIONABLE(object))                                                                                \
+        if (!IS_POSITIONABLE(object))                                                                                    \
             GET_INTERFACES(object)->capabilities.is_positionable = true;                                                 \
         PositionHandler *position_handler = POSITION_HANDLER(object);                                                    \
         if (position_handler == NULL) {                                                                                  \

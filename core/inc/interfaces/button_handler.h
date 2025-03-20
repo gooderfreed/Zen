@@ -115,7 +115,7 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
     do {                                                                                                         \
         ButtonList *buttons_list = NULL;                                                                         \
         Coords base_coords = COORDS(0, 0);                                                                       \
-        Direction direction = VERTICAL;                                                                        \
+        Direction direction = VERTICAL;                                                                          \
         _config;                                                                                                 \
         Coords start_coords = base_coords;                                                                       \
         int button_count = 0;                                                                                    \
@@ -132,7 +132,7 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
                 ButtonList *button_list_elem = buttons_list;                                                     \
                 new_button_group->buttons[_i] = button_list_elem->button;                                        \
                 buttons_list = button_list_elem->next;                                                           \
-                arena_free_block(arena, button_list_elem);                                                       \
+                arena_free_block(button_list_elem);                                                       \
             }                                                                                                    \
             new_group_list->button_group = new_button_group;                                                     \
             new_group_list->next = button_group_list;                                                            \
@@ -173,7 +173,7 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
                 ButtonGroupList *button_group_list_elem = button_group_list;                                                        \
                 button_handler->button_groups[_i] = button_group_list_elem->button_group;                                           \
                 button_group_list = button_group_list_elem->next;                                                                   \
-                arena_free_block(arena, button_group_list_elem);                                                                    \
+                arena_free_block(button_group_list_elem);                                                                    \
             }                                                                                                                       \
         }                                                                                                                           \
     } while (0)

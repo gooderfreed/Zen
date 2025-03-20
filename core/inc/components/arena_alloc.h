@@ -15,9 +15,11 @@
  */
 struct Block {
     size_t size;          // Size of the data block.
-    void *data;           // Pointer to the start of user data in this block.
+    void  *data;          // Pointer to the start of user data in this block.
     Block *next;          // Pointer to the next block in the global list.
     Block *prev;          // Pointer to the previous block in the global list.
+
+    Arena *arena;         // Pointer to the arena that allocated this block.
 
     bool is_free;         // Flag indicating whether the block is free.
     Block *next_free;     // Pointer to the next free block in the free list.
@@ -50,8 +52,9 @@ Arena *arena_new_dynamic(size_t size);
 Arena *arena_new_static(void *memory, size_t size);
 void arena_reset(Arena *arena);
 void *arena_alloc(Arena *arena, size_t size);
-void arena_free_block(Arena *arena, void *data);
+void arena_free_block(void *data);
 void arena_free(Arena *arena);
 void print_arena(Arena *arena);
+void print_fancy(Arena *arena, size_t bar_size);
 
 #endif

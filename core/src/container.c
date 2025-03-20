@@ -27,8 +27,8 @@ Container *container_init(Arena *arena, int length) {
  * Free container of cards
  * Frees memory allocated for container
  */
-void container_free(Arena *arena, Container *container) {
-    arena_free_block(arena, container);
+void container_free(Container *container) {
+    arena_free_block(container);
 }
 
 /*

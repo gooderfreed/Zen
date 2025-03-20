@@ -191,6 +191,7 @@ static void *alloc_in_tail(Arena *arena, size_t size) {
         arena->free_size_in_tail = 0;
     }
 
+    block->arena = arena;
     // return allocated data pointer
     return block->data;
 }
@@ -219,6 +220,8 @@ static void *alloc_in_free_block(Arena *arena, size_t size) {
         update_max_free_block_on_detach(arena, block->size);
     }
 
+    block->arena = arena;
+
     return block->data;
 }
 
@@ -239,15 +242,11 @@ void *arena_alloc(Arena *arena, size_t size) {
     if (arena->max_free_block_size >= size) {
         return alloc_in_free_block(arena, size);
     }
+
     return NULL;
 }
 
-/*
- * Free a block of memory in the arena
- * Marks the block as free, merges it with adjacent free blocks if possible,
- * and updates the free block list
- */
-void arena_free_block(Arena *arena, void *data) {
+static void arena_free_block_full(Arena *arena, void *data) {
     Block *block = (Block *)((void *)((char *)data - sizeof(Block)));
     block->is_free = true;
 
@@ -280,6 +279,17 @@ void arena_free_block(Arena *arena, void *data) {
             arena->free_blocks = block;
         }
     }
+}
+
+/*
+ * Free a block of memory in the arena
+ * Marks the block as free, merges it with adjacent free blocks if possible,
+ * and updates the free block list
+ */
+void arena_free_block(void *data) {
+    Block *block = (Block *)((void *)((char *)data - sizeof(Block)));
+    Arena *arena = block->arena;
+    arena_free_block_full(arena, data);
 }
 
 /*
@@ -415,3 +425,117 @@ void print_arena(Arena *arena) {
     wprintf(L"Arena occupied full size: %lu\n", occupied_data + occupied_meta);
     wprintf(L"Arena block count: %lu\n", len);
 }
+
+/*
+ * Print a fancy visualization of the arena memory
+ * Displays a bar chart of the arena's memory usage, including free blocks, occupied data, and metadata
+ * Uses ANSI escape codes to colorize the visualization
+ */
+void print_fancy(Arena *arena, size_t bar_size) {
+    if (!arena) return;
+    
+    size_t total_size = arena->capacity;
+
+    wprintf(L"\nArena Memory Visualization [%zu bytes]\n", total_size + sizeof(Arena));
+    wprintf(L"┌");
+    for (int i = 0; i < (int)bar_size; i++) wprintf(L"─");
+    wprintf(L"┐\n│");
+    
+    // Size of one segment of visualization in bytes
+    double segment_size = (double)(total_size / bar_size);
+    
+    // Iterate through each segment of visualization
+    for (int i = 0; i < (int)bar_size; i++) {
+        // Calculate the start and end positions of the segment in memory
+        size_t segment_start = (size_t)(i * segment_size);
+        size_t segment_end = (size_t)((i + 1) * segment_size);
+        
+        // Determine which data type prevails in this segment
+        char segment_type = ' '; // Empty by default
+        size_t max_overlap = 0;
+        
+        // Check arena metadata
+        size_t arena_meta_end = sizeof(Arena);
+        if (segment_start < arena_meta_end) {
+            size_t overlap = segment_start < arena_meta_end ? 
+                (arena_meta_end > segment_end ? segment_end - segment_start : arena_meta_end - segment_start) : 0;
+            if (overlap > max_overlap) {
+                max_overlap = overlap;
+                segment_type = '@'; // Arena metadata
+            }
+        }
+        
+        // Check each block
+        size_t current_pos = 0;
+        Block *current = arena->data;
+        
+        while (current) {
+            // Position of block metadata
+            size_t block_meta_start = current_pos;
+            size_t block_meta_end = block_meta_start + sizeof(Block);
+            
+            // Check intersection with block metadata
+            if (segment_start < block_meta_end && segment_end > block_meta_start) {
+                size_t overlap = (segment_end < block_meta_end ? segment_end : block_meta_end) - 
+                             (segment_start > block_meta_start ? segment_start : block_meta_start);
+                if (overlap > max_overlap) {
+                    max_overlap = overlap;
+                    segment_type = '@'; // Block metadata
+                }
+            }
+            
+            // Position of block data
+            size_t block_data_start = block_meta_end;
+            size_t block_data_end = block_data_start + current->size;
+            
+            // Check intersection with block data
+            if (segment_start < block_data_end && segment_end > block_data_start) {
+                size_t overlap = (segment_end < block_data_end ? segment_end : block_data_end) - 
+                             (segment_start > block_data_start ? segment_start : block_data_start);
+                if (overlap > max_overlap) {
+                    max_overlap = overlap;
+                    segment_type = current->is_free ? ' ' : '#'; // Free or occupied block
+                }
+            }
+            
+            current_pos = block_data_end;
+            current = current->next;
+        }
+
+        // Check tail free memory
+        if (arena->free_size_in_tail > 0) {
+            size_t tail_start = total_size - arena->free_size_in_tail;
+            if (segment_start < total_size && segment_end > tail_start) {
+                size_t overlap = (segment_end < total_size ? segment_end : total_size) - 
+                               (segment_start > tail_start ? segment_start : tail_start);
+                if (overlap > max_overlap) {
+                    max_overlap = overlap;
+                    segment_type = '-'; // Free tail
+                }
+            }
+        }
+        
+        // Display the corresponding symbol with color
+        if (segment_type == '@') {
+            wprintf(L"\033[43m@\033[0m"); // Yellow for metadata
+        } else if (segment_type == '#') {
+            wprintf(L"\033[41m#\033[0m"); // Red for occupied blocks
+        } else if (segment_type == ' ') {
+            wprintf(L"\033[42m \033[0m"); // Green for free blocks
+        } else if (segment_type == '-') {
+            wprintf(L"\033[40m \033[0m"); // Black for empty space
+        }
+        
+    }
+    
+    wprintf(L"│\n└");
+    for (int i = 0; i < (int)bar_size; i++) wprintf(L"─");
+    wprintf(L"┘\n");
+
+    wprintf(L"Legend: ");
+    wprintf(L"\033[43m @ \033[0m - Used Meta blocks, ");
+    wprintf(L"\033[41m # \033[0m - Used Data blocks, ");
+    wprintf(L"\033[42m   \033[0m - Free blocks, ");
+    wprintf(L"\033[40m   \033[0m - Empty space\n\n");
+}
+
