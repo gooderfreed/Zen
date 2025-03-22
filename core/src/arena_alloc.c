@@ -46,12 +46,11 @@ static inline void update_max_free_block_on_free(Arena *arena, size_t block_size
 static inline Block *create_empty_block(Block *prev_block) {
     // prep data for new block
     Block *prev_tail = prev_block;
-    void *new_chunk = (char *)prev_tail->data + prev_tail->size;
+    void *new_chunk = (char *)block_data(prev_tail) + prev_tail->size;
 
     // create new block
     Block *block = (Block *)new_chunk;
     block->size = 0;
-    block->data = (char *)new_chunk + sizeof(Block);
     block->is_free = true;
     block->next = NULL;
     block->prev = NULL;
@@ -193,7 +192,7 @@ static void *alloc_in_tail(Arena *arena, size_t size) {
 
     block->arena = arena;
     // return allocated data pointer
-    return block->data;
+    return block_data(block);
 }
 
 /*
@@ -221,8 +220,8 @@ static void *alloc_in_free_block(Arena *arena, size_t size) {
     }
 
     block->arena = arena;
-
-    return block->data;
+    // return allocated data pointer
+    return block_data(block);
 }
 
 /*
@@ -308,7 +307,6 @@ Arena *arena_new_static(void *memory, size_t size) {
     
     Block *block = (Block *)arena->data;
     block->size = 0;
-    block->data = (char *)arena->data + sizeof(Block);
     block->is_free = true;
     block->next = NULL;
     block->prev = NULL;
@@ -394,7 +392,7 @@ void print_arena(Arena *arena) {
         wprintf(L"  Block Full Size: %lu\n", block->size + sizeof(Block));
         wprintf(L"  Block Data Size: %lu\n", block->size);
         wprintf(L"  Is Free: %d\n", block->is_free);
-        wprintf(L"  Data Pointer: %p\n", block->data);
+        wprintf(L"  Data Pointer: %p\n", block_data(block));
         wprintf(L"  Next: %p\n", block->next);
         wprintf(L"  Prev: %p\n", block->prev);
         wprintf(L"\n");
@@ -410,7 +408,7 @@ void print_arena(Arena *arena) {
         wprintf(L"  Block Full Size: %lu\n", free_block->size + sizeof(Block));
         wprintf(L"  Block Data Size: %lu\n", free_block->size);
         wprintf(L"  Is Free: %d\n", free_block->is_free);
-        wprintf(L"  Data Pointer: %p\n", free_block->data);
+        wprintf(L"  Data Pointer: %p\n", block_data(free_block));
         wprintf(L"  Next: %p\n", free_block->next);
         wprintf(L"  Prev: %p\n", free_block->prev);
         wprintf(L"  Next Free: %p\n", free_block->next_free);
