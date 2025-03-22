@@ -5,6 +5,35 @@
 #include "../inc/core.h"
 
 /*
+ * Safe next block pointer
+ * Checks if the next block exists and is not in the tail free space
+ */
+static inline bool has_next_block(Arena *arena, Block *block) {
+    // Calculate the offset of the next block (as a number, not a pointer)
+    size_t next_offset = (size_t)((char *)block - (char *)arena->data) + 
+                         sizeof(Block) + block->size;
+    
+    // Verify that the next block offset is within valid limits
+    // And not in the tail free space
+    return (next_offset < arena->capacity) && 
+           ((block != arena->tail) || (arena->free_size_in_tail == 0));
+}
+
+/*
+ * Safe next block pointer
+ * Checks if the next block exists and is not in the tail free space
+ */
+static inline Block *next_block(Arena *arena, Block *block) {
+    if (!has_next_block(arena, block)) {
+        return NULL;
+    }
+    
+    // Only if the check passed, calculate the pointer
+    return (Block *)(void *)((char *)block + sizeof(Block) + block->size);
+}
+
+
+/*
  * Update the next_free pointer of the previous free block
  * Sets the next_free pointer to new_val or updates the arena's free_blocks if no previous free block exists
  */
@@ -52,7 +81,6 @@ static inline Block *create_empty_block(Block *prev_block) {
     Block *block = (Block *)new_chunk;
     block->size = 0;
     block->is_free = true;
-    block->next = NULL;
     block->prev = NULL;
 
     return block;
@@ -95,8 +123,7 @@ static inline void update_max_free_block_on_detach(Arena *arena, size_t block_si
  * Handles tail adjustments, updates max free block size, and cleans up the free block
  */
 static void wipe_free_block(Arena *arena, Block *free_block, Block *tail) {
-    if (tail->next == NULL && tail->size == 0) {
-        free_block->next = NULL;
+    if (next_block(arena, tail) == NULL && tail->size == 0) {
 
         arena->free_size_in_tail += free_block->size + sizeof(Block);
         arena->tail = free_block;
@@ -116,16 +143,15 @@ static void wipe_free_block(Arena *arena, Block *free_block, Block *tail) {
  */
 static void merge_blocks(Arena *arena, Block *block1, Block *block2) {
     // wipe free block if it's the last block
-    if (block2->next == NULL && block2->size == 0) {
+    if (next_block(arena, block2) == NULL && block2->size == 0) {
         wipe_free_block(arena, block1, block2);
         return;
     }
 
     // merge blocks
     block1->size += block2->size + sizeof(Block);
-    Block *block_after = block2->next;
+    Block *block_after = next_block(arena, block2);
     block_after->prev = block1;
-    block1->next = block_after;
 
     update_next_of_prev_block(arena, block2, block2->next_free);
     update_max_free_block_on_free(arena, block1->size);
@@ -145,14 +171,9 @@ static void split_block(Arena *arena, Block *block, size_t size) {
     new_block->size = new_block_size;
     new_block->is_free = true;
 
-    if (block->next) {
-        new_block->next = block->next;
-        block->next->prev = new_block;
+    if (next_block(arena, block)) {
+        next_block(arena, block)->prev = new_block;
     }
-    else {
-        new_block->next = NULL;
-    }
-    block->next = new_block;
     new_block->prev = block;
 
     update_next_of_prev_block(arena, block, new_block);
@@ -179,7 +200,6 @@ static void *alloc_in_tail(Arena *arena, size_t size) {
     // create new block
     if (arena->free_size_in_tail >= sizeof(Block)) {
         Block *new_block = create_empty_block(arena->tail);
-        block->next = new_block;
         new_block->prev = block;
         // update arena
         arena->tail = new_block;
@@ -250,7 +270,7 @@ static void arena_free_block_full(Arena *arena, void *data) {
     block->is_free = true;
 
     Block *prev = block->prev;
-    Block *next = block->next;
+    Block *next = next_block(arena, block);
 
     update_max_free_block_on_free(arena, block->size);
 
@@ -308,7 +328,6 @@ Arena *arena_new_static(void *memory, size_t size) {
     Block *block = (Block *)arena->data;
     block->size = 0;
     block->is_free = true;
-    block->next = NULL;
     block->prev = NULL;
 
     arena->tail = block;
@@ -342,7 +361,6 @@ void arena_reset(Arena *arena) {
     Block *block = (Block *)arena->data;
     block->size = 0;
     block->is_free = true;
-    block->next = NULL;
     block->prev = NULL;
     block->next_free = NULL;
     block->prev_free = NULL;
@@ -382,6 +400,7 @@ void print_arena(Arena *arena) {
     size_t occupied_meta = 0;
     size_t len = 0;
 
+    occupied_meta = sizeof(Arena);
 
     Block *block = (Block *)arena->data;
     while (block != NULL) {
@@ -393,10 +412,10 @@ void print_arena(Arena *arena) {
         wprintf(L"  Block Data Size: %lu\n", block->size);
         wprintf(L"  Is Free: %d\n", block->is_free);
         wprintf(L"  Data Pointer: %p\n", block_data(block));
-        wprintf(L"  Next: %p\n", block->next);
+        wprintf(L"  Next: %p\n", next_block(arena, block));
         wprintf(L"  Prev: %p\n", block->prev);
         wprintf(L"\n");
-        block = block->next;
+        block = next_block(arena, block);
     }
 
     wprintf(L"Arena Free Blocks\n");
@@ -409,12 +428,12 @@ void print_arena(Arena *arena) {
         wprintf(L"  Block Data Size: %lu\n", free_block->size);
         wprintf(L"  Is Free: %d\n", free_block->is_free);
         wprintf(L"  Data Pointer: %p\n", block_data(free_block));
-        wprintf(L"  Next: %p\n", free_block->next);
+        wprintf(L"  Next: %p\n", next_block(arena, free_block));
         wprintf(L"  Prev: %p\n", free_block->prev);
         wprintf(L"  Next Free: %p\n", free_block->next_free);
         wprintf(L"  Prev Free: %p\n", free_block->prev_free);
         wprintf(L"\n");
-        free_block = free_block->next_free;
+        free_block = next_block(arena, free_block);
     }
     wprintf(L"\n");
 
@@ -497,7 +516,7 @@ void print_fancy(Arena *arena, size_t bar_size) {
             }
             
             current_pos = block_data_end;
-            current = current->next;
+            current = next_block(arena, current);
         }
 
         // Check tail free memory

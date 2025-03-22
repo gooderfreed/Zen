@@ -10,7 +10,6 @@
 #endif
 
 #define block_data(block) ((void *)((char *)(block) + sizeof(Block)))
-#define next_block(block) ((Block *)(void *)((char *)(block) + sizeof(Block) + (block)->size))
 
 /*
  * Memory block structure.
@@ -18,8 +17,6 @@
  */
 struct Block {
     size_t size;          // Size of the data block.
-    // void  *data;          // Pointer to the start of user data in this block.
-    Block *next;          // Pointer to the next block in the global list.
     Block *prev;          // Pointer to the previous block in the global list.
 
     Arena *arena;         // Pointer to the arena that allocated this block.
