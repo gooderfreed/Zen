@@ -26,8 +26,6 @@ typedef struct Cursor Cursor;
 
 typedef struct Coords Coords;
 
-typedef struct Card Card;
-
 typedef struct Container Container;
 
 typedef struct TimeManager TimeManager;

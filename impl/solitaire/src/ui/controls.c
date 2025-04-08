@@ -42,11 +42,13 @@ static void print_controls(const void *controls_pointer, Screen *screen, const C
  * Place cursor in controls
  * Places the cursor in the controls
  */
-static void place_cursor_in_controls(const void *controls_pointer, const Coords cursor_coords, Coords *target_coords) {
+static Coords place_cursor_in_controls(const void *controls_pointer, const Coords cursor_coords) {
     (void)controls_pointer;
     (void)cursor_coords;
-    target_coords->y = 29;
-    target_coords->x = SCREEN_WIDTH/2 - 6 + 1;
+    return (Coords) {
+        .y = 29,
+        .x = SCREEN_WIDTH/2 - 6 + 1
+    };
 }
 
 /*

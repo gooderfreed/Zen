@@ -93,27 +93,29 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
 }
 
 
-#define BUTTON_FULL(arena, buttons_list, _params, _on_click)                                     \
-    do {                                                                                         \
-        ButtonList *new_button_list = (ButtonList *)arena_alloc(arena, sizeof(ButtonList));      \
-        Button *new_button = (Button *)arena_alloc(arena, sizeof(Button));                       \
-        new_button->on_click = _on_click;                                                        \
-        new_button->name = #_on_click;                                                           \
-        Coords coords = AUTO();                                                                  \
-        void *context = NULL;                                                                    \
-        _params;                                                                                 \
-        if (coords.z < 0) {                                                                      \
-            if (direction == HORIZONTAL) coords.x = base_coords.x++;                             \
-            else coords.y = base_coords.y++;                                                     \
-        } else {                                                                                 \
-            base_coords = coords;                                                                \
-        }                                                                                        \
-        new_button->coords = coords;                                                             \
-        new_button->context = context;                                                           \
-        new_button_list->button = new_button;                                                    \
-        new_button_list->next = buttons_list;                                                    \
-        buttons_list = new_button_list;                                                          \
-        button_count++;                                                                          \
+#define BUTTON_FULL(arena, buttons_list, _params, _on_click)                                                          \
+    do {                                                                                                              \
+        ButtonList *new_button_list = (ButtonList *)arena_alloc(arena, sizeof(ButtonList));                           \
+        Button *new_button = (Button *)arena_alloc(arena, sizeof(Button));                                            \
+        new_button->on_click = _on_click;                                                                             \
+        if (!_on_click)                                                                                               \
+            wprintf(L"Error in '%s': Button is missing 'on_click' function\n", GET_INTERFACES(cur_object)->name);     \
+        new_button->name = #_on_click;                                                                                \
+        Coords coords = AUTO();                                                                                       \
+        void *context = NULL;                                                                                         \
+        _params;                                                                                                      \
+        if (coords.z < 0) {                                                                                           \
+            if (direction == HORIZONTAL) coords.x = base_coords.x++;                                                  \
+            else coords.y = base_coords.y++;                                                                          \
+        } else {                                                                                                      \
+            base_coords = coords;                                                                                     \
+        }                                                                                                             \
+        new_button->coords = coords;                                                                                  \
+        new_button->context = context;                                                                                \
+        new_button_list->button = new_button;                                                                         \
+        new_button_list->next = buttons_list;                                                                         \
+        buttons_list = new_button_list;                                                                               \
+        button_count++;                                                                                               \
     } while (0)
 
 #define BUTTON_1(_on_click) \
@@ -128,34 +130,36 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
 
 
 
-#define BUTTONS_GROUP_FULL(arena, button_group_list, _config, _buttons)                                          \
-    do {                                                                                                         \
-        ButtonList *buttons_list = NULL;                                                                         \
-        Coords base_coords = COORDS(0, 0);                                                                       \
-        Direction direction = VERTICAL;                                                                          \
-        _config;                                                                                                 \
-        Coords start_coords = base_coords;                                                                       \
-        int button_count = 0;                                                                                    \
-        _buttons;                                                                                                \
-        if (button_count > 0) {                                                                                  \
-            ButtonGroupList *new_group_list = (ButtonGroupList *)arena_alloc(arena, sizeof(ButtonGroupList));    \
-            ButtonGroup *new_button_group = (ButtonGroup *)arena_alloc(arena, sizeof(ButtonGroup));              \
-            new_button_group->start_coords = start_coords;                                                       \
-            new_button_group->direction = direction;                                                             \
-            new_button_group->length = button_count;                                                             \
-            Button **buttons = (Button **)arena_alloc(arena, sizeof(Button *) * (size_t)button_count);           \
-            new_button_group->buttons = buttons;                                                                 \
-            for (int _i = button_count - 1; _i >= 0; _i--) {                                                     \
-                ButtonList *button_list_elem = buttons_list;                                                     \
-                new_button_group->buttons[_i] = button_list_elem->button;                                        \
-                buttons_list = button_list_elem->next;                                                           \
-                arena_free_block(button_list_elem);                                                              \
-            }                                                                                                    \
-            new_group_list->button_group = new_button_group;                                                     \
-            new_group_list->next = button_group_list;                                                            \
-            button_group_list = new_group_list;                                                                  \
-            button_group_count++;                                                                                \
-        }                                                                                                        \
+#define BUTTONS_GROUP_FULL(arena, button_group_list, _config, _buttons)                                                              \
+    do {                                                                                                                             \
+        ButtonList *buttons_list = NULL;                                                                                             \
+        Coords base_coords = COORDS(0, 0);                                                                                           \
+        Direction direction = VERTICAL;                                                                                              \
+        _config;                                                                                                                     \
+        Coords start_coords = base_coords;                                                                                           \
+        int button_count = 0;                                                                                                        \
+        _buttons;                                                                                                                    \
+        if (button_count == 0)                                                                                                       \
+            wprintf(L"Error in '%s': ButtonGroup is declared but no buttons are provided\n", GET_INTERFACES(cur_object)->name);      \
+        if (button_count > 0) {                                                                                                      \
+            ButtonGroupList *new_group_list = (ButtonGroupList *)arena_alloc(arena, sizeof(ButtonGroupList));                        \
+            ButtonGroup *new_button_group = (ButtonGroup *)arena_alloc(arena, sizeof(ButtonGroup));                                  \
+            new_button_group->start_coords = start_coords;                                                                           \
+            new_button_group->direction = direction;                                                                                 \
+            new_button_group->length = button_count;                                                                                 \
+            Button **buttons = (Button **)arena_alloc(arena, sizeof(Button *) * (size_t)button_count);                               \
+            new_button_group->buttons = buttons;                                                                                     \
+            for (int _i = button_count - 1; _i >= 0; _i--) {                                                                         \
+                ButtonList *button_list_elem = buttons_list;                                                                         \
+                new_button_group->buttons[_i] = button_list_elem->button;                                                            \
+                buttons_list = button_list_elem->next;                                                                               \
+                arena_free_block(button_list_elem);                                                                                  \
+            }                                                                                                                        \
+            new_group_list->button_group = new_button_group;                                                                         \
+            new_group_list->next = button_group_list;                                                                                \
+            button_group_list = new_group_list;                                                                                      \
+            button_group_count++;                                                                                                    \
+        }                                                                                                                            \
     } while (0)
 
 #define BUTTONS_GROUP_1(_buttons) \
@@ -170,29 +174,31 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
 
 
 
-#define BUTTONS_HANDLER_FULL(arena, object, groups)                                                                                 \
-    do {                                                                                                                            \
-        ButtonGroupList *button_group_list = NULL;                                                                                  \
-        int button_group_count = 0;                                                                                                 \
-        groups;                                                                                                                     \
-        if (button_group_count > 0) {                                                                                               \
-            if (!IS_BUTTON_HANDLER(object))                                                                                         \
-                GET_INTERFACES(object)->capabilities.have_buttons = true;                                                           \
-            ButtonHandler *button_handler = GET_BUTTON_HANDLER(object);                                                             \
-            if (button_handler == NULL) {                                                                                           \
-                GET_INTERFACES(object)->button_handler = (ButtonHandler *)arena_alloc(arena, sizeof(ButtonHandler));                \
-                button_handler = GET_BUTTON_HANDLER(object);                                                                        \
-            }                                                                                                                       \
-            button_handler->button_groups_count = button_group_count;                                                               \
-            ButtonGroup **button_groups = (ButtonGroup **)arena_alloc(arena, sizeof(ButtonGroup *) * (size_t)button_group_count);   \
-            button_handler->button_groups = button_groups;                                                                          \
-            for (int _i = button_group_count - 1; _i >= 0; _i--) {                                                                  \
-                ButtonGroupList *button_group_list_elem = button_group_list;                                                        \
-                button_handler->button_groups[_i] = button_group_list_elem->button_group;                                           \
-                button_group_list = button_group_list_elem->next;                                                                   \
-                arena_free_block(button_group_list_elem);                                                                           \
-            }                                                                                                                       \
-        }                                                                                                                           \
+#define BUTTONS_HANDLER_FULL(arena, object, groups)                                                                                        \
+    do {                                                                                                                                   \
+        ButtonGroupList *button_group_list = NULL;                                                                                         \
+        int button_group_count = 0;                                                                                                        \
+        groups;                                                                                                                            \
+        if (button_group_count == 0)                                                                                                       \
+            wprintf(L"Error in '%s': ButtonHandler interface is declared but no buttons are provided\n", GET_INTERFACES(object)->name);    \
+        if (button_group_count > 0) {                                                                                                      \
+            if (!IS_BUTTON_HANDLER(object))                                                                                                \
+                GET_INTERFACES(object)->capabilities.have_buttons = true;                                                                  \
+            ButtonHandler *button_handler = GET_BUTTON_HANDLER(object);                                                                    \
+            if (button_handler == NULL) {                                                                                                  \
+                GET_INTERFACES(object)->button_handler = (ButtonHandler *)arena_alloc(arena, sizeof(ButtonHandler));                       \
+                button_handler = GET_BUTTON_HANDLER(object);                                                                               \
+            }                                                                                                                              \
+            button_handler->button_groups_count = button_group_count;                                                                      \
+            ButtonGroup **button_groups = (ButtonGroup **)arena_alloc(arena, sizeof(ButtonGroup *) * (size_t)button_group_count);          \
+            button_handler->button_groups = button_groups;                                                                                 \
+            for (int _i = button_group_count - 1; _i >= 0; _i--) {                                                                         \
+                ButtonGroupList *button_group_list_elem = button_group_list;                                                               \
+                button_handler->button_groups[_i] = button_group_list_elem->button_group;                                                  \
+                button_group_list = button_group_list_elem->next;                                                                          \
+                arena_free_block(button_group_list_elem);                                                                                  \
+            }                                                                                                                              \
+        }                                                                                                                                  \
     } while (0)
 
 #define BUTTONS_HANDLER(groups) \

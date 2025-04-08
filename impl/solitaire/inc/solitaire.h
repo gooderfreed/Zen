@@ -14,7 +14,7 @@
  * Extends core engine with specific card game logic
  */
 
-
+typedef struct Card Card;
 
 
 /*
@@ -67,14 +67,14 @@ typedef enum {
  * Extended Card structure
  * Adds suit and numeral to base Card
  */
-typedef struct Card {
+struct Card {
     Coords coords;      // Card position on screen
     Numeral numeral;    // Card value (Ace through King)
     Suit suit;          // Card suit (Spades, Hearts, etc)
     Objects object;     // Owner object type
     bool selected : 1;  // Selection state
     bool hidden   : 1;  // Hidden state
-} Card;
+};
 
 extern const wchar_t fat_border[8];
 extern const wchar_t slim_border[8];

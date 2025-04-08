@@ -136,11 +136,12 @@ static void print_stock(const void *stock_pointer, Screen *screen, const Cursor 
  * Position cursor relative to stock piles
  * Places cursor at bottom of selected foundation pile
  */
-static void place_cursor_in_stock(const void *stock_pointer, const Coords cursor_coords, Coords *target_coords) {
+static Coords place_cursor_in_stock(const void *stock_pointer, const Coords cursor_coords) {
     (void)stock_pointer;
-    
-    target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
-    target_coords->x = STOCK_CURSOR_BASE_X + CARD_WIDTH * cursor_coords.x;
+    return (Coords) {
+        .y = BORDER_OFFSET_Y + CARD_HEIGHT,
+        .x = STOCK_CURSOR_BASE_X + CARD_WIDTH * cursor_coords.x
+    };
 }
 
 /*

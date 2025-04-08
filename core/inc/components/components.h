@@ -19,7 +19,6 @@
 #include "screen.h"
 #include "cursor.h"
 #include "map.h"
-#include "card.h"
 #include "time_manager.h"
 #include "fps_stats.h"
 #include "tick_counter.h"

@@ -45,24 +45,18 @@ void cursor_set_coords(Cursor *cursor, Coords coords) {
 void print_cursor(Cursor *cursor, Screen *screen) {
     // If subject is interactable, let it place the cursor
     if (cursor && IS_CURSOR_INTERACTABLE(cursor->subject)) {
-        // Get base coordinates for cursor
-        Coords base_coords = {
-            .x = cursor->coords.x * CARD_WIDTH + (CARD_WIDTH / 2), 
-            .y = CARD_HEIGHT
-        };
-
-        PLACE_CURSOR(cursor->subject, cursor->coords, &base_coords);
+        Coords spot = PLACE_CURSOR(cursor->subject, cursor->coords);
 
         CursorConfig config = GET_CURSOR_CONFIG(cursor->subject, cursor->coords);
 
         // If subject has custom cursor, let it draw it
         if (config.type == CURSOR_CUSTOM) {
-            CUSTOM_DRAW(cursor->subject, cursor, screen, base_coords);
+            CUSTOM_DRAW(cursor->subject, cursor, screen, spot);
             return;
         }
 
         // Otherwise, draw default cursor
-        screen_draw_cursor(screen, base_coords, config);
+        screen_draw_cursor(screen, spot, config);
     }
     
 }

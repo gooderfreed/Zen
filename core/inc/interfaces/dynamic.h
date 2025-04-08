@@ -24,16 +24,18 @@ static inline void FREE(void *object) {
     DYNAMIC_HANDLER(object)->free(object);
 }
 
-#define DYNAMIC_FULL(arena, object, _free)                                                      \
-    do {                                                                                        \
-        if (!IS_DYNAMIC(object))                                                                \
-            GET_INTERFACES(object)->capabilities.is_dynamic = true;                             \
-        Dynamic *dynamic = DYNAMIC_HANDLER(object);                                             \
-        if (dynamic == NULL) {                                                                  \
-            GET_INTERFACES(object)->dynamic = (Dynamic *)arena_alloc(arena, sizeof(Dynamic));   \
-            dynamic = DYNAMIC_HANDLER(object);                                                  \
-        }                                                                                       \
-        dynamic->free = _free;                                                                  \
+#define DYNAMIC_FULL(arena, object, _free)                                                                                \
+    do {                                                                                                                  \
+        if (!IS_DYNAMIC(object))                                                                                          \
+            GET_INTERFACES(object)->capabilities.is_dynamic = true;                                                       \
+        Dynamic *dynamic = DYNAMIC_HANDLER(object);                                                                       \
+        if (dynamic == NULL) {                                                                                            \
+            GET_INTERFACES(object)->dynamic = (Dynamic *)arena_alloc(arena, sizeof(Dynamic));                             \
+            dynamic = DYNAMIC_HANDLER(object);                                                                            \
+        }                                                                                                                 \
+        dynamic->free = _free;                                                                                            \
+        if (!_free)                                                                                                       \
+            wprintf(L"Error in '%s': Dynamic interface is missing 'free' function\n", GET_INTERFACES(object)->name);      \
     } while (0)
 
 #define DYNAMIC(_free) \

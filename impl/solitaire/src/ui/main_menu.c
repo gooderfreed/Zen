@@ -45,10 +45,12 @@ static void print_menu(const void *menu_pointer, Screen *screen, const Cursor *c
  * Place cursor in menu
  * Places the cursor in the menu
  */
-static void place_cursor_in_menu(const void *menu_pointer, const Coords cursor_coords, Coords *target_coords) {
+static Coords place_cursor_in_menu(const void *menu_pointer, const Coords cursor_coords) {
     (void)menu_pointer;
-    target_coords->y = 25 + cursor_coords.y;
-    target_coords->x = SCREEN_WIDTH/2 - 6;
+    return (Coords) {
+        .y = 25 + cursor_coords.y,
+        .x = SCREEN_WIDTH/2 - 6
+    };
 }
 
 /*

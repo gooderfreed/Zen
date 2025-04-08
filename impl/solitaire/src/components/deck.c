@@ -121,11 +121,12 @@ static void move_in_deck(const void *deck_pointer, Coords *coords, const Coords 
  * Position cursor relative to deck elements
  * Places cursor at bottom of deck or current card
  */
-static void place_cursor_in_deck(const void *deck_pointer, const Coords cursor_coords, Coords *target_coords) {
+static Coords place_cursor_in_deck(const void *deck_pointer, const Coords cursor_coords) {
     (void)deck_pointer;
-    
-    target_coords->y = BORDER_OFFSET_Y + CARD_HEIGHT;
-    target_coords->x = (short)(cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1);
+    return (Coords) {
+        .y = BORDER_OFFSET_Y + CARD_HEIGHT,
+        .x = (short)(cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2) + BORDER_OFFSET_X - 1)
+    };
 }
 
 /*
@@ -195,10 +196,10 @@ static void get_card_in_deck(void *deck_pointer, const Container *container) {
  * Check if cursor is on the same card in deck
  * Compares cursor position to deck pointer
  */
-static bool is_same_card_in_deck(const void *deck_pointer, const Coords cursor_coords, const Card *card) {
+static bool is_same_card_in_deck(const void *deck_pointer, const Coords cursor_coords, const void *card) {
     (void)cursor_coords;
     const Deck *deck = (const Deck *)deck_pointer;
-    return deck->pointer == card;
+    return deck->pointer == (Card *)card;
 }
 
 

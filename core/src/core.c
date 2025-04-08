@@ -83,7 +83,6 @@ void core_set_map(Core *core, Map *map) {
 
     }
 
-    core_validate_interfaces(core);
     MapLayer *layer = map_get_current_layer(core->map);
     if (layer->prepare_screen) {
         layer->prepare_screen(core->screen);
@@ -163,7 +162,7 @@ void core_action(Core *core) {
 
     // Handle card operations
     if (cursor->cards->size != 0) {
-        Card *first_card = cursor->cards->container[0];
+        void *first_card = cursor->cards->container[0];
 
         // Toggle card selection if clicking on the same card
         if (cursor->subject == cursor->cards->source &&
@@ -270,28 +269,6 @@ void core_update(Core *core) {
 
             if (IS_UPDATEABLE(object.object)) {
                 UPDATE(object.object);
-            }
-        }
-    }
-}
-
-/*
- * Validate interfaces of all objects on map
- * Ensures all objects have correctly implemented required interfaces
- * Exits program if validation fails
- */
-void core_validate_interfaces(Core *core) {
-    for (int z = 0; z < core->map->layers_count; z++) {
-        MapLayer *layer = map_get_layer(core->map, z);
-        for (int y = 0; y < layer->height; y++) {
-            for (int x = 0; x < layer->width; x++) {
-                MapObject object = map_get_object(core->map, (Coords){.x = (short)x, .y = (short)y, .z = (short)z});
-                if (!object.object) continue;
-                
-                const ObjectInterfaces *interfaces = (const ObjectInterfaces*)object.object;
-                if (!validate_object_interfaces(interfaces)) {
-                    exit(1);
-                }
             }
         }
     }

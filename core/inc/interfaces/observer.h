@@ -107,17 +107,19 @@ static inline bool IS_OBSERVER(const void *object) {
     } while (0)
 
 
-#define OBSERVER_FULL(arena, object, observers)                                                    \
-    do {                                                                                           \
-        if (!IS_OBSERVER(object))                                                                  \
-            GET_INTERFACES(object)->capabilities.is_observer = true;                               \
-        Observer *observer = OBSERVER_HANDLER(object);                                             \
-        if (observer == NULL) {                                                                    \
-            GET_INTERFACES(object)->observer = (Observer *)arena_alloc(arena, sizeof(Observer));   \
-            observer = OBSERVER_HANDLER(object);                                                   \
-            observer->observer = object;                                                           \
-        }                                                                                          \
-        observers;                                                                                 \
+#define OBSERVER_FULL(arena, object, observers)                                                                                           \
+    do {                                                                                                                                  \
+        if (!IS_OBSERVER(object))                                                                                                         \
+            GET_INTERFACES(object)->capabilities.is_observer = true;                                                                      \
+        Observer *observer = OBSERVER_HANDLER(object);                                                                                    \
+        if (observer == NULL) {                                                                                                           \
+            GET_INTERFACES(object)->observer = (Observer *)arena_alloc(arena, sizeof(Observer));                                          \
+            observer = OBSERVER_HANDLER(object);                                                                                          \
+            observer->observer = object;                                                                                                  \
+        }                                                                                                                                 \
+        observers;                                                                                                                        \
+        if (!observer->subscriptions)                                                                                                     \
+            wprintf(L"Error in '%s': Observer declaration is missing while observer interface is used\n", GET_INTERFACES(object)->name);  \
     } while (0)
 
 #define OBSERVER(observers) \

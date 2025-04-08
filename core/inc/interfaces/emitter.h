@@ -77,16 +77,18 @@ static inline bool IS_EMITTER(const void *object) {
     } while (0)
 
 
-#define EMITTER_FULL(arena, object, emitters)                                                 \
-    do {                                                                                      \
-        if (!IS_EMITTER(object))                                                              \
-            GET_INTERFACES(object)->capabilities.is_emitter = true;                           \
-        Emitter *emitter = EMITTER_HANDLER(object);                                           \
-        if (emitter == NULL) {                                                                \
-            GET_INTERFACES(object)->emitter = (Emitter *)arena_alloc(arena, sizeof(Emitter)); \
-            emitter = EMITTER_HANDLER(object);                                                \
-        }                                                                                     \
-        emitters;                                                                             \
+#define EMITTER_FULL(arena, object, emitters)                                                                                                \
+    do {                                                                                                                                     \
+        if (!IS_EMITTER(object))                                                                                                             \
+            GET_INTERFACES(object)->capabilities.is_emitter = true;                                                                          \
+        Emitter *emitter = EMITTER_HANDLER(object);                                                                                          \
+        if (emitter == NULL) {                                                                                                               \
+            GET_INTERFACES(object)->emitter = (Emitter *)arena_alloc(arena, sizeof(Emitter));                                                \
+            emitter = EMITTER_HANDLER(object);                                                                                               \
+        }                                                                                                                                    \
+        emitters;                                                                                                                            \
+        if (!emitter->signals)                                                                                                               \
+            wprintf(L"Error in '%s': Emitter declaration is missing while emitter interface is used\n", GET_INTERFACES(object)->name);       \
     } while (0)
 
 #define EMITTER(emitters) \

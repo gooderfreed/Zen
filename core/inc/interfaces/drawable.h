@@ -37,17 +37,19 @@ static inline void SET_DRAWABLE_INACTIVE(void *object) {
     DRAW_HANDLER(object)->is_active = false;
 }
 
-#define DRAWABLE_FULL(arena, object, active, _print)                                                       \
-    do {                                                                                           \
-        if (!IS_DRAWABLE(object))                                                                  \
-            GET_INTERFACES(object)->capabilities.is_drawable = true;                               \
-        Drawable *drawable = DRAW_HANDLER(object);                                                 \
-        if (drawable == NULL) {                                                                    \
-            GET_INTERFACES(object)->drawable = (Drawable *)arena_alloc(arena, sizeof(Drawable));   \
-            drawable = DRAW_HANDLER(object);                                                       \
-            drawable->is_active = active;                                                          \
-        }                                                                                          \
-        drawable->print = _print;                                                                  \
+#define DRAWABLE_FULL(arena, object, active, _print)                                                                        \
+    do {                                                                                                                    \
+        if (!IS_DRAWABLE(object))                                                                                           \
+            GET_INTERFACES(object)->capabilities.is_drawable = true;                                                        \
+        Drawable *drawable = DRAW_HANDLER(object);                                                                          \
+        if (drawable == NULL) {                                                                                             \
+            GET_INTERFACES(object)->drawable = (Drawable *)arena_alloc(arena, sizeof(Drawable));                            \
+            drawable = DRAW_HANDLER(object);                                                                                \
+            drawable->is_active = active;                                                                                   \
+        }                                                                                                                   \
+        drawable->print = _print;                                                                                           \
+        if (!_print)                                                                                                        \
+            wprintf(L"Error in '%s': Drawable interface is missing 'print' function\n", GET_INTERFACES(object)->name);      \
     } while (0)
 
 #define DRAWABLE(_print)                              \

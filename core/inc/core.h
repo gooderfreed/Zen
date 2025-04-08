@@ -23,7 +23,6 @@
 
 #include "interfaces/interfaces.h"
 #include "components/components.h"
-#include "validator.h"
 
 /*
  * Key definitions
@@ -72,7 +71,6 @@ void core_action(Core *core);
 void core_update(Core *core);
 void core_update_screen(Core *core);
 void core_global_move(Core *core, Coords move);
-void core_validate_interfaces(Core *core);
 void core_free(Core *core);
 void core_change_layer(Core *core, int layer);
 void core_set_target_fps(Core *core, int fps);

@@ -44,10 +44,12 @@ static void print_win_screen(const void *win_screen_pointer, Screen *screen, con
  * Place cursor in win screen
  * Places the cursor in the win screen
  */
-static void place_cursor_in_menu(const void *win_screen_pointer, const Coords cursor_coords, Coords *target_coords) {
+static Coords place_cursor_in_menu(const void *win_screen_pointer, const Coords cursor_coords) {
     (void)win_screen_pointer;
-    target_coords->y = (SCREEN_HEIGHT - WIN_SCREEN_HEIGHT) / 2 + 15 + cursor_coords.y;
-    target_coords->x = (SCREEN_WIDTH  - WIN_SCREEN_WIDTH)  / 2 + 14;
+    return (Coords) {
+        .y = (SCREEN_HEIGHT - WIN_SCREEN_HEIGHT) / 2 + 15 + cursor_coords.y,
+        .x = (SCREEN_WIDTH  - WIN_SCREEN_WIDTH)  / 2 + 14
+    };
 }
 
 /*

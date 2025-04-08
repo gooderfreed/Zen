@@ -104,13 +104,15 @@ static void print_field(const void *field_pointer, Screen *screen, const Cursor 
  * Place cursor in field
  * Calculates target coordinates based on cursor position and updates them
  */
-static void place_cursor_in_field(const void *field_pointer, const Coords cursor_coords, Coords *target_coords) {
+static Coords place_cursor_in_field(const void *field_pointer, const Coords cursor_coords) {
     const Field *field = (const Field *)field_pointer;
     int part = BORDER_OFFSET_Y + 1 + cursor_coords.y * 2 + BORDER_OFFSET_Y;
     bool is_last_card = FIELD_HEIGHT == cursor_coords.y || !field->field[cursor_coords.y + 1][cursor_coords.x];
 
-    target_coords->y += (short)(part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1));
-    target_coords->x += (short)(BORDER_OFFSET_X - 1);
+    return (Coords) {
+        .y = (short)(part + (is_last_card ? CARD_HEIGHT : CARD_COVERED_HEIGHT + 1) + CARD_HEIGHT),
+        .x = (short)(BORDER_OFFSET_X - 1 + cursor_coords.x * CARD_WIDTH + (CARD_WIDTH / 2))
+    };
 }
 
 /*
@@ -255,9 +257,9 @@ static void place_cards_in_field(void *field_pointer, Coords cursor_coord, Conta
  * Check if cursor is on the same card in field
  * Compares cursor position to field card
  */
-static bool is_same_card_in_field(const void *field_pointer, const Coords cursor_coords, const Card *card) {
+static bool is_same_card_in_field(const void *field_pointer, const Coords cursor_coords, const void *card) {
     const Field *field = (const Field *)field_pointer;
-    return field->field[cursor_coords.y][cursor_coords.x] == card;
+    return field->field[cursor_coords.y][cursor_coords.x] == (Card *)card;
 }
 
 
