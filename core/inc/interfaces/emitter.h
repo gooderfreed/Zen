@@ -107,7 +107,9 @@ static inline void link_observers_to_emitters(Arena *arena, SignalListenersList 
                 while (_listeners) {
                     SignalListeners *listeners_elem = _listeners->listeners;
 
-                    if (strcmp(listeners_elem->signal, signal_emission->emission.signal) == 0) {
+                    if ((listeners_elem->signal[0] == signal_emission->emission.signal[0])
+                        && strcmp(listeners_elem->signal, signal_emission->emission.signal) == 0) {
+                        
                         emitter->observers = add_signal_listeners_to_list(arena, emitter->observers, listeners_elem);
                         break;
                     }
@@ -134,7 +136,8 @@ static inline void emit_signal(void *object, char *signal, void *data) {
     while (listeners) {
         SignalListeners *listeners_elem = listeners->listeners;
 
-        if (strcmp(listeners_elem->signal, signal) == 0) {
+        if ((listeners_elem->signal[0] == signal[0])   // if you think that stupid -- read about cpu prediction, silly
+            && strcmp(listeners_elem->signal, signal) == 0) {
             SignalListenerList *listener_list = listeners_elem->listeners;
 
             while (listener_list) {

@@ -58,11 +58,13 @@ void handle_button(void *object, Coords coords) {
  * Sets the context for the button with the specified name
  */
 void set_button_context(ButtonHandler *button_handler, char *name, void *context) {
+    if (!button_handler || !name) return;
+
     for (int i = 0; i < button_handler->button_groups_count; i++) {
         ButtonGroup *button_group = button_handler->button_groups[i];
         for (int j = 0; j < button_group->length; j++) {
             Button *button = button_group->buttons[j];
-            if (strcmp(button->name, name) == 0) {
+            if (name[0] == button->name[0] && strcmp(button->name, name) == 0) {
                 button->context = context;
             }
         }

@@ -65,13 +65,10 @@ static void layer_loop(Core *core, wint_t key) {
  * This function initializes the core, screen, map, and other necessary components.
  * It also sets up the game loop and handles user input.
  */
-// #define ARENA_SIZE 3732
-// #define ARENA_SIZE 3268
-// #define ARENA_SIZE 3172
-#define ARENA_SIZE 3076
+#define ARENA_SIZE 4096
 int main(void) {
     // Initialize the memory arena
-    size_t buffer[ARENA_SIZE]; // 4KB | demo requires 3800 bytes
+    size_t buffer[ARENA_SIZE]; // 4KB | demo requires -3172- 3076 bytes
     Arena *arena = arena_new_static(buffer, ARENA_SIZE);
     // Initialize the core
     Core  *core  = core_init(arena);

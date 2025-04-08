@@ -3,11 +3,11 @@
 
 #include "object_interfaces.h"
 
-/*
- * ButtonHandler - Interface for objects that can handle buttons
- * Provides button position and handling capabilities
- */
 
+/*
+ * Button - Button object
+ * Contains a name, coordinates, context, and on_click function
+ */
 typedef struct {
     char *name;
     Coords coords;
@@ -17,16 +17,29 @@ typedef struct {
 
 typedef struct ButtonList ButtonList;
 
+/*
+ * ButtonList - List of buttons
+ * Contains a list of buttons
+ */
 struct ButtonList {
     Button *button;
     ButtonList *next;
 };
 
+/*
+ * Direction - Enum for the direction of the buttons for auto positioning
+ * HORIZONTAL - Horizontal direction flow
+ * VERTICAL - Vertical direction flow
+ */
 typedef enum Direction {
     HORIZONTAL,
     VERTICAL
 } Direction;
 
+/*
+ * ButtonGroup - Group of buttons
+ * Contains a list of buttons and their position
+ */
 typedef struct ButtonGroup {
     Coords start_coords;
     Button **buttons;
@@ -36,21 +49,25 @@ typedef struct ButtonGroup {
 
 typedef struct ButtonGroupList ButtonGroupList;
 
+/*
+ * ButtonGroupList - List of button groups
+ * Contains a list of button groups
+ */
 struct ButtonGroupList {
     ButtonGroup *button_group;
     ButtonGroupList *next;
 };
 
+/*
+ * ButtonHandler - Interface for objects that can handle buttons
+ * Provides button position and handling capabilities
+ */
 typedef struct ButtonHandler {
     ButtonGroup **button_groups;
     int button_groups_count;
 } ButtonHandler;
 
 
-// Button **buttons_init(int length);
-// void add_button(ButtonHandler *button_handler, Button *button);
-// void remove_button(ButtonHandler *button_handler, int index);
-// Button *get_button(ButtonHandler *button_handler, int index);
 void set_button_context(ButtonHandler *button_handler, char *name, void *context);
 bool is_button(void *object, Coords coords);
 Button *get_button_by_coords(void *object, Coords coords);
@@ -132,7 +149,7 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
                 ButtonList *button_list_elem = buttons_list;                                                     \
                 new_button_group->buttons[_i] = button_list_elem->button;                                        \
                 buttons_list = button_list_elem->next;                                                           \
-                arena_free_block(button_list_elem);                                                       \
+                arena_free_block(button_list_elem);                                                              \
             }                                                                                                    \
             new_group_list->button_group = new_button_group;                                                     \
             new_group_list->next = button_group_list;                                                            \
@@ -173,7 +190,7 @@ static inline void SET_BUTTON_CONTEXT(void *object, char *name, void *context) {
                 ButtonGroupList *button_group_list_elem = button_group_list;                                                        \
                 button_handler->button_groups[_i] = button_group_list_elem->button_group;                                           \
                 button_group_list = button_group_list_elem->next;                                                                   \
-                arena_free_block(button_group_list_elem);                                                                    \
+                arena_free_block(button_group_list_elem);                                                                           \
             }                                                                                                                       \
         }                                                                                                                           \
     } while (0)

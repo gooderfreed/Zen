@@ -40,7 +40,6 @@ static inline int tput_exists(void) {
 
 /*
  * Executes a 'tput' command and returns the integer result.
- * It executes a 'tput' command and returns the integer result.
  */
 static int tput_command(const char *command) {
     FILE *fp = popen(command, "r");
