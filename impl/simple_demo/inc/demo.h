@@ -1,7 +1,7 @@
 #ifndef DEMO_H
 #define DEMO_H
 
-#include "../../../core/inc/core.h"
+#include "core.h"
 
 /*
  * Sinple Demo structure

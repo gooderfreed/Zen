@@ -4,7 +4,7 @@
 #define _POSIX_C_SOURCE 199309L
 
 #include "config.h"
-#include "../../../core/inc/core.h"
+#include "core.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

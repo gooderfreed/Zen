@@ -56,7 +56,12 @@ dkms.conf
 .timetracker
 
 # Projects executable
-impl/*/solitaire
-impl/*/snake
-impl/*/demo
-impl/*/donut
+impl/*/solitaire*
+impl/*/snake*
+impl/*/demo*
+impl/*/donut*
+
+# Core library
+core/lib/libcore.a
+core/lib/libcore.so
+core/obj/*

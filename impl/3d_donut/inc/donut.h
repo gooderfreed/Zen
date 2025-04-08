@@ -1,7 +1,7 @@
 #ifndef DONUT_H
 #define DONUT_H
 
-#include "../../../core/inc/core.h"
+#include "core.h"
 
 #define DONUT_HEIGHT 30
 #define DONUT_WIDTH  30

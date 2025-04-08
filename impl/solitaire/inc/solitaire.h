@@ -3,7 +3,7 @@
 
 #include "config.h"
 #define CARD_STRUCT
-#include "../../../core/inc/core.h"
+#include "core.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
