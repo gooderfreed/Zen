@@ -55,13 +55,13 @@ dkms.conf
 .vscode/
 .timetracker
 
-# Projects executable
-impl/*/solitaire*
-impl/*/snake*
-impl/*/demo*
-impl/*/donut*
+# Projects executables
+examples/*/solitaire*
+examples/*/snake*
+examples/*/demo*
+examples/*/donut*
 
-# Core library
-core/lib/libcore.a
-core/lib/libcore.so
-core/obj/*
+# Zen framework
+zen/lib/libzen.a
+zen/lib/libzen.so
+zen/obj/*
