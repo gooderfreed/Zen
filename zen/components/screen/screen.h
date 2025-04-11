@@ -1,7 +1,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include "components.h"
+#include "../components.h"
 
 /*
  * Terminal control macros

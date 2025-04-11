@@ -2,7 +2,7 @@
 #ifndef ARENA_ALLOCATOR_H
 #define ARENA_ALLOCATOR_H
 
-#include "components.h"
+#include "../components.h"
 
 #ifndef MIN_BUFFER_SIZE
     // Default minimum buffer size for the arena.

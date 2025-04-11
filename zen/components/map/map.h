@@ -1,7 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "components.h"
+#include "../components.h"
 
 /*
  * MapObject structure

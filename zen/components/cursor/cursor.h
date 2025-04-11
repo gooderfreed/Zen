@@ -1,7 +1,7 @@
 #ifndef CURSOR_H
 #define CURSOR_H
 
-#include "components.h"
+#include "../components.h"
 
 /*
  * Cursor movement vectors

@@ -1,5 +1,5 @@
 
-#include "../inc/zen.h"
+#include "../zen.h"
 
 /*
  * Create FPS statistics

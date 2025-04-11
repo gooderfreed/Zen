@@ -1,7 +1,7 @@
 #ifndef FRAME_TIMER_H
 #define FRAME_TIMER_H
 
-#include "components.h"
+#include "../components.h"
 
 /*
  * Frame timer structure

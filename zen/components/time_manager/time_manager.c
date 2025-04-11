@@ -1,4 +1,4 @@
-#include "../inc/zen.h"
+#include "../zen.h"
 
 /*
  * Initialize time manager

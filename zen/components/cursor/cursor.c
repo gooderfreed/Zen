@@ -2,7 +2,7 @@
  * Cursor implementation
  * Handles cursor state and visualization
  */
-#include "../inc/zen.h"
+#include "../zen.h"
 
 
 /*

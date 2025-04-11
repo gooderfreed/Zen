@@ -1,7 +1,7 @@
 #ifndef TICK_COUNTER_H
 #define TICK_COUNTER_H
 
-#include "components.h"
+#include "../components.h"
 
 /*
  * Tick counter structure

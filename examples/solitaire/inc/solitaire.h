@@ -3,7 +3,7 @@
 
 #include "config.h"
 #define CARD_STRUCT
-#include "../../../zen/inc/zen.h"
+#include "../../../zen/zen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

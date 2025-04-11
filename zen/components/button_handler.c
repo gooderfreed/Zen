@@ -2,7 +2,7 @@
  * Button handling implementation
  * Manages button creation, removal, and click handling
  */
-#include "../inc/zen.h"
+#include "../zen.h"
 
 /*
  * Check if a button exists at given coordinates

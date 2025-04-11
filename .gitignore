@@ -62,6 +62,6 @@ examples/*/demo*
 examples/*/donut*
 
 # Zen framework
-zen/lib/libzen.a
-zen/lib/libzen.so
+lib/libzen.a
+lib/libzen.so
 zen/obj/*

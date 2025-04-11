@@ -11,16 +11,16 @@
 #define GET_MACRO_3(_1, _2, _3, NAME, ...) NAME
 #define GET_MACRO_2(_1, _2, NAME, ...) NAME
 
-#include "arena_alloc.h"
 #include "coords.h"
 #include "color.h"
-#include "container.h"
-#include "screen.h"
-#include "cursor.h"
-#include "map.h"
-#include "time_manager.h"
-#include "fps_stats.h"
-#include "tick_counter.h"
-#include "frame_timer.h"
+#include "zen_arena/arena_alloc.h"
+#include "container/container.h"
+#include "screen/screen.h"
+#include "cursor/cursor.h"
+#include "map/map.h"
+#include "time_manager/time_manager.h"
+#include "fps_stats/fps_stats.h"
+#include "tick_counter/tick_counter.h"
+#include "frame_timer/frame_timer.h"
 
 #endif

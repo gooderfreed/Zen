@@ -3,7 +3,7 @@
  * Default Screen implementation
  * Handles terminal output and screen buffer management
  */
-#include "../inc/zen.h"
+#include "../zen.h"
 
 // -----------------------------------------------------------------------------
 //  ANSI Escape Code Generation

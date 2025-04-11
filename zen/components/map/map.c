@@ -2,7 +2,7 @@
  * Map implementation
  * Handles map object management and cursor movement
  */
-#include "../inc/zen.h"
+#include "../zen.h"
 
 /*
  * Initialize map structure

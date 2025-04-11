@@ -4,7 +4,7 @@
  * Container implementation
  * Handles container operations for objects
  */
-#include "../inc/zen.h"
+#include "../zen.h"
 
 /*
  * Initialize container of objects

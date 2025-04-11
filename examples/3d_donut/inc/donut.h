@@ -1,7 +1,7 @@
 #ifndef DONUT_H
 #define DONUT_H
 
-#include "../../../zen/inc/zen.h"
+#include "../../../zen/zen.h"
 
 #define DONUT_HEIGHT 30
 #define DONUT_WIDTH  30

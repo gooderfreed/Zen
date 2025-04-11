@@ -1,7 +1,7 @@
 #ifndef TIME_MANAGER_H
 #define TIME_MANAGER_H
 
-#include "components.h"
+#include "../components.h"
 
 /*
  * Time manager structure

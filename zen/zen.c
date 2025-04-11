@@ -2,7 +2,7 @@
  * Core engine implementation
  * Contains main game loop logic and object management
  */
-#include "../inc/zen.h"
+#include "zen.h"
 
 /*
  * Initialize core structure
