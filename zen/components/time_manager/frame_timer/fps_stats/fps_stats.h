@@ -1,7 +1,7 @@
 #ifndef FPS_STATS_H
 #define FPS_STATS_H
 
-#include "../components.h"
+#include "../frame_timer.h"
 
 /*
  * FPS statistics structure

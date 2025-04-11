@@ -2,6 +2,8 @@
 #define TIME_MANAGER_H
 
 #include "../components.h"
+#include "frame_timer/frame_timer.h"
+#include "tick_counter/tick_counter.h"
 
 /*
  * Time manager structure

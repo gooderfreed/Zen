@@ -19,8 +19,5 @@
 #include "cursor/cursor.h"
 #include "map/map.h"
 #include "time_manager/time_manager.h"
-#include "fps_stats/fps_stats.h"
-#include "tick_counter/tick_counter.h"
-#include "frame_timer/frame_timer.h"
 
 #endif

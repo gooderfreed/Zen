@@ -1,5 +1,5 @@
 
-#include "../zen.h"
+#include "zen.h"
 
 /*
  * Initialize frame timer

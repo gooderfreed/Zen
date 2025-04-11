@@ -1,7 +1,8 @@
 #ifndef FRAME_TIMER_H
 #define FRAME_TIMER_H
 
-#include "../components.h"
+#include "../time_manager.h"
+#include "fps_stats/fps_stats.h"
 
 /*
  * Frame timer structure
