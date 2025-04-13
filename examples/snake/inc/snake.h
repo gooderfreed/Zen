@@ -4,7 +4,7 @@
 #define _POSIX_C_SOURCE 199309L
 
 #include "config.h"
-#include "../../../zen/zen.h"
+#include "zen.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

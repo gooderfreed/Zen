@@ -1,7 +1,7 @@
 #ifndef DEMO_H
 #define DEMO_H
 
-#include "../../../zen/zen.h"
+#include "zen.h"
 
 /*
  * Sinple Demo structure

@@ -18,7 +18,7 @@ CFLAGS = -std=c11 -Oz $(addprefix -f, visibility=hidden no-math-errno omit-frame
             cast-align unreachable-code strict-prototypes bad-function-cast \
             strict-aliasing shadow double-promotion missing-prototypes \
             missing-declarations pointer-arith format=2) \
-            -I$(INC_DIR) -I$(ZEN_DIR)/inc
+            -I$(INC_DIR) -I$(ZEN_DIR)/inc -I$(ZEN_DIR)
 
 DEBUG_FLAGS = -g3 -DDEBUG -O0
 
