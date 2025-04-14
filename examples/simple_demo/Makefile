@@ -39,7 +39,7 @@ MKDIR = mkdir -p
 RM = rm -rf
 
 # Default target builds with static library
-all: static clean
+all: clean static
 
 # Check if required library exists
 check_static_lib:
@@ -129,7 +129,7 @@ list:
 	@echo "  $(YELLOW)make dynamic_debug$(RESET) - Build with dynamic debug library"
 	@echo ""
 	@echo "$(BLUE)Other targets:$(RESET)"
-	@echo "  $(YELLOW)make clean$(RESET)     - Clean all build artifacts"
-	@echo "  $(YELLOW)make list$(RESET)      - Show this help message"
+	@echo "  $(YELLOW)make clean$(RESET)         - Clean all build artifacts"
+	@echo "  $(YELLOW)make list$(RESET)          - Show this help message"
 
 .PHONY: all clean reinstall static dynamic static_debug dynamic_debug check_static_lib check_dynamic_lib check_static_debug_lib check_dynamic_debug_lib

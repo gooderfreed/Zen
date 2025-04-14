@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := all
+
 # Step 1: Find source files
 ZEN_DIR := zen
 ZEN_SOURCES := $(shell find $(ZEN_DIR) -name '*.c')
@@ -105,6 +107,11 @@ $(DYNAMIC_DEBUG_LIB): $(ZEN_DEBUG_OBJECTS) | $(LIB_DIR) # Depends on objects and
 	@$(CC) $(CFLAGS) $(DEBUG_FLAGS) -shared -o $@ $(ZEN_DEBUG_OBJECTS)
 
 # Main Targets
+
+# Find all implementation Makefiles is already done above
+.PHONY: all
+all: clean compile build
+
 .PHONY: release
 release: ensure_obj_dirs $(STATIC_LIB) $(DYNAMIC_LIB) # Depends on obj dirs and library files
 	@echo "$(GREEN)Release libraries built successfully!$(RESET)"
@@ -139,12 +146,20 @@ clean: clean_lib # Clean library first
 	done
 	@echo "$(GREEN)Cleaning complete$(RESET)"
 
-# Default target builds all implementations
-# Find all implementation Makefiles is already done above
-.PHONY: all
-all: $(IMPL_DIRS)
+# Target to PRINT commands for building all examples
+# Ensure 'make compile' has been run first.
+.PHONY: build
+build:
+	@echo "$(BLUE)Building all examples (ensure library is compiled)...$(RESET)"
+	@for dir in $(IMPL_DIRS); do \
+		name=$$(basename $$dir); \
+		echo "$(GREEN)Building example '$(YELLOW)$$name$(GREEN)'...$(RESET)"; \
+		$(MAKE) --no-print-directory -C $$dir; \
+		echo "$(GREEN)Done building '$(YELLOW)$$name$(GREEN)'$(RESET)"; \
+	done
+	@echo "$(BLUE)Finished building examples.$(RESET)"
 
-# Build each implementation
+# Build each implementation (OLD BEHAVIOUR)
 .PHONY: $(IMPL_DIRS)
 $(IMPL_DIRS):
 	@echo "$(GREEN)Building '$(YELLOW)$(notdir $(patsubst %/,%,$@))$(GREEN)'...$(RESET)"
@@ -155,11 +170,13 @@ $(IMPL_DIRS):
 .PHONY: list
 list:
 	@echo "$(BLUE)Available targets:$(RESET)"
-	@echo "  $(YELLOW)make$(RESET)         - Build all implementations"
-	@echo "  $(YELLOW)make compile$(RESET) - Build zen libraries (both release and debug versions)"
-	@echo "  $(YELLOW)make clean$(RESET)   - Clean all build artifacts and examples"
-	@echo "  $(YELLOW)make clean_lib$(RESET)- Clean only zen library artifacts (obj, lib)"
+	@echo "  $(YELLOW)make$(RESET)            - Build all examples (automatically runs 'make compile')"
+	@echo "  $(YELLOW)make compile$(RESET)    - Build zen libraries (both release and debug versions)"
+	@echo "  $(YELLOW)make build$(RESET)      - Build all examples (run 'make compile' first)"
+	@echo "  $(YELLOW)make clean$(RESET)      - Clean all build artifacts and examples"
+	@echo "  $(YELLOW)make clean_lib$(RESET)  - Clean only zen library artifacts (obj, lib)"
+	@echo "  $(YELLOW)make clean_all$(RESET)  - Clean all build artifacts and examples"
 	@echo ""
 	@echo "$(BLUE)Zen library targets:$(RESET)"
-	@echo "  $(YELLOW)make release$(RESET) - Build release versions of zen libraries"
-	@echo "  $(YELLOW)make debug$(RESET)   - Build debug versions of zen libraries"
+	@echo "  $(YELLOW)make release$(RESET)    - Build release versions of zen libraries"
+	@echo "  $(YELLOW)make debug$(RESET)      - Build debug versions of zen libraries"
