@@ -3,8 +3,14 @@
 **A Lightweight, Modular Framework for Building Console Applications in C**
 
 **⚠️ Warning: Active Development ⚠️**
-
 Zen is currently under active development. APIs, internal structures, and core concepts may change significantly and without extensive prior notice as the framework evolves. Use in production environments is not recommended at this stage. Feedback and contributions are welcome!
+
+**TL;DR**
+*   **What is it?** A lightweight, modular C framework for building console apps (especially interactive/TUI/games).
+*   **Key Features:** Component-oriented, interface-based, declarative macros (`INTERFACES`, `MAP_LAYER`), **Arena-based Allocator**, advanced color rendering, Observer/Emitter signals.
+*   **Why use it?** Build efficient console apps/games in C with a structured, flexible architecture.
+*   **Status:** Actively developed (API may change).
+*   **Try it:** `git clone https://github.com/gooderfreed/Zen.git && cd Zen && make` (builds library & all examples).
 
 ## Overview
 
@@ -28,7 +34,7 @@ Zen aims to be lightweight, producing compact executables while offering these f
 
 Zen's architecture revolves around a few key concepts that enable its modularity and declarative style.
 
-### 1. Code Structure (`zen/inc`)
+### 1. Code Structure (`zen/`)
 
 The core library headers are organized into three main directories:
 
@@ -90,11 +96,11 @@ MAP_LAYER(arena, game_layer, {
 
 ### 4. Arena Memory Management
 
-Zen relies heavily on its [Arena Allocator](https://github.com/gooderfreed/arena_c) (`components/arena_alloc.h`). Almost all dynamic memory required by the framework is allocated from an Arena instance provided during initialization (`zen_init`).
+Zen relies heavily on its [Arena-based Allocator](https://github.com/gooderfreed/arena_c) (`components/arena_alloc.h`). **All** dynamic memory within the framework is managed through an Arena instance provided during initialization (`zen_init`).
 
 *   Supports both static (`arena_new_static`) and dynamic (`arena_new_dynamic`) arenas
 *   Reduces fragmentation and potentially improves allocation/deallocation speed compared to standard `malloc`/`free`
-*   Allows for easy cleanup of entire states using `arena_reset`
+*   Allows for easy cleanup of entire states using `arena_reset`, **and also supports freeing individual blocks (`arena_free_block`) for memory reuse within the arena.**
 *   For dynamic arenas, memory is automatically freed when calling `arena_free` or when the arena is reset
 
 ### 5. Signal System (`Observer`/`Emitter`)
@@ -128,7 +134,7 @@ Zen implements a standard game loop (`time_manager.h`, `tick_counter.h`, `frame_
 Zen provides a range of components and interfaces (detailed in **Core Concepts**) to facilitate application development:
 
 *   **Core (`Zen` struct, `zen.h`)**: Central orchestrator managing the main loop, components, and event dispatch.
-*   **Memory Management**: Integrated **Arena Allocator** (`arena_alloc.h`) for efficient static or dynamic allocation.
+*   **Memory Management**: Integrated **Arena-based Allocator** (`arena_alloc.h`) for efficient static or dynamic memory management.
 *   **Screen Rendering (`Screen`, `screen.h`)**: Double-buffered terminal rendering with support for Unicode, `TextEffect`s (bold, etc.), and **RGB color** (using `Color` struct from `color.h`). Includes drawing primitives.
 *   **Color Handling (`Color`, `color.h`)**: Simple `uint32_t` based RGB color representation with many predefined `COLOR_*` constants (CSS/X11 names). Color output is **automatically adapted** to terminal capabilities (TrueColor, 256-color, 16-color) detected via internal methods or optionally using the `tput` command if available.
 *   **Layered Map (`Map`, `MapLayer`, `map.h`)**: A component for organizing objects (`void*`) in a 2D grid with multiple layers. Supports declarative definition via `MAP_LAYER` / `OBJECT` macros and layer-specific callbacks.
@@ -167,7 +173,7 @@ Zen is designed as a collection of modular components that can be used independe
 
 ### Standalone Libraries
 
-* **[Arena Allocator](https://github.com/gooderfreed/arena_c)**: A header-only arena memory allocation library extracted from Zen. Provides efficient memory management with both static and dynamic allocation options.
+* **[Arena-based Allocator](https://github.com/gooderfreed/arena_c)**: A header-only arena-based memory allocation library extracted from Zen. Provides efficient memory management with both static and dynamic allocation options.
 
 * **Screen Renderer** *(coming soon)*: A standalone library for terminal rendering with color support and automatic terminal capability detection.
 
