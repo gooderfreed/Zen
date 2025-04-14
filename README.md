@@ -32,20 +32,7 @@ The core library headers are organized into three main directories:
 *   `components/`: Defines concrete data structures and core functionalities like `Screen` (rendering), `Map` (layered map), `Cursor`, `Arena` (memory), `Container`, `Color`, time managers (`TimeManager`, `TickCounter`, `FrameTimer`), etc.
 *   `interfaces/`: Defines the interfaces (contracts) that objects can implement to interact with the framework and each other. Examples include `Drawable`, `Updateable`, `InputHandler`, `Observer`, `Emitter`, `CursorInteractable`, `ButtonHandler`, `CardHandler`.
 
-### 2. Interface System
-
-Interfaces define capabilities. They are typically implemented as:
-
-1.  **A struct** holding state (if any) and function pointers for the interface's methods (e.g., `struct Drawable { bool is_active; void (*print)(...); }`).
-2.  **A set of macros** for convenience:
-    *   `IS_*`: Checks the corresponding bit in `ObjectInterfaces.capabilities`.
-    *   `*_HANDLER`: Gets the pointer to the interface struct from `ObjectInterfaces`.
-    *   `*_CALLER` (e.g., `DRAW`, `UPDATE`, `HANDLE_INPUT`): Calls the interface method via the function pointer.
-    *   `*_INITIALIZER` (e.g., `DRAWABLE`, `UPDATEABLE`): Used within the `INTERFACES` macro to attach the interface.
-
-Memory for the interface structs themselves is allocated from the Arena when the interface is attached.
-
-### 3. Declarative Initialization (`INTERFACES` Macro)
+### 2. Declarative Initialization (`INTERFACES` Macro)
 
 The primary way to create framework-aware objects and attach interfaces is using the `INTERFACES` macro:
 
@@ -79,7 +66,7 @@ The `INTERFACES` macro handles:
 - Setting capability flags
 - Storing function pointers
 
-### 4. Map Layers (`MAP_LAYER`)
+### 3. Map Layers (`MAP_LAYER`)
 
 Define map layers, their properties (like loop callbacks), and the objects they contain:
 
@@ -97,7 +84,7 @@ MAP_LAYER(arena, game_layer, {
 });
 ```
 
-### 5. Arena Memory Management
+### 4. Arena Memory Management
 
 Zen relies heavily on its [Arena Allocator](https://github.com/gooderfreed/arena_c) (`components/arena_alloc.h`). Almost all dynamic memory required by the framework is allocated from an Arena instance provided during initialization (`zen_init`).
 
@@ -106,7 +93,7 @@ Zen relies heavily on its [Arena Allocator](https://github.com/gooderfreed/arena
 *   Allows for easy cleanup of entire states using `arena_reset`
 *   For dynamic arenas, memory is automatically freed when calling `arena_free` or when the arena is reset
 
-### 6. Signal System (`Observer`/`Emitter`)
+### 5. Signal System (`Observer`/`Emitter`)
 
 Provides a publish-subscribe mechanism for decoupled communication (`interfaces/observer.h`, `interfaces/emitter.h`).
 
@@ -116,7 +103,7 @@ Provides a publish-subscribe mechanism for decoupled communication (`interfaces/
 *   A central registry (managed internally) connects observers to emitters efficiently during a linking phase (`link_observers_to_emitters`).
 *   Signals are sent using `emit_signal(emitter_object, "signal_name", data_payload)`.
 
-### 7. Dependency Injection (`*Dependent` Interfaces)
+### 6. Dependency Injection (`*Dependent` Interfaces)
 
 Interfaces like `CoreDependent` and `TickDependent` allow objects to declare dependencies on core framework components (`Zen`, `TickCounter`).
 
@@ -124,7 +111,7 @@ Interfaces like `CoreDependent` and `TickDependent` allow objects to declare dep
 *   The framework (during setup) injects the necessary pointers (e.g., `Zen *zen`) into the object's `ObjectInterfaces`.
 *   The object can then use helper macros (`GET_CORE()`, `CORE_ACTION()`, `GET_CURRENT_TICK()`) to access core functionality safely.
 
-### 8. Game Loop (Fixed Timestep / Variable Rendering)
+### 7. Game Loop (Fixed Timestep / Variable Rendering)
 
 Zen implements a standard game loop (`time_manager.h`, `tick_counter.h`, `frame_timer.h`, `updatable.h`) suitable for interactive applications.
 
@@ -253,9 +240,9 @@ make static   # Build with static library (release mode)
 ### Build Options for Examples
 
 Each example has multiple build targets:
-- `make static` - Build with static library (release)
-- `make dynamic` - Build with dynamic library (release)
-- `make static_debug` - Build with static library (debug)
+- `make static`        - Build with static library (release)
+- `make dynamic`       - Build with dynamic library (release)
+- `make static_debug`  - Build with static library (debug)
 - `make dynamic_debug` - Build with dynamic library (debug)
 
 ### Using Zen in Your Project

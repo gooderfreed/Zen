@@ -159,13 +159,6 @@ build:
 	done
 	@echo "$(BLUE)Finished building examples.$(RESET)"
 
-# Build each implementation (OLD BEHAVIOUR)
-.PHONY: $(IMPL_DIRS)
-$(IMPL_DIRS):
-	@echo "$(GREEN)Building '$(YELLOW)$(notdir $(patsubst %/,%,$@))$(GREEN)'...$(RESET)"
-	@$(MAKE) --no-print-directory -C $@
-	@echo "$(GREEN)Done '$(YELLOW)$(notdir $(patsubst %/,%,$@))$(GREEN)'$(RESET)"
-
 # List available targets
 .PHONY: list
 list:
