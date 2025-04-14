@@ -2,6 +2,10 @@
 
 **A Lightweight, Modular Framework for Building Console Applications in C**
 
+**⚠️ Warning: Active Development ⚠️**
+
+Zen is currently under active development. APIs, internal structures, and core concepts may change significantly and without extensive prior notice as the framework evolves. Use in production environments is not recommended at this stage. Feedback and contributions are welcome!
+
 ## Overview
 
 Zen is a streamlined C framework designed for developing robust and efficient console-based applications. It employs a flexible, component-oriented architecture centered around interfaces and utilizes **C macros to provide a declarative API** for configuring application structure and object capabilities.
@@ -139,6 +143,23 @@ Zen provides a range of components and interfaces (detailed in **Core Concepts**
     *   `ButtonHandler`: Handles activation (e.g., Enter/Space press) on objects, often used with `CursorInteractable` for UI buttons. Supports declarative definition via `BUTTONS_HANDLER` / `BUTTON` macros.
     *   `CardHandler`: Specific interface for selecting/moving card-like objects (used in Solitaire).
 *   **Dependency Injection**: `CoreDependent` and `TickDependent` interfaces provide controlled access to core systems.
+
+## Roadmap
+
+Here are some of the planned features and improvements for Zen (subject to change):
+
+*   **Refinement & Consistency**: General improvements to existing components and ensuring a consistent API/style across the framework.
+*   **Screen Module Extraction**: Enhancing the screen rendering functionality and extracting it into a standalone library.
+*   **Input System Enhancement**: Improving the input system, adding an abstraction layer for input locales, and extracting it into a standalone library.
+*   **Advanced Signal System**: Implementing a more flexible signal system (e.g., "wide, narrow, deep" signals) for unified inter-object communication.
+*   **Request/Response System:** Extend the signal system to support request-response patterns (getting a return value from a signal/call).
+*   **Dynamic Context System**: Introducing a system for managing dynamic context at different levels (application, layer).
+*   **File I/O Utilities**: Adding helpers or components for file operations.
+*   **Resource Bundling & Localization**: Support for packaging resources and internationalization.
+*   **Logging System**: Implementing a robust logging system (e.g., logging to a file) for diagnostics and analysis.
+*   **Serialization/Deserialization**: Adding mechanisms for saving and loading application state or data.
+*   **Theming/Color Schemes**: Developing a system for easily defining and applying color themes.
+*   **Socket/Network Communication**: Basic support for network operations.
 
 ## Modular Components
 
