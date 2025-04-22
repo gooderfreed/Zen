@@ -11,6 +11,11 @@ ZEN_OBJECTS := $(patsubst $(ZEN_DIR)/%.c,$(ZEN_OBJ_DIR)/%.o,$(filter %.c,$(ZEN_S
 ZEN_DEBUG_OBJECTS := $(patsubst $(ZEN_DIR)/%.c,$(ZEN_OBJ_DIR)/%_debug.o,$(filter %.c,$(ZEN_SOURCES)))
 ZEN_OBJ_DIRS := $(sort $(dir $(ZEN_OBJECTS) $(ZEN_DEBUG_OBJECTS)))
 
+# Arena object file paths
+ARENA_OBJ_DIR := $(ZEN_OBJ_DIR)/components/zen_arena
+ARENA_OBJ := $(ARENA_OBJ_DIR)/arena.o
+ARENA_DEBUG_OBJ := $(ARENA_OBJ_DIR)/arena_debug.o
+
 # Step 3: Compiler settings and Directory/Compilation Rules
 CC := clang
 CFLAGS := -I$(ZEN_DIR) \
@@ -31,6 +36,7 @@ ensure_obj_dirs: $(ZEN_OBJ_DIRS)
 
 $(ZEN_OBJ_DIRS):
 	@mkdir -p $@
+	@mkdir -p $(ARENA_OBJ_DIR)
 
 # Rule to compile object files (release)
 # Depends on the corresponding object directory being created via ensure_obj_dirs
@@ -87,24 +93,32 @@ BLUE := \033[34m
 RESET := \033[0m
 
 # Build static library (release)
-$(STATIC_LIB): $(ZEN_OBJECTS) | $(LIB_DIR) # Depends on objects and lib directory
+$(STATIC_LIB): $(ZEN_OBJECTS) $(ARENA_OBJ) | $(LIB_DIR) # Depends on objects and lib directory
 	@echo "$(GREEN)Building static library $(YELLOW)$@$(GREEN)...$(RESET)"
-	@ar rcs $@ $(ZEN_OBJECTS)
+	@ar rcs $@ $(ZEN_OBJECTS) $(ARENA_OBJ)
 
 # Build dynamic library (release)
-$(DYNAMIC_LIB): $(ZEN_OBJECTS) | $(LIB_DIR) # Depends on objects and lib directory
+$(DYNAMIC_LIB): $(ZEN_OBJECTS) $(ARENA_OBJ) | $(LIB_DIR) # Depends on objects and lib directory
 	@echo "$(GREEN)Building dynamic library $(YELLOW)$@$(GREEN)...$(RESET)"
-	@$(CC) $(CFLAGS) -shared -o $@ $(ZEN_OBJECTS)
+	@$(CC) $(CFLAGS) -shared -o $@ $(ZEN_OBJECTS) $(ARENA_OBJ)
 
 # Build static library (debug)
-$(STATIC_DEBUG_LIB): $(ZEN_DEBUG_OBJECTS) | $(LIB_DIR) # Depends on objects and lib directory
+$(STATIC_DEBUG_LIB): $(ZEN_DEBUG_OBJECTS) $(ARENA_DEBUG_OBJ) | $(LIB_DIR) # Depends on objects and lib directory
 	@echo "$(GREEN)Building debug static library $(YELLOW)$@$(GREEN)...$(RESET)"
-	@ar rcs $@ $(ZEN_DEBUG_OBJECTS)
+	@ar rcs $@ $(ZEN_DEBUG_OBJECTS) $(ARENA_DEBUG_OBJ)
 
 # Build dynamic library (debug)
-$(DYNAMIC_DEBUG_LIB): $(ZEN_DEBUG_OBJECTS) | $(LIB_DIR) # Depends on objects and lib directory
+$(DYNAMIC_DEBUG_LIB): $(ZEN_DEBUG_OBJECTS) $(ARENA_DEBUG_OBJ) | $(LIB_DIR) # Depends on objects and lib directory
 	@echo "$(GREEN)Building debug dynamic library $(YELLOW)$@$(GREEN)...$(RESET)"
-	@$(CC) $(CFLAGS) $(DEBUG_FLAGS) -shared -o $@ $(ZEN_DEBUG_OBJECTS)
+	@$(CC) $(CFLAGS) $(DEBUG_FLAGS) -shared -o $@ $(ZEN_DEBUG_OBJECTS) $(ARENA_DEBUG_OBJ)
+
+$(ARENA_OBJ): $(ZEN_DIR)/components/zen_arena/arena_alloc.h | ensure_obj_dirs
+	@echo "Compiling arena header -> $@"
+	@$(CC) $(CFLAGS) -x c -DARENA_IMPLEMENTATION -c $< -o $@
+
+$(ARENA_DEBUG_OBJ): $(ZEN_DIR)/components/zen_arena/arena_alloc.h | ensure_obj_dirs
+	@echo "Compiling arena header (debug) -> $@"
+	@$(CC) $(CFLAGS) $(DEBUG_FLAGS) -x c -DARENA_IMPLEMENTATION -c $< -o $@
 
 # Main Targets
 

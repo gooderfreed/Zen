@@ -56,7 +56,7 @@ static void game_loop(Zen *zen) {
 int main(void) {
     srand((unsigned int)time(NULL));
 
-    size_t size = 1024 * 80;  // 73928kb is minimum
+    ssize_t size = 1024 * 80;  // 73928kb is minimum
     Arena *arena = arena_new_dynamic(size);
 
     Zen *zen = zen_init(arena);

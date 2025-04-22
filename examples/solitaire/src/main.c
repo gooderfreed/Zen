@@ -58,7 +58,7 @@ static void game_loop(Zen *zen) {
 int main(void) {
     srand((unsigned int)time(NULL));
 
-    size_t size = 1024 * 1024;
+    ssize_t size = 1024 * 1024;
     Arena *arena = arena_new_dynamic(size);
 
     Zen *zen = zen_init(arena);
