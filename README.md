@@ -6,6 +6,7 @@
 If the poser bullshit below serves as your criterion for evaluating the quality of the project, know that I, even as an atheist, despite you with every fiber of my godless soul.
 -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Zen CI](https://github.com/gooderfreed/Zen/actions/workflows/ci.yml/badge.svg)](https://github.com/gooderfreed/Zen/actions/workflows/ci.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/gooderfreed/zen/badge)](https://www.codefactor.io/repository/github/gooderfreed/zen)
 <!--
 Look, badges! Thats means it`s a *real* project now, right? Right?... gky ffs

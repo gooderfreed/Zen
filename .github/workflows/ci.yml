@@ -1,4 +1,4 @@
-name: CI
+name: Zen CI
 
 on:
   push:
