@@ -91,7 +91,9 @@ void    print_screen(const Screen *screen);
 void add_borders(Screen *screen, int y, int x, int height, int width, Color background, Color foreground, const wchar_t *borders);
 void add_separator(Screen *screen, int y, int x, Color background, Color foreground, const wchar_t *borders);
 void fill_area(Screen *screen, int y, int x, int height, int width, wchar_t symbol, Color background, Color foreground);
+void put_pixel(Screen *screen, int y, int x, wchar_t symbol, Color background, Color foreground, TextEffect effect);
 void insert_text(Screen *screen, int y, int x, const char *text, Color foreground, Color background, TextEffect effect);
+void insert_wtext(Screen *screen, int y, int x, const wchar_t *text, Color foreground, Color background, TextEffect effect);
 void screen_draw_cursor(Screen *screen, Coords coords, CursorConfig config); // Assuming Coords and CursorConfig are defined in components.h
 
 // Terminal setup (non-canonical mode)

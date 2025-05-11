@@ -461,6 +461,21 @@ void print_screen(const Screen *screen) {
     wprintf(L"%ls\033[0m", screen->buffer); // Print the entire buffer and reset
 }
 
+
+/*
+ * Put pixel at specified position
+ * Puts a pixel at the specified position with specified symbol, background and foreground formatting
+ */
+void put_pixel(Screen *screen, int y, int x, wchar_t symbol, Color background, Color foreground, TextEffect effect) {
+    if (!screen) return; // NULL check
+    if (x < 0 || y < 0) return;
+    if (x >= screen->width || y >= screen->height) return;
+
+    Pixel pixel = (Pixel) {background, foreground, symbol, effect}; // Create the pixel
+    SET_PIXEL(&screen->pixels[y][x], pixel); // Set the pixel using the macro
+}
+
+
 /*
  * Fill rectangular area with specified symbol
  * Fills the area with specified symbol, background and foreground formatting
@@ -501,6 +516,31 @@ void insert_text(Screen *screen, int y, int x, const char *text, Color foregroun
         screen->pixels[y][x + i].effect = effect;
     }
 }
+
+/*
+ * Insert wide text into screen
+ * Inserts wide text into the screen at the specified position
+ */
+void insert_wtext(Screen *screen, int y, int x, const wchar_t *text, Color foreground, Color background, TextEffect effect) {
+    if (!screen || !text) return; // Check for NULL pointers
+    if(x < 0 || y < 0) return;
+    if (y >= screen->height || x >= screen->width) return;
+
+    int text_length;
+    for (text_length = 0; text[text_length] != L'\0'; text_length++);
+
+    if (x + text_length > screen->width) {
+        text_length = screen->width - x;  // Truncate if text goes beyond screen width
+    }
+    
+    Pixel pixel = (Pixel) {background, foreground, ' ', effect};
+    for (int i = 0; i < text_length; i++) {
+        SET_PIXEL(&screen->pixels[y][x + i], pixel);
+        screen->pixels[y][x + i].symbol = text[i];
+        screen->pixels[y][x + i].effect = effect;
+    }
+}
+
 
 /*
  * Set noncanonical mode for terminal
