@@ -1,7 +1,7 @@
 #include "../../inc/snake.h"
 
 // =========================
-//  DECK METHODS
+//  SNAKE METHODS
 // =========================
 /*
  * Generate apple position

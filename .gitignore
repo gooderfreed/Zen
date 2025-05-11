@@ -60,6 +60,7 @@ examples/*/solitaire*
 examples/*/snake*
 examples/*/demo*
 examples/*/donut*
+examples/*/minesweeper*
 
 # Zen framework
 lib/libzen.a
