@@ -259,13 +259,17 @@ static void print_cursor_in_field(const void *field_pointer, const Cursor *curso
     (void)cursor;
 
     for (int x = 0; x < CELL_WIDTH; x++) {
-        put_pixel(screen, coords.y, coords.x + x, L'▀', COLOR_NONE, COLOR_BLACK, Effect_None);
-        put_pixel(screen, coords.y + CELL_HEIGHT - 1, coords.x + x, L'▄', COLOR_NONE, COLOR_BLACK, Effect_None);
+        if ((x / 2) % 2 == 0) {
+            put_pixel(screen, coords.y, coords.x + x, L'▀', COLOR_NONE, COLOR_BLACK, Effect_None);
+            put_pixel(screen, coords.y + CELL_HEIGHT - 1, coords.x + x, L'▄', COLOR_NONE, COLOR_BLACK, Effect_None);
+        }
     }
 
     for (int y = 0; y < CELL_HEIGHT; y++) {
-        put_pixel(screen, coords.y + y, coords.x, L'█', COLOR_NONE, COLOR_BLACK, Effect_None);
-        put_pixel(screen, coords.y + y, coords.x + CELL_WIDTH - 1, L'█', COLOR_NONE, COLOR_BLACK, Effect_None);
+        if (y % 2 == 0) {
+            put_pixel(screen, coords.y + y, coords.x, L'█', COLOR_NONE, COLOR_BLACK, Effect_None);
+            put_pixel(screen, coords.y + y, coords.x + CELL_WIDTH - 1, L'█', COLOR_NONE, COLOR_BLACK, Effect_None);
+        }
     }
     
 }
@@ -294,8 +298,8 @@ static void move_in_field(const void *field_pointer, Coords *coords, const Coord
  * Gets the default coords of the field
  */
 static Coords get_default_coords(const void *field_pointer) {
-    (void)field_pointer;
-    return (Coords) {.x = 0, .y = 0};
+    const MinesweeperBoard *field = (const MinesweeperBoard *)field_pointer;
+    return (Coords) {.x = (short)(field->width / 2), .y = (short)(field->height / 2)};
 }
 
 /*
